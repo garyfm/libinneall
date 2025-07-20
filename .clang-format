@@ -1,4 +1,4 @@
-BasedOnStyle: LLVM
+BasedOnStyle: webkit
 
 IndentWidth: 4
 TabWidth: 4
@@ -7,3 +7,5 @@ UseTab: Never
 
 Language: Cpp
 PointerAlignment: Left
+
+BreakBeforeBraces: Attach

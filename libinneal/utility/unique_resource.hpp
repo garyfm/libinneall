@@ -1,16 +1,14 @@
 #pragma once
 
-#include <type_traits>
+#include <utility>
 
 namespace inl {
 
-template <typename T, typename Deleter, T Sentinel = {}>
-class UniqueResource {
+template <typename T, typename Deleter, T Sentinel = {}> class UniqueResource {
 public:
     explicit UniqueResource(T resource, Deleter deleter) noexcept
         : m_resource { resource }
-        , m_deleter { std::move(deleter) } {
-    }
+        , m_deleter { std::move(deleter) } { }
 
     ~UniqueResource() {
         if ((m_resource != Sentinel) && m_deleter) {
@@ -29,7 +27,7 @@ public:
     }
 
     UniqueResource& operator=(UniqueResource&& other) noexcept {
-        if (this != other) {
+        if (this != &other) {
             reset(); // Clear this instance
             m_resource = other.m_resource;
             m_deleter = std::move(other.m_deleter);
@@ -38,30 +36,25 @@ public:
         return *this;
     }
 
-    void reset(UniqueResource new_resource = Sentinel) noexcept {
+    void reset(T new_resource = Sentinel) noexcept {
         if ((m_resource != Sentinel) && m_deleter) {
             m_deleter(m_resource);
         }
         m_resource = new_resource;
     }
 
-    T get() const noexcept {
-        return m_resource;
-    }
+    T get() const noexcept { return m_resource; }
 
-    operator T() const noexcept {
-        return m_resource;
-    }
+    operator T() const noexcept { return m_resource; }
 
-    explicit operator bool() const noexcept {
-        return m_resource != Sentinel;
-    }
+    explicit operator bool() const noexcept { return m_resource != Sentinel; }
+
+    T* operator&() noexcept { return std::addressof(m_resource); }
 
 private:
-    T m_resource;
+    T m_resource {};
     Deleter m_deleter;
 };
 
-template <typename T, typename Deleter>
-UniqueResource(T, Deleter, T) -> UniqueResource<T, Deleter, T {}>;
+template <typename T, typename Deleter> UniqueResource(T, Deleter, T) -> UniqueResource<T, Deleter, T {}>;
 } // namespace inl

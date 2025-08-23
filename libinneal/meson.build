@@ -2,7 +2,8 @@ include_dir = '..'
 
 source_files = files(
   'glad/src/glad.c',
-  'window.cpp'
+  'window.cpp',
+  'renderer/shader_stage.cpp'
 )
 
 glfw_subproject = subproject('glfw')

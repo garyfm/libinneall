@@ -1,11 +1,16 @@
 #include <libinneal/log.hpp>
 #include <libinneal/renderer/shader_program.hpp>
 #include <libinneal/renderer/shader_stage.hpp>
+#include <libinneal/renderer/vertex_array.hpp>
+#include <libinneal/renderer/vertex_buffer.hpp>
+#include <libinneal/renderer/vertex_data.hpp>
 #include <libinneal/utility/unique_resource.hpp>
 #include <libinneal/window.hpp>
 
+#include <array>
 #include <filesystem>
 #include <fstream>
+#include <span>
 
 namespace {
 
@@ -39,53 +44,50 @@ int main(int argc, char* argv[]) {
         Window window { 800, 600, "demo game" };
 
         std::string basic_vert_shader_source = read_file(resource_path + "/basic.vert.glsl");
-        ShaderStage vertex_stage(ShaderType::Vertex, basic_vert_shader_source);
+        ShaderStage vertex_stage { ShaderType::Vertex, basic_vert_shader_source };
 
         std::string basic_frag_shader_source = read_file(resource_path + "/basic.frag.glsl");
-        ShaderStage fragment_stage(ShaderType::Fragment, basic_frag_shader_source);
+        ShaderStage fragment_stage { ShaderType::Fragment, basic_frag_shader_source };
 
-        ShaderProgram shader_program(vertex_stage, fragment_stage);
+        ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        std::array<float, 9> vertices { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f };
+        std::array<VertexData, 3> vertices { { { -0.5f, -0.5f, 0.0f }, { 0.5f, -0.5f, 0.0f }, { 0.0f, 0.5f, 0.0f } } };
 
-        auto delete_vertex_buffer = [](GLuint buffer) { glDeleteBuffers(1, &buffer); };
-        UniqueResource vertex_buffer { GLuint {}, delete_vertex_buffer };
-
-        auto delete_vertex_array = [](GLuint array) { glDeleteVertexArrays(1, &array); };
-        UniqueResource vertex_array { GLuint {}, delete_vertex_array };
-
+        VertexArray vertex_array {};
         {
-            glGenVertexArrays(1, &vertex_array);
-            glGenBuffers(1, &vertex_buffer);
+            std::span<const std::byte> vertices_bytes { as_bytes(vertices.data(), vertices.size()) };
+            VertexBuffer vertex_buffer { vertices_bytes };
 
-            glBindVertexArray(vertex_array);
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+            vertex_array.bind_vertex_buffer({
+                .index = 0,
+                .buffer = vertex_buffer,
+                .offset_bytes = 0,
+                .stride_bytes = sizeof(VertexData),
+            });
 
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-
-            // unbind
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
+            vertex_array.set_attribute({
+                .index = 0,
+                .binding_index = 0,
+                .n_components = 3,
+                .stride_bytes = 0,
+                .type = GL_FLOAT,
+                .normalise = false,
+            });
         }
 
         while (!glfwWindowShouldClose(window.native_handle())) {
-
             window.process_input();
 
             glClearColor(0.5, 0.0, 0.5, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             shader_program.use();
-            glBindVertexArray(vertex_array);
+            vertex_array.bind();
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
             window.swap_buffers();
         }
-
     } catch (const std::exception& e) {
         log::error("Exception: {}", e.what());
         return -1;

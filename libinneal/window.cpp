@@ -1,5 +1,7 @@
-#include <libinneal/log.hpp>
 #include <libinneal/window.hpp>
+
+#include <libinneal/log.hpp>
+
 #include <memory>
 
 namespace inl {
@@ -8,6 +10,95 @@ namespace {
     void error_callback(int error, const char* description) { log::error("GLFW error: {}({})", description, error); }
     void framebuffer_resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
+    }
+
+    void APIENTRY opengl_debug_callback(GLenum source, GLenum type, unsigned int id, GLenum severity,
+        [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
+        // ignore non-significant error/warning codes
+        if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
+            return;
+
+        std::string_view source_str {};
+        switch (source) {
+        case GL_DEBUG_SOURCE_API:
+            source_str = "api";
+            break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            source_str = "window system";
+            break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER:
+            source_str = "shader compiler";
+            break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:
+            source_str = "third party";
+            break;
+        case GL_DEBUG_SOURCE_APPLICATION:
+            source_str = "application";
+            break;
+        case GL_DEBUG_SOURCE_OTHER:
+            source_str = "other";
+            break;
+        default:
+            source_str = "unknown";
+        }
+
+        std::string_view type_str {};
+        switch (type) {
+        case GL_DEBUG_TYPE_ERROR:
+            type_str = "error";
+            break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            type_str = "deprecated behaviour";
+            break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            type_str = "undefined behaviour";
+            break;
+        case GL_DEBUG_TYPE_PORTABILITY:
+            type_str = "portability";
+            break;
+        case GL_DEBUG_TYPE_PERFORMANCE:
+            type_str = "performance";
+            break;
+        case GL_DEBUG_TYPE_MARKER:
+            type_str = "marker";
+            break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:
+            type_str = "push group";
+            break;
+        case GL_DEBUG_TYPE_POP_GROUP:
+            type_str = "pop group";
+            break;
+        case GL_DEBUG_TYPE_OTHER:
+            type_str = "other";
+            break;
+        default:
+            type_str = "unknown";
+        }
+
+        std::string_view severity_str {};
+        switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+            severity_str = "high";
+            break;
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            severity_str = "medium";
+            break;
+        case GL_DEBUG_SEVERITY_LOW:
+            severity_str = "low";
+            break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            severity_str = "notification";
+            break;
+        default:
+            severity_str = "unknown";
+        }
+
+        log::info("OpenGL debug callback - servierty: {} source: {} type: {} msg: {} ", severity_str, source_str,
+            type_str, message);
+
+        if (type == GL_DEBUG_TYPE_ERROR) {
+            throw std::runtime_error("OpenGL debug error");
+        }
     }
 }
 
@@ -44,6 +135,13 @@ Window::Window(unsigned width, unsigned height, const std::string& title)
 
     glfwSetFramebufferSizeCallback(m_window.get(), framebuffer_resize_callback);
     glViewport(0, 0, m_width, m_height);
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(opengl_debug_callback, nullptr);
+
+    // note: This can be used to filter opengl debug messages
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 }
 
 Window::~Window() { glfwTerminate(); }

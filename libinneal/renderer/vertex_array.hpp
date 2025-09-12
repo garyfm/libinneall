@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libinneal/glad/include/glad/glad.h>
-#include <libinneal/renderer/vertex_buffer.hpp>
+#include <libinneal/renderer/gl_buffer.hpp>
 #include <libinneal/utility/unique_resource.hpp>
 
 namespace inl {
@@ -19,7 +19,7 @@ public:
 
     struct BindPoint {
         std::size_t index;
-        VertexBuffer const& buffer;
+        GlBuffer const& buffer;
         std::size_t offset_bytes;
         std::size_t stride_bytes;
     };
@@ -31,6 +31,7 @@ public:
     void set_attribute(Attribute const& attribute) const;
 
     void bind_vertex_buffer(BindPoint const& bind_point) const;
+    void bind_element_buffer(GlBuffer& buffer) const;
 
     void bind() const { glBindVertexArray(m_handle); }
     void unbind() const { glBindVertexArray(0); }

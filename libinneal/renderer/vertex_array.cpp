@@ -13,6 +13,11 @@ void VertexArray::bind_vertex_buffer(BindPoint const& bind_point) const {
         bind_point.stride_bytes);
 }
 
+void VertexArray::bind_element_buffer(GlBuffer& buffer) const {
+
+    glVertexArrayElementBuffer(m_handle, buffer.native_handle());
+}
+
 void VertexArray::set_attribute(Attribute const& attribute) const {
 
     // Enable the attribtute

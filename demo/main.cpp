@@ -1,8 +1,8 @@
 #include <libinneal/log.hpp>
+#include <libinneal/renderer/gl_buffer.hpp>
 #include <libinneal/renderer/shader_program.hpp>
 #include <libinneal/renderer/shader_stage.hpp>
 #include <libinneal/renderer/vertex_array.hpp>
-#include <libinneal/renderer/vertex_buffer.hpp>
 #include <libinneal/renderer/vertex_data.hpp>
 #include <libinneal/utility/unique_resource.hpp>
 #include <libinneal/window.hpp>
@@ -52,12 +52,20 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        std::array<VertexData, 3> vertices { { { -0.5f, -0.5f, 0.0f }, { 0.5f, -0.5f, 0.0f }, { 0.0f, 0.5f, 0.0f } } };
+        std::array<VertexData, 4> vertices { { { 0.5f, 0.5f, 0.0f }, { 0.5f, -0.5f, 0.0f }, { -0.5f, -0.5f, 0.0f },
+            { -0.5f, 0.5f, 0.0f } } };
+
+        std::array<unsigned, 6> indices = {
+            0, 1, 3, // first triangle
+            1, 2, 3 // second triangle
+        };
 
         VertexArray vertex_array {};
         {
             std::span<const std::byte> vertices_bytes { as_bytes(vertices.data(), vertices.size()) };
-            VertexBuffer vertex_buffer { vertices_bytes };
+            std::span<const std::byte> indices_bytes { std::as_bytes(std::span { indices }) };
+            GlBuffer vertex_buffer { vertices_bytes };
+            GlBuffer index_buffer { indices_bytes };
 
             vertex_array.bind_vertex_buffer({
                 .index = 0,
@@ -65,6 +73,8 @@ int main(int argc, char* argv[]) {
                 .offset_bytes = 0,
                 .stride_bytes = sizeof(VertexData),
             });
+
+            vertex_array.bind_element_buffer(index_buffer);
 
             vertex_array.set_attribute({
                 .index = 0,
@@ -84,7 +94,7 @@ int main(int argc, char* argv[]) {
 
             shader_program.use();
             vertex_array.bind();
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
             window.swap_buffers();
         }

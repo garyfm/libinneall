@@ -7,9 +7,9 @@
 
 namespace inl {
 
-class VertexBuffer {
+class GlBuffer {
 public:
-    explicit VertexBuffer(std::span<std::byte const> data);
+    explicit GlBuffer(std::span<std::byte const> data);
 
     GLuint native_handle() const { return m_handle; }
     std::size_t size() const { return m_data.size(); };

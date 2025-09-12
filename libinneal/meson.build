@@ -5,7 +5,7 @@ source_files = files(
   'window.cpp',
   'renderer/shader_stage.cpp',
   'renderer/shader_program.cpp',
-  'renderer/vertex_buffer.cpp',
+  'renderer/gl_buffer.cpp',
   'renderer/vertex_array.cpp',
   'renderer/vertex_data.cpp'
 )

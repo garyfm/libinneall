@@ -21,4 +21,4 @@ private:
     std::span<std::byte const> m_data {};
 };
 
-}
+} // namespace inl

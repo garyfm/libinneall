@@ -7,7 +7,8 @@ source_files = files(
   'renderer/shader_program.cpp',
   'renderer/gl_buffer.cpp',
   'renderer/vertex_array.cpp',
-  'renderer/vertex_data.cpp'
+  'renderer/vertex_data.cpp',
+  'renderer/mesh.cpp'
 )
 
 glfw_subproject = subproject('glfw')

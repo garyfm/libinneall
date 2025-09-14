@@ -5,8 +5,7 @@ namespace inl {
 
 Mesh::Mesh(MeshData const& data)
     : m_data { data }
-    , m_vertex_buffer { std::as_bytes(m_data.vertex_data) }
-    , m_index_buffer { std::as_bytes(m_data.index_data) } {
+    , m_vertex_buffer { std::as_bytes(m_data.vertex_data) } {
 
     m_vertex_array.bind_vertex_buffer({
         .index = 0,
@@ -15,7 +14,10 @@ Mesh::Mesh(MeshData const& data)
         .stride_bytes = sizeof(VertexData),
     });
 
-    m_vertex_array.bind_element_buffer(m_index_buffer);
+    if (m_data.index_data.size() != 0) {
+        m_index_buffer = GlBuffer(std::as_bytes(m_data.index_data));
+        m_vertex_array.bind_element_buffer(m_index_buffer);
+    }
 
     m_vertex_array.set_attribute({
         .index = 0,

@@ -19,13 +19,14 @@ public:
 
     void bind() const;
 
+    std::size_t vertext_count() const { return m_data.vertex_data.size(); };
     std::size_t index_count() const { return m_data.index_data.size(); };
 
 private:
-    MeshData m_data;
-    GlBuffer m_vertex_buffer;
-    GlBuffer m_index_buffer;
-    VertexArray m_vertex_array;
+    MeshData m_data {};
+    GlBuffer m_vertex_buffer {};
+    GlBuffer m_index_buffer {};
+    VertexArray m_vertex_array {};
 };
 
 } // namespace inl

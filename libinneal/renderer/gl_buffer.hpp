@@ -9,6 +9,7 @@ namespace inl {
 
 class GlBuffer {
 public:
+    GlBuffer() = default;
     explicit GlBuffer(std::span<std::byte const> data);
 
     GLuint native_handle() const { return m_handle; }

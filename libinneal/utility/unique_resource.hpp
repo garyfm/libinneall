@@ -27,7 +27,7 @@ public:
     }
 
     UniqueResource& operator=(UniqueResource&& other) noexcept {
-        if (this != &other) {
+        if (this != std::addressof(other)) {
             reset(); // Clear this instance
             m_resource = other.m_resource;
             m_deleter = std::move(other.m_deleter);
@@ -53,7 +53,7 @@ public:
 
 private:
     T m_resource {};
-    Deleter m_deleter;
+    Deleter m_deleter { nullptr };
 };
 
 template <typename T, typename Deleter> UniqueResource(T, Deleter, T) -> UniqueResource<T, Deleter, T {}>;

@@ -9,7 +9,12 @@ void Renderer::render(Scene const& scene) const {
     for (const auto model : scene.models) {
         model->mesh->bind();
         model->shader->use();
-        glDrawElements(GL_TRIANGLES, model->mesh->index_count(), GL_UNSIGNED_INT, 0);
+
+        if (model->mesh->index_count() != 0) {
+            glDrawElements(GL_TRIANGLES, model->mesh->index_count(), GL_UNSIGNED_INT, 0);
+        } else {
+            glDrawArrays(GL_TRIANGLES, 0, model->mesh->vertext_count());
+        }
     }
 }
 };

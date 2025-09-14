@@ -6,9 +6,9 @@
 namespace inl {
 
 struct Model {
-    Mesh const* mesh;
+    Mesh const* mesh { nullptr };
     // TODO: Make this a material
-    ShaderProgram const* shader;
+    ShaderProgram const* shader { nullptr };
 };
 
 } // namespace inl

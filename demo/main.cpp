@@ -70,11 +70,11 @@ int main(int argc, char* argv[]) {
             { 0.5f, -0.5f, 0.0f },
         } };
 
-        MeshData mesh_data { std::span { vertices }, std::span { indices } };
+        MeshData mesh_data { std::span { vertices }, { indices } };
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
-        MeshData mesh_data_1 { std::span { vertices_1 }, std::span { indices } };
+        MeshData mesh_data_1 { std::span { vertices_1 }, { indices } };
         Mesh mesh_1 { mesh_data_1 };
         Model model_1 { &mesh_1, &shader_program };
 

@@ -1,5 +1,8 @@
 #include <libinneal/renderer/gl_buffer.hpp>
 #include <libinneal/renderer/mesh.hpp>
+#include <libinneal/renderer/model.hpp>
+#include <libinneal/renderer/renderer.hpp>
+#include <libinneal/renderer/scene.hpp>
 #include <libinneal/renderer/shader_program.hpp>
 #include <libinneal/renderer/shader_stage.hpp>
 #include <libinneal/renderer/vertex_array.hpp>
@@ -53,28 +56,37 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        std::array<VertexData, 4> vertices { { { 0.5f, 0.5f, 0.0f }, { 0.5f, -0.5f, 0.0f }, { -0.5f, -0.5f, 0.0f },
-            { -0.5f, 0.5f, 0.0f } } };
+        std::array<VertexData, 3> vertices { {
+            { -0.5f, -0.5f, 0.0f },
+            { -0.25f, 0.5f, 0.0f },
+            { 0.0f, -0.5f, 0.0f },
+        } };
 
-        std::array<unsigned, 6> indices = {
-            0, 1, 3, // first triangle
-            1, 2, 3 // second triangle
-        };
+        std::array<unsigned, 3> indices = { 0, 1, 2 };
+
+        std::array<VertexData, 3> vertices_1 { {
+            { 0.0f, -0.5f, 0.0f },
+            { 0.25f, 0.5f, 0.0f },
+            { 0.5f, -0.5f, 0.0f },
+        } };
 
         MeshData mesh_data { std::span { vertices }, std::span { indices } };
         Mesh mesh { mesh_data };
+        Model model { &mesh, &shader_program };
 
+        MeshData mesh_data_1 { std::span { vertices_1 }, std::span { indices } };
+        Mesh mesh_1 { mesh_data_1 };
+        Model model_1 { &mesh_1, &shader_program };
+
+        Scene scene;
+        scene.models.push_back(&model);
+        scene.models.push_back(&model_1);
+
+        Renderer renderer;
         while (!glfwWindowShouldClose(window.native_handle())) {
             window.process_input();
 
-            // TODO: Wrap in a renderer class
-            glClearColor(0.5, 0.0, 0.5, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            shader_program.use();
-
-            mesh.bind();
-            glDrawElements(GL_TRIANGLES, mesh.index_count(), GL_UNSIGNED_INT, 0);
+            renderer.render(scene);
 
             window.swap_buffers();
         }

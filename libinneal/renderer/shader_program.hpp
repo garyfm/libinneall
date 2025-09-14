@@ -13,7 +13,7 @@ public:
 
     GLuint native_handle() const { return m_handle; }
 
-    void use() { glUseProgram(m_handle); }
+    void use() const { glUseProgram(m_handle); }
 
 private:
     bool link(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);

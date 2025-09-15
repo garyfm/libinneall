@@ -1,3 +1,5 @@
+#include <libinneal/base/log.hpp>
+#include <libinneal/base/unique_resource.hpp>
 #include <libinneal/renderer/gl_buffer.hpp>
 #include <libinneal/renderer/mesh.hpp>
 #include <libinneal/renderer/model.hpp>
@@ -7,8 +9,6 @@
 #include <libinneal/renderer/shader_stage.hpp>
 #include <libinneal/renderer/vertex_array.hpp>
 #include <libinneal/renderer/vertex_data.hpp>
-#include <libinneal/utility/log.hpp>
-#include <libinneal/utility/unique_resource.hpp>
 #include <libinneal/window.hpp>
 
 #include <array>
@@ -83,6 +83,7 @@ int main(int argc, char* argv[]) {
         scene.models.push_back(&model_1);
 
         Renderer renderer;
+
         while (!glfwWindowShouldClose(window.native_handle())) {
             window.process_input();
 

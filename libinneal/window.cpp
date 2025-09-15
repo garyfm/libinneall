@@ -1,4 +1,4 @@
-#include <libinneal/utility/log.hpp>
+#include <libinneal/base/log.hpp>
 #include <libinneal/window.hpp>
 
 #include <memory>

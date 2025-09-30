@@ -1,7 +1,7 @@
 #pragma once
 
-#include <libinneal/renderer/mesh.hpp>
-#include <libinneal/renderer/shader_program.hpp>
+#include <libinneall/renderer/mesh.hpp>
+#include <libinneall/renderer/shader_program.hpp>
 
 namespace inl {
 

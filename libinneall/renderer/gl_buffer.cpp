@@ -1,4 +1,4 @@
-#include <libinneal/renderer/gl_buffer.hpp>
+#include <libinneall/renderer/gl_buffer.hpp>
 
 #include <span>
 

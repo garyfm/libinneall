@@ -1,15 +1,17 @@
-#include <libinneal/base/log.hpp>
-#include <libinneal/base/unique_resource.hpp>
-#include <libinneal/renderer/gl_buffer.hpp>
-#include <libinneal/renderer/mesh.hpp>
-#include <libinneal/renderer/model.hpp>
-#include <libinneal/renderer/renderer.hpp>
-#include <libinneal/renderer/scene.hpp>
-#include <libinneal/renderer/shader_program.hpp>
-#include <libinneal/renderer/shader_stage.hpp>
-#include <libinneal/renderer/vertex_array.hpp>
-#include <libinneal/renderer/vertex_data.hpp>
-#include <libinneal/window.hpp>
+#include <libinneall/base/assert.hpp>
+#include <libinneall/base/log.hpp>
+#include <libinneall/base/result.hpp>
+#include <libinneall/base/unique_resource.hpp>
+#include <libinneall/renderer/gl_buffer.hpp>
+#include <libinneall/renderer/mesh.hpp>
+#include <libinneall/renderer/model.hpp>
+#include <libinneall/renderer/renderer.hpp>
+#include <libinneall/renderer/scene.hpp>
+#include <libinneall/renderer/shader_program.hpp>
+#include <libinneall/renderer/shader_stage.hpp>
+#include <libinneall/renderer/vertex_array.hpp>
+#include <libinneall/renderer/vertex_data.hpp>
+#include <libinneall/window.hpp>
 
 #include <array>
 #include <filesystem>
@@ -36,7 +38,7 @@ int main(int argc, char* argv[]) {
 
     try {
 
-        log::debug("libinneal demo game");
+        log::debug("libinneall demo game");
 
         if (argc < 2) {
             log::error("Usage: game <resource_path>");

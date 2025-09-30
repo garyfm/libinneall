@@ -1,1 +1,1 @@
-executable('game', 'main.cpp', link_with: libinneal, dependencies: libinneal_dep)
+executable('game', 'main.cpp', link_with: libinneall, dependencies: libinneall_dep)

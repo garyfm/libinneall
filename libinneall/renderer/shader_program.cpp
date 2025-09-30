@@ -1,6 +1,6 @@
-#include <libinneal/base/log.hpp>
-#include <libinneal/renderer/shader_program.hpp>
-#include <libinneal/renderer/shader_stage.hpp>
+#include <libinneall/base/log.hpp>
+#include <libinneall/renderer/shader_program.hpp>
+#include <libinneall/renderer/shader_stage.hpp>
 
 #include <exception>
 

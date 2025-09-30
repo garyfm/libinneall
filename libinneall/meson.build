@@ -19,14 +19,14 @@ glfw_subproject = subproject('glfw')
 glfw_dep = dependency('glfw3')
 gl_dep = dependency('gl')
 
-libinneal = static_library(
-    'libinneal',
+libinneall = static_library(
+    'libinneall',
     source_files,
     include_directories: include_dir,
     dependencies: [glfw_dep, gl_dep]
 )
 
-libinneal_dep = declare_dependency(
+libinneall_dep = declare_dependency(
     include_directories: include_dir,
-    link_with: libinneal,
+    link_with: libinneall,
 )

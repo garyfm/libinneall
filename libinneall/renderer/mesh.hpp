@@ -1,8 +1,8 @@
 #pragma once
 
-#include <libinneal/renderer/gl_buffer.hpp>
-#include <libinneal/renderer/vertex_array.hpp>
-#include <libinneal/renderer/vertex_data.hpp>
+#include <libinneall/renderer/gl_buffer.hpp>
+#include <libinneall/renderer/vertex_array.hpp>
+#include <libinneall/renderer/vertex_data.hpp>
 
 #include <span>
 

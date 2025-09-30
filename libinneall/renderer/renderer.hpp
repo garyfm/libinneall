@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinneal/renderer/scene.hpp>
+#include <libinneall/renderer/scene.hpp>
 
 namespace inl {
 

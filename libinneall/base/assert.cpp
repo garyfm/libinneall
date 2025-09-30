@@ -1,5 +1,5 @@
-#include <libinneal/base/assert.hpp>
-#include <libinneal/base/log.hpp>
+#include <libinneall/base/assert.hpp>
+#include <libinneall/base/log.hpp>
 
 #include <cstdlib>
 

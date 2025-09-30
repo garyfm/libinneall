@@ -1,4 +1,4 @@
-#include <libinneal/renderer/renderer.hpp>
+#include <libinneall/renderer/renderer.hpp>
 
 namespace inl {
 void Renderer::render(Scene const& scene) const {

@@ -1,5 +1,5 @@
-#include <libinneal/base/log.hpp>
-#include <libinneal/window.hpp>
+#include <libinneall/base/log.hpp>
+#include <libinneall/window.hpp>
 
 #include <memory>
 

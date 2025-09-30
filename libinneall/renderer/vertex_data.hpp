@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinneal/math/vector3.hpp>
+#include <libinneall/math/vector3.hpp>
 
 #include <span>
 

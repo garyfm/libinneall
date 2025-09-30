@@ -1,4 +1,4 @@
-#include <libinneal/renderer/mesh.hpp>
+#include <libinneall/renderer/mesh.hpp>
 #include <span>
 
 namespace inl {

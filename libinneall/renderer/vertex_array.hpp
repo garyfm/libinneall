@@ -1,8 +1,8 @@
 #pragma once
 
-#include <libinneal/base/unique_resource.hpp>
-#include <libinneal/glad/include/glad/glad.h>
-#include <libinneal/renderer/gl_buffer.hpp>
+#include <libinneall/base/unique_resource.hpp>
+#include <libinneall/glad/include/glad/glad.h>
+#include <libinneall/renderer/gl_buffer.hpp>
 
 namespace inl {
 

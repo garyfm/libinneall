@@ -1,4 +1,4 @@
-#include <libinneal/renderer/vertex_data.hpp>
+#include <libinneall/renderer/vertex_data.hpp>
 
 #include <span>
 

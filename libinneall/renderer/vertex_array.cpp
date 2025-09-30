@@ -1,4 +1,4 @@
-#include <libinneal/renderer/vertex_array.hpp>
+#include <libinneall/renderer/vertex_array.hpp>
 
 namespace inl {
 

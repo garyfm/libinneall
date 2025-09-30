@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinneal/renderer/model.hpp>
+#include <libinneall/renderer/model.hpp>
 
 #include <vector>
 

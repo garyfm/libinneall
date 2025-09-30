@@ -2,6 +2,8 @@ include_dir = '..'
 
 source_files = files(
   'glad/src/glad.c',
+  'base/assert.cpp',
+  'base/result.cpp',
   'window.cpp',
   'renderer/gl_buffer.cpp',
   'renderer/mesh.cpp',
@@ -16,7 +18,6 @@ glfw_subproject = subproject('glfw')
 
 glfw_dep = dependency('glfw3')
 gl_dep = dependency('gl')
-
 
 libinneal = static_library(
     'libinneal',

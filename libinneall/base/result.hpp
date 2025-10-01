@@ -16,6 +16,7 @@ namespace inl {
 enum class Error {
     OK = 0,
     ERROR = 1,
+    RENDERER_SHADER_PROGRAM_FAILED_TO_SET_UNIFORM,
 };
 
 template <typename T> using Result = std::expected<T, Error>;

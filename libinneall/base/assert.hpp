@@ -1,7 +1,6 @@
 #pragma once
 
 #include <source_location>
-#include <stacktrace>
 #include <string_view>
 
 // TODO: libbacktrace is supported yet ???

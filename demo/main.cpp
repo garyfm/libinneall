@@ -2,6 +2,7 @@
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
+#include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/mesh.hpp>
 #include <libinneall/renderer/model.hpp>
@@ -14,6 +15,7 @@
 #include <libinneall/window.hpp>
 
 #include <array>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <span>
@@ -60,34 +62,27 @@ int main(int argc, char* argv[]) {
 
         std::array<VertexData, 3> vertices { {
             { -0.5f, -0.5f, 0.0f },
-            { -0.25f, 0.5f, 0.0f },
-            { 0.0f, -0.5f, 0.0f },
+            { 0.0f, 0.5f, 0.0f },
+            { 0.5f, -0.5f, 0.0f },
         } };
 
         std::array<unsigned, 3> indices = { 0, 1, 2 };
-
-        std::array<VertexData, 3> vertices_1 { {
-            { 0.0f, -0.5f, 0.0f },
-            { 0.25f, 0.5f, 0.0f },
-            { 0.5f, -0.5f, 0.0f },
-        } };
 
         MeshData mesh_data { std::span { vertices }, { indices } };
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
-        MeshData mesh_data_1 { std::span { vertices_1 }, { indices } };
-        Mesh mesh_1 { mesh_data_1 };
-        Model model_1 { &mesh_1, &shader_program };
-
         Scene scene;
         scene.models.push_back(&model);
-        scene.models.push_back(&model_1);
 
         Renderer renderer;
 
         while (!glfwWindowShouldClose(window.native_handle())) {
             window.process_input();
+
+            float varying_color = sin(glfwGetTime()) / 2.0f + 0.5f;
+            Color color { 0.0f, varying_color, varying_color };
+            model.shader->set_uniform("set_color", color);
 
             renderer.render(scene);
 

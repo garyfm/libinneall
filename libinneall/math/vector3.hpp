@@ -7,6 +7,9 @@ struct Vector3 {
     float y;
     float z;
 
+    // TODO: What does this do under the hood ?
+    constexpr auto operator==(const Vector3&) const -> bool = default;
+
     friend Vector3 operator+(Vector3 const& vector, float scalar);
     friend Vector3 operator-(Vector3 const& vector, float scalar);
     friend Vector3 operator/(Vector3 const& vector, float scalar);

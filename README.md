@@ -15,8 +15,14 @@ meson compile -C build
 ```
 
 Run:
-```
+```bash
 ./build/demo/game resources
+```
+
+Test:
+
+```bash
+build test -C build
 ```
 
 ## TODO
@@ -43,6 +49,7 @@ Stage 2
 - [ ] Lighting
 
 Misc:
+- [x] Setup testing
 - [ ] Static String
 - [ ] Add platform layer (Remove GLFW)
 - [ ] Remove GLAD

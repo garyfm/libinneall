@@ -5,6 +5,7 @@ source_files = files(
   'base/result.cpp',
   'glad/src/glad.c',
   'math/vector3.cpp',
+  'math/vector2.cpp',
   'renderer/gl_buffer.cpp',
   'renderer/mesh.cpp',
   'renderer/renderer.cpp',
@@ -41,4 +42,13 @@ vector3_test = executable('vector3_test',
 )
 
 test('vector3', vector3_test)
+
+# TODO: Add a way to auto generate this for all tests 
+vector2_test = executable('vector2_test',
+    'math/vector2.test.cpp',
+    link_with: libinneall,
+    dependencies: [doctest_dep, libinneall_dep]
+)
+
+test('vector2', vector2_test)
 

@@ -4,6 +4,7 @@ source_files = files(
   'base/assert.cpp',
   'base/result.cpp',
   'glad/src/glad.c',
+  'math/vector4.cpp',
   'math/vector3.cpp',
   'math/vector2.cpp',
   'renderer/gl_buffer.cpp',
@@ -14,6 +15,13 @@ source_files = files(
   'renderer/vertex_array.cpp',
   'renderer/vertex_data.cpp',
   'window.cpp',
+)
+
+test_files = files(
+    'doctest.cpp',
+    'math/vector2.test.cpp',
+    'math/vector3.test.cpp',
+    'math/vector4.test.cpp',
 )
 
 glfw_subproject = subproject('glfw')
@@ -34,21 +42,10 @@ libinneall_dep = declare_dependency(
     link_with: libinneall,
 )
 
-# TODO: Add a way to auto generate this for all tests 
-vector3_test = executable('vector3_test',
-    'math/vector3.test.cpp',
+libinneal_tests = executable('libinneal_tests',
+    test_files,
     link_with: libinneall,
     dependencies: [doctest_dep, libinneall_dep]
 )
-
-test('vector3', vector3_test)
-
-# TODO: Add a way to auto generate this for all tests 
-vector2_test = executable('vector2_test',
-    'math/vector2.test.cpp',
-    link_with: libinneall,
-    dependencies: [doctest_dep, libinneall_dep]
-)
-
-test('vector2', vector2_test)
+test('libinneal', libinneal_tests)
 

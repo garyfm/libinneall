@@ -28,8 +28,8 @@ struct Vector4 {
     friend Vector4 operator*(float scalar, Vector4 const& vector);
     friend Vector4 operator/(float scalar, Vector4 const& vector);
 
-    Vector4& operator+=(Vector4 const& right);
-    Vector4& operator-=(Vector4 const& right);
+    Vector4& operator+=(Vector4 const& other);
+    Vector4& operator-=(Vector4 const& other);
 
     friend Vector4 operator+(Vector4 const& left, Vector4 const& right);
     friend Vector4 operator-(Vector4 const& left, Vector4 const& right);

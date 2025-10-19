@@ -62,15 +62,15 @@ Vector2 operator*(float scalar, Vector2 const& vector) { return vector * scalar;
 
 Vector2 operator/(float scalar, Vector2 const& vector) { return vector / scalar; }
 
-Vector2& Vector2::operator+=(Vector2 const& right) {
-    x += right.x;
-    y += right.y;
+Vector2& Vector2::operator+=(Vector2 const& other) {
+    x += other.x;
+    y += other.y;
     return *this;
 }
 
-Vector2& Vector2::operator-=(Vector2 const& right) {
-    x -= right.x;
-    y -= right.y;
+Vector2& Vector2::operator-=(Vector2 const& other) {
+    x -= other.x;
+    y -= other.y;
     return *this;
 }
 

@@ -27,8 +27,8 @@ struct Vector3 {
     friend Vector3 operator*(float scalar, Vector3 const& vector);
     friend Vector3 operator/(float scalar, Vector3 const& vector);
 
-    Vector3& operator+=(Vector3 const& right);
-    Vector3& operator-=(Vector3 const& right);
+    Vector3& operator+=(Vector3 const& other);
+    Vector3& operator-=(Vector3 const& other);
 
     friend Vector3 operator+(Vector3 const& left, Vector3 const& right);
     friend Vector3 operator-(Vector3 const& left, Vector3 const& right);

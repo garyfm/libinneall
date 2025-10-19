@@ -4,9 +4,10 @@ source_files = files(
   'base/assert.cpp',
   'base/result.cpp',
   'glad/src/glad.c',
-  'math/vector4.cpp',
-  'math/vector3.cpp',
+  'math/matrix3.cpp',
   'math/vector2.cpp',
+  'math/vector3.cpp',
+  'math/vector4.cpp',
   'renderer/gl_buffer.cpp',
   'renderer/mesh.cpp',
   'renderer/renderer.cpp',
@@ -19,12 +20,11 @@ source_files = files(
 
 test_files = files(
     'doctest.cpp',
+    'math/matrix3.test.cpp',
     'math/vector2.test.cpp',
     'math/vector3.test.cpp',
     'math/vector4.test.cpp',
 )
-
-glfw_subproject = subproject('glfw')
 
 glfw_dep = dependency('glfw3')
 gl_dep = dependency('gl')

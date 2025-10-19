@@ -27,28 +27,30 @@ build test -C build
 
 ## TODO
 
-Stage 1 - 3D model loader
-- [x] Logging
-- [x] Unique Resource
+Stage 1 - Basic Scene
 - [x] Setup shader compilation
+- [x] Shader uniforms 
 - [x] Render triangle
 - [x] DSA vertex array/buffer
 - [x] Element buffer
 - [x] Mesh class
 - [x] Renderer class
-- [x] Error handing
-- [x] Shader uniforms 
 - [ ] Math
 - [ ] Camera
+
+Stage 2 - 3D model loader
 - [ ] Model format
 - [ ] Model loader
 
-Stage 2
+Stage 3
 - [ ] Image format
 - [ ] Textures
 - [ ] Lighting
 
 Misc:
+- [x] Error handing
+- [x] Logging
+- [x] Unique Resource
 - [x] Setup testing
 - [ ] Static String
 - [ ] Add platform layer (Remove GLFW)

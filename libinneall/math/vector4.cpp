@@ -70,19 +70,19 @@ Vector4 operator*(float scalar, Vector4 const& vector) { return vector * scalar;
 
 Vector4 operator/(float scalar, Vector4 const& vector) { return vector / scalar; }
 
-Vector4& Vector4::operator+=(Vector4 const& right) {
-    x += right.x;
-    y += right.y;
-    z += right.z;
-    w += right.w;
+Vector4& Vector4::operator+=(Vector4 const& other) {
+    x += other.x;
+    y += other.y;
+    z += other.z;
+    w += other.w;
     return *this;
 }
 
-Vector4& Vector4::operator-=(Vector4 const& right) {
-    x -= right.x;
-    y -= right.y;
-    z -= right.z;
-    w -= right.w;
+Vector4& Vector4::operator-=(Vector4 const& other) {
+    x -= other.x;
+    y -= other.y;
+    z -= other.z;
+    w -= other.w;
     return *this;
 }
 

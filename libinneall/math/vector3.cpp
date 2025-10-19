@@ -66,17 +66,17 @@ Vector3 operator*(float scalar, Vector3 const& vector) { return vector * scalar;
 
 Vector3 operator/(float scalar, Vector3 const& vector) { return vector / scalar; }
 
-Vector3& Vector3::operator+=(Vector3 const& right) {
-    x += right.x;
-    y += right.y;
-    z += right.z;
+Vector3& Vector3::operator+=(Vector3 const& other) {
+    x += other.x;
+    y += other.y;
+    z += other.z;
     return *this;
 }
 
-Vector3& Vector3::operator-=(Vector3 const& right) {
-    x -= right.x;
-    y -= right.y;
-    z -= right.z;
+Vector3& Vector3::operator-=(Vector3 const& other) {
+    x -= other.x;
+    y -= other.y;
+    z -= other.z;
     return *this;
 }
 

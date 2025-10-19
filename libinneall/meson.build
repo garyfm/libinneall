@@ -5,6 +5,7 @@ source_files = files(
   'base/result.cpp',
   'glad/src/glad.c',
   'math/matrix3.cpp',
+  'math/matrix4.cpp',
   'math/vector2.cpp',
   'math/vector3.cpp',
   'math/vector4.cpp',
@@ -21,6 +22,7 @@ source_files = files(
 test_files = files(
     'doctest.cpp',
     'math/matrix3.test.cpp',
+    'math/matrix4.test.cpp',
     'math/vector2.test.cpp',
     'math/vector3.test.cpp',
     'math/vector4.test.cpp',

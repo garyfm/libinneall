@@ -149,11 +149,11 @@ float determinant(Matrix3 const& matrix) {
     // |c d|
     // det = ad - bc
 
-    float det_1 = (matrix[4] * matrix[8]) - (matrix[7] * matrix[5]);
-    float det_2 = (matrix[1] * matrix[8]) - (matrix[7] * matrix[2]);
-    float det_3 = (matrix[1] * matrix[5]) - (matrix[4] * matrix[2]);
+    const float det_0 = (matrix.element(1, 1) * matrix.element(2, 2)) - (matrix.element(1, 2) * matrix.element(2, 1));
+    const float det_1 = (matrix.element(1, 0) * matrix.element(2, 2)) - (matrix.element(1, 2) * matrix.element(2, 0));
+    const float det_2 = (matrix.element(1, 0) * matrix.element(2, 1)) - (matrix.element(1, 1) * matrix.element(2, 0));
 
-    float result = matrix[0] * det_1 - matrix[3] * det_2 + matrix[6] * det_3;
+    const float result = matrix.element(0, 0) * det_0 - matrix.element(0, 1) * det_1 + matrix.element(0, 2) * det_2;
 
     return result;
 }

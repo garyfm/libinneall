@@ -46,7 +46,8 @@ public:
     friend Matrix3 operator-(Matrix3 const& left, Matrix3 const& right);
     friend Matrix3 operator*(Matrix3 const& left, Matrix3 const& right);
 
-    std::span<const float> elements() { return m_elements; };
+    std::span<const float> elements() const { return m_elements; };
+    float element(std::size_t row, std::size_t col) const { return m_elements[(col * 3) + row]; };
 
 private:
     std::array<float, 9> m_elements {};

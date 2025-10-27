@@ -161,6 +161,51 @@ Matrix4 operator*(Matrix4 const& left, Matrix4 const& right) {
     return result;
 }
 
+Matrix4 Matrix4::create_scaling(float scale_x, float scale_y, float scale_z) {
+
+    Matrix4 scaling { {
+        scale_x,
+        0,
+        0,
+        0,
+        0,
+        scale_y,
+        0,
+        0,
+        0,
+        0,
+        scale_z,
+        0,
+        0,
+        0,
+        0,
+        1,
+    } };
+    return scaling;
+}
+
+Matrix4 Matrix4::create_translation(float translate_x, float translate_y, float translate_z) {
+    Matrix4 translation { {
+        1,
+        0,
+        0,
+        translate_x,
+        0,
+        1,
+        0,
+        translate_y,
+        0,
+        0,
+        1,
+        translate_z,
+        0,
+        0,
+        0,
+        1,
+    } };
+    return translation;
+}
+
 float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col) {
 
     std::array<float, 9> minor { 0 };
@@ -242,4 +287,14 @@ Matrix4 inverse(Matrix4 const& matrix) {
     return result;
 }
 
+Vector4 operator*(Matrix4 const& matrix, Vector4 const& vector) {
+    Vector4 result {};
+    for (std::size_t row = 0; row < 4; ++row) {
+        for (std::size_t col = 0; col < 4; ++col) {
+            result.elements[row] += matrix.element(row, col) * vector.elements[col];
+        }
+    }
+
+    return result;
+}
 } // namespace inl

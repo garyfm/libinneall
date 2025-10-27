@@ -1,16 +1,29 @@
 #pragma once
 
+#include <cmath>
 #include <format>
 
 namespace inl {
 
 struct Vector4 {
-    float x;
-    float y;
-    float z;
-    float w;
 
-    bool operator==(const Vector4& vector) const = default;
+    static constexpr float EPSILON = 1e-5f;
+    union {
+        struct {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+
+        float elements[4];
+    };
+
+    bool operator==(const Vector4& other) const {
+        return std::fabs(x - other.x) < EPSILON && std::fabs(y - other.y) < EPSILON && std::fabs(y - other.y) < EPSILON
+            && std::fabs(z - other.z) < EPSILON && std::fabs(w - other.w) < EPSILON;
+    }
+
     Vector4 operator-() const;
 
     Vector4& operator+=(float scalar);

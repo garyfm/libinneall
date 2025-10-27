@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libinneall/base/assert.hpp>
+#include <libinneall/math/vector4.hpp>
 
 #include <array>
 #include <format>
@@ -46,6 +47,9 @@ public:
     friend Matrix4 operator-(Matrix4 const& left, Matrix4 const& right);
     friend Matrix4 operator*(Matrix4 const& left, Matrix4 const& right);
 
+    static Matrix4 create_scaling(float scale_x, float scale_y, float scale_z);
+    static Matrix4 create_translation(float translate_x, float translate_y, float translate_z);
+
     std::span<const float> elements() const { return m_elements; };
     float element(std::size_t row, std::size_t col) const { return m_elements[(col * 4) + row]; };
 
@@ -57,6 +61,8 @@ float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col);
 float determinant(Matrix4 const& matrix);
 Matrix4 transpose(Matrix4 const& matrix);
 Matrix4 inverse(Matrix4 const& matrix);
+
+Vector4 operator*(Matrix4 const& matrix, Vector4 const& vector);
 
 } // namespace inl
 

@@ -131,8 +131,6 @@ TEST_CASE("matrix4: Testing transpose") {
     }
 }
 
-#include <libinneall/base/log.hpp>
-
 TEST_CASE("matrix4: Testing inverse") {
     {
         inl::Matrix4 m1 { { 1, 0, 1, 2, 2, 1, 0, 1, 3, 2, 1, 0, 4, 3, 2, 1 } };
@@ -142,9 +140,14 @@ TEST_CASE("matrix4: Testing inverse") {
 
     {
         inl::Matrix4 m1 { { 4, 0, 1, 2, 4, 1, 0, 1, 0, 2, 1, 0, 4, 3, 2, 1 } };
-
-        inl::log::debug("{}", inl::inverse(m1));
         CHECK(inl::inverse(m1)
             == inl::Matrix4 { { -0.25, 0, -0.75, 0.5, 0, 0.5, 1, -0.5, 0, -1, -1, 1, 1, 0.5, 2, -1.5 } });
     }
+}
+
+TEST_CASE("matrix4: Testing vector operations") {
+    inl::Matrix4 m1 { inl::Matrix4::create_scaling({ 2, 2, 2 }) };
+    inl::Vector4 v1 { 1, 2, 3, 4 };
+
+    CHECK(m1 * v1 == inl::Vector4 { 2, 4, 6, 4 });
 }

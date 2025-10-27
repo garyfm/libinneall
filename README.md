@@ -27,18 +27,18 @@ build test -C build
 
 ## TODO
 
-Stage 1 - Basic Scene
+Stage 1 - Draw scene
 - [x] Setup shader compilation
 - [x] Shader uniforms 
 - [x] Render triangle
 - [x] DSA vertex array/buffer
 - [x] Element buffer
-- [x] Mesh class
 - [x] Renderer class
 - [ ] Math
 - [ ] Camera
 
 Stage 2 - 3D model loader
+- [ ] Model class
 - [ ] Model format
 - [ ] Model loader
 

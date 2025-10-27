@@ -1,3 +1,4 @@
+#include <libinneall/math/math.hpp>
 #include <libinneall/math/matrix3.hpp>
 #include <libinneall/math/matrix4.hpp>
 
@@ -161,6 +162,81 @@ Matrix4 operator*(Matrix4 const& left, Matrix4 const& right) {
     return result;
 }
 
+Matrix4 Matrix4::create_scaling(Vector3 factors) {
+    const Matrix4 scaling { {
+        factors.x,
+        0,
+        0,
+        0,
+        0,
+        factors.y,
+        0,
+        0,
+        0,
+        0,
+        factors.z,
+        0,
+        0,
+        0,
+        0,
+        1,
+    } };
+    return scaling;
+}
+
+Matrix4 Matrix4::create_translation(Vector3 translation) {
+    const Matrix4 translate { {
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        translation.x,
+        translation.y,
+        translation.z,
+        1,
+    } };
+    return translate;
+}
+
+Matrix4 Matrix4::create_rotation(float angle_radians, Vector3 const& unit_axis) {
+
+    const float cos_angle = std::cos(angle_radians);
+    const float sin_angle = std::sin(angle_radians);
+
+    const float x = unit_axis.x;
+    const float y = unit_axis.y;
+    const float z = unit_axis.z;
+
+    const Matrix4 rotation { {
+        cos_angle + ((x * x) * (1 - cos_angle)),
+        y * x * (1 - cos_angle) + (z * sin_angle),
+        z * x * (1 - cos_angle) - (y * sin_angle),
+        0,
+        x * y * (1 - cos_angle) - (z * sin_angle),
+        cos_angle + ((y * y) * (1 - cos_angle)),
+        z * y * (1 - cos_angle) + (x * sin_angle),
+        0,
+        x * z * (1 - cos_angle) + (y * sin_angle),
+        y * z * (1 - cos_angle) - (x * sin_angle),
+        cos_angle + ((z * z) * (1 - cos_angle)),
+        0,
+        0,
+        0,
+        0,
+        1,
+    } };
+
+    return rotation;
+}
+
 float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col) {
 
     std::array<float, 9> minor { 0 };
@@ -242,4 +318,14 @@ Matrix4 inverse(Matrix4 const& matrix) {
     return result;
 }
 
+Vector4 operator*(Matrix4 const& matrix, Vector4 const& vector) {
+    Vector4 result {};
+    for (std::size_t row = 0; row < 4; ++row) {
+        for (std::size_t col = 0; col < 4; ++col) {
+            result.elements[row] += matrix.element(row, col) * vector.elements[col];
+        }
+    }
+
+    return result;
+}
 } // namespace inl

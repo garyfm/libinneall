@@ -1,16 +1,49 @@
 #pragma once
 
+#include <libinneall/math/math.hpp>
+#include <libinneall/math/vector3.hpp>
+
+#include <cmath>
 #include <format>
 
 namespace inl {
 
 struct Vector4 {
-    float x;
-    float y;
-    float z;
-    float w;
 
-    bool operator==(const Vector4& vector) const = default;
+    union {
+        struct {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+
+        float elements[4];
+    };
+
+    explicit Vector4()
+        : x {}
+        , y {}
+        , z {}
+        , w {} { }
+
+    Vector4(float x_in, float y_in, float z_in, float w_in)
+        : x { x_in }
+        , y { y_in }
+        , z { z_in }
+        , w { w_in } { }
+
+    explicit Vector4(Vector3 vector)
+        : x { vector.x }
+        , y { vector.y }
+        , z { vector.z }
+        , w { 1 } { }
+
+    bool operator==(const Vector4& other) const {
+        return std::fabs(x - other.x) < EPSILON && std::fabs(y - other.y) < EPSILON && std::fabs(y - other.y) < EPSILON
+            && std::fabs(z - other.z) < EPSILON && std::fabs(w - other.w) < EPSILON;
+    }
+
     Vector4 operator-() const;
 
     Vector4& operator+=(float scalar);

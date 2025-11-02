@@ -6,7 +6,7 @@ namespace inl {
 
 class Renderer {
 public:
-    Renderer() { };
+    Renderer() { glEnable(GL_DEPTH_TEST); };
 
     void render(Scene const& scene) const;
 

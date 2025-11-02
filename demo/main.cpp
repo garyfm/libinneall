@@ -35,6 +35,58 @@ std::string read_file(std::filesystem::path path) {
     return contents;
 }
 
+// clang-format off
+std::array<inl::VertexData, 36> cube_vertices { {
+    {-0.5f, -0.5f, -0.5f},
+    { 0.5f, -0.5f, -0.5f},
+    { 0.5f,  0.5f, -0.5f},
+    { 0.5f,  0.5f, -0.5f},
+    {-0.5f,  0.5f, -0.5f},
+    {-0.5f, -0.5f, -0.5f},
+
+    {-0.5f, -0.5f,  0.5f},
+    { 0.5f, -0.5f,  0.5f},
+    { 0.5f,  0.5f,  0.5f},
+    { 0.5f,  0.5f,  0.5f},
+    {-0.5f,  0.5f,  0.5f},
+    {-0.5f, -0.5f,  0.5f},
+
+    {-0.5f,  0.5f,  0.5f},
+    {-0.5f,  0.5f, -0.5f},
+    {-0.5f, -0.5f, -0.5f},
+    {-0.5f, -0.5f, -0.5f},
+    {-0.5f, -0.5f,  0.5f},
+    {-0.5f,  0.5f,  0.5f},
+
+    { 0.5f,  0.5f,  0.5f},
+    { 0.5f,  0.5f, -0.5f},
+    { 0.5f, -0.5f, -0.5f},
+    { 0.5f, -0.5f, -0.5f},
+    { 0.5f, -0.5f,  0.5f},
+    { 0.5f,  0.5f,  0.5f},
+
+    {-0.5f, -0.5f, -0.5f},
+    { 0.5f, -0.5f, -0.5f},
+    { 0.5f, -0.5f,  0.5f},
+    { 0.5f, -0.5f,  0.5f},
+    {-0.5f, -0.5f,  0.5f},
+    {-0.5f, -0.5f, -0.5f},
+
+    {-0.5f,  0.5f, -0.5f},
+    { 0.5f,  0.5f, -0.5f},
+    { 0.5f,  0.5f,  0.5f},
+    { 0.5f,  0.5f,  0.5f},
+    {-0.5f,  0.5f,  0.5f},
+    {-0.5f,  0.5f, -0.5f},
+} };
+// clang-format on
+
+[[maybe_unused]] std::array<inl::VertexData, 3> trigangle_vertices { {
+    { -0.5f, -0.5f, 0.0f },
+    { 0.0f, 0.5f, 0.0f },
+    { 0.5f, -0.5f, 0.0f },
+} };
+
 }
 
 int main(int argc, char* argv[]) {
@@ -53,27 +105,21 @@ int main(int argc, char* argv[]) {
 
         Window window { 800, 600, "demo game" };
 
+        log::debug("Creating vertex shader");
         std::string basic_vert_shader_source = read_file(resource_path + "/basic.vert.glsl");
         ShaderStage vertex_stage { ShaderType::Vertex, basic_vert_shader_source };
-        log::debug("Created vertex shader");
 
+        log::debug("Creating fragment shader");
         std::string basic_frag_shader_source = read_file(resource_path + "/basic.frag.glsl");
         ShaderStage fragment_stage { ShaderType::Fragment, basic_frag_shader_source };
-        log::debug("Created fragment shader");
 
+        log::debug("Creating shader program");
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
-        log::debug("Created shader program");
 
-        std::array<VertexData, 3> vertices { {
-            { -0.5f, -0.5f, 0.0f },
-            { 0.0f, 0.5f, 0.0f },
-            { 0.5f, -0.5f, 0.0f },
-        } };
+        // std::array<unsigned, 3> indices = { 0, 1, 2 };
 
-        std::array<unsigned, 3> indices = { 0, 1, 2 };
-
-        MeshData mesh_data { std::span { vertices }, { indices } };
+        MeshData mesh_data { std::span { cube_vertices }, {} };
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
@@ -85,12 +131,11 @@ int main(int argc, char* argv[]) {
         while (!glfwWindowShouldClose(window.native_handle())) {
             window.process_input();
 
-            float varying_color = sin(glfwGetTime()) / 2.0f + 0.5f;
-            Color color { 0.0f, varying_color, varying_color };
-            model.shader->set_uniform("set_color", color);
+            shader_program.use();
 
             Matrix4 transform { 1 };
-            transform = rotate(transform, (float)glfwGetTime(), { 0, 0, 1 });
+            // transform = translate(transform, { 0.0, 0.0, -1.0 });
+            transform = rotate(transform, (float)glfwGetTime() * to_radians(50.0f), { 0.5, 1.0f, 0.0f });
             shader_program.set_uniform("transform", transform);
 
             renderer.render(scene);

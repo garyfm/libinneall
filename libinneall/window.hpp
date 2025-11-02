@@ -1,7 +1,7 @@
 #pragma once
 
 #define GLFW_INCLUDE_NONE
-#include <libinneall/glad/include/glad/glad.h>
+#include <subprojects/glad/include/glad/glad.h>
 #include <subprojects/glfw-3.4/include/GLFW/glfw3.h>
 
 #include <memory>

@@ -86,7 +86,7 @@ Vector2 operator-(Vector2 const& left, Vector2 const& right) {
     return result;
 }
 
-float length(Vector2 const& vector) { return std::sqrt(std::pow(vector.x, 2) + std::pow(vector.y, 2)); }
+float length(Vector2 const& vector) { return std::sqrtf(std::powf(vector.x, 2) + std::powf(vector.y, 2)); }
 
 Vector2 normalise(Vector2 const& vector) {
     float len = length(vector);

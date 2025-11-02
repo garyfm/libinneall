@@ -93,7 +93,7 @@ Vector3 operator-(Vector3 const& left, Vector3 const& right) {
 }
 
 float length(Vector3 const& vector) {
-    return std::sqrt(std::pow(vector.x, 2) + std::pow(vector.y, 2) + std::pow(vector.z, 2));
+    return std::sqrtf(std::powf(vector.x, 2) + std::powf(vector.y, 2) + std::powf(vector.z, 2));
 }
 
 Vector3 normalise(Vector3 const& vector) {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libinneall/base/unique_resource.hpp>
-#include <libinneall/glad/include/glad/glad.h>
+#include <subprojects/glad/include/glad/glad.h>
 
 #include <string_view>
 

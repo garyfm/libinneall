@@ -12,9 +12,9 @@ void Renderer::render(Scene const& scene) const {
         model->shader->use();
 
         if (model->mesh->index_count() != 0) {
-            glDrawElements(GL_TRIANGLES, model->mesh->index_count(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(model->mesh->index_count()), GL_UNSIGNED_INT, 0);
         } else {
-            glDrawArrays(GL_TRIANGLES, 0, model->mesh->vertext_count());
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(model->mesh->vertext_count()));
         }
     }
 }

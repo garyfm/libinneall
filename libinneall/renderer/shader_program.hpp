@@ -2,9 +2,9 @@
 
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
-#include <libinneall/glad/include/glad/glad.h>
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/renderer/color.hpp>
+#include <subprojects/glad/include/glad/glad.h>
 
 #include <string_view>
 #include <unordered_map>

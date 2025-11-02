@@ -15,7 +15,7 @@ public:
     explicit Matrix3(float diagonal);
     explicit Matrix3(const std::array<float, 9>& elements);
 
-    float operator[](int i) const {
+    float operator[](std::size_t i) const {
         INL_ASSERT(i < 9, "Out of bounds array access");
         return m_elements[i];
     }

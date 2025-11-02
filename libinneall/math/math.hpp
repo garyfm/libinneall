@@ -4,7 +4,7 @@
 
 namespace inl {
 
-static constexpr float PI = 3.14159265359;
+static constexpr float PI = 3.14159265359f;
 static constexpr float EPSILON = 1e-6f;
 
 inline float to_degrees(float radian) { return radian * (180 / PI); }

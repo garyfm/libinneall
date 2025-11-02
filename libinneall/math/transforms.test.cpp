@@ -47,6 +47,6 @@ TEST_CASE("matrix4: Testing rotation") {
 
     {
         inl::Vector3 v1 { 1, 0, 0 };
-        CHECK(inl::rotate(v1, inl::to_radians(120), { 0, 0, 1 }) == inl::Vector3 { -0.5, 0.866025, 0 });
+        CHECK(inl::rotate(v1, inl::to_radians(120), { 0, 0, 1 }) == inl::Vector3 { -0.5, 0.866025f, 0 });
     }
 }

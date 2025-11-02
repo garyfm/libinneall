@@ -13,7 +13,7 @@ TEST_CASE("matrix3: Testing scalar operations") {
         CHECK(m + 1 == inl::Matrix3 { { 2, 5, 8, 3, 6, 9, 4, 7, 10 } });
         CHECK(m - 1 == inl::Matrix3 { { 0, 3, 6, 1, 4, 7, 2, 5, 8 } });
         CHECK(m * 2 == inl::Matrix3 { { 2, 8, 14, 4, 10, 16, 6, 12, 18 } });
-        CHECK(m / 2 == inl::Matrix3 { { 0.5, 2, 3.5, 1, 2.5, 4, 1.5, 3, 4.5 } });
+        CHECK(m / 2 == inl::Matrix3 { { 0.5f, 2, 3.5f, 1, 2.5f, 4, 1.5f, 3, 4.5f } });
     }
 
     {
@@ -34,7 +34,7 @@ TEST_CASE("matrix3: Testing scalar operations") {
     {
         inl::Matrix3 m { { 1, 4, 7, 2, 5, 8, 3, 6, 9 } };
         m /= 2;
-        CHECK(m == inl::Matrix3 { { 0.5, 2, 3.5, 1, 2.5, 4, 1.5, 3, 4.5 } });
+        CHECK(m == inl::Matrix3 { { 0.5f, 2, 3.5f, 1, 2.5f, 4, 1.5f, 3, 4.5f } });
     }
 }
 

@@ -3,7 +3,6 @@ include_dir = '..'
 source_files = files(
   'base/assert.cpp',
   'base/result.cpp',
-  'glad/src/glad.c',
   'math/matrix3.cpp',
   'math/matrix4.cpp',
   'math/transforms.cpp',
@@ -33,12 +32,13 @@ test_files = files(
 glfw_dep = dependency('glfw3')
 gl_dep = dependency('gl')
 doctest_dep = dependency('doctest')
+glad_dep = dependency('glad')
 
 libinneall = static_library(
     'libinneall',
     source_files,
     include_directories: include_dir,
-    dependencies: [glfw_dep, gl_dep]
+    dependencies: [glfw_dep, gl_dep, glad_dep]
 )
 
 libinneall_dep = declare_dependency(

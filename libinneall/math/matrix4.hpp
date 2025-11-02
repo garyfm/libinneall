@@ -17,7 +17,7 @@ public:
     explicit Matrix4(float diagonal);
     explicit Matrix4(const std::array<float, 16>& elements);
 
-    float operator[](int i) const {
+    float operator[](std::size_t i) const {
         INL_ASSERT(i < 16, "Out of bounds array access");
         return m_elements[i];
     }

@@ -4,10 +4,9 @@ add_project_arguments(
   '-Werror',
   '-Wall',
   '-Wextra',
-  #'-Wpedantic', # FIX: glad.c doesnt work with this
   '-Wshadow',
   '-Wformat=2',
-  #'-Wconversion', # FIX: glad.c doesnt work with this
+  '-Wconversion', 
   '-Wnull-dereference',
   '-Wunreachable-code',
   '-Wsign-compare',

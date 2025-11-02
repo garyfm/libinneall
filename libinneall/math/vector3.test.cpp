@@ -17,7 +17,7 @@ TEST_CASE("vector3: Testing scalar operations") {
         CHECK(2 * v1 == inl::Vector3 { 2.0f, 4.0f, 6.0f });
         CHECK(2 / v1 == inl::Vector3 { 0.5f, 1.0f, 1.5f });
 
-        CHECK(v1 + 2.4 == inl::Vector3 { 3.4f, 4.4f, 5.4f });
+        CHECK(v1 + 2.4f == inl::Vector3 { 3.4f, 4.4f, 5.4f });
     }
 
     {

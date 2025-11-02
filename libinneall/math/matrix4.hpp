@@ -51,6 +51,7 @@ public:
     static Matrix4 create_scaling(Vector3 factors);
     static Matrix4 create_translation(Vector3 translation);
     static Matrix4 create_rotation(float angle_radians, Vector3 const& unit_axis);
+    static Matrix4 create_perspective(float fov_y, float aspect, float z_near, float z_far);
 
     std::span<const float> elements() const { return m_elements; };
     float element(std::size_t row, std::size_t col) const { return m_elements[(col * 4) + row]; };

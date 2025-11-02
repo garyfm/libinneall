@@ -211,9 +211,10 @@ Matrix4 Matrix4::create_rotation(float angle_radians, Vector3 const& unit_axis) 
     const float cos_angle = std::cos(angle_radians);
     const float sin_angle = std::sin(angle_radians);
 
-    const float x = unit_axis.x;
-    const float y = unit_axis.y;
-    const float z = unit_axis.z;
+    Vector3 normalized = normalise(unit_axis);
+    const float x = normalized.x;
+    const float y = normalized.y;
+    const float z = normalized.z;
 
     const Matrix4 rotation { {
         cos_angle + ((x * x) * (1 - cos_angle)),
@@ -235,6 +236,31 @@ Matrix4 Matrix4::create_rotation(float angle_radians, Vector3 const& unit_axis) 
     } };
 
     return rotation;
+}
+
+Matrix4 Matrix4::create_perspective(float fov_y, float aspect, float z_near, float z_far) {
+
+    const float tan_fov = std::tan(fov_y / 2);
+
+    const Matrix4 perspecitve { {
+        1 / (aspect * tan_fov),
+        0,
+        0,
+        0,
+        0,
+        1 / tan_fov,
+        0,
+        0,
+        0,
+        0,
+        -((z_far + z_near) / (z_far - z_near)),
+        -1,
+        0,
+        0,
+        -((2 * z_far * z_near) / (z_far - z_near)),
+        0,
+    } };
+    return perspecitve;
 }
 
 float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col) {

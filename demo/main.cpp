@@ -117,8 +117,6 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        // std::array<unsigned, 3> indices = { 0, 1, 2 };
-
         MeshData mesh_data { std::span { cube_vertices }, {} };
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
@@ -128,15 +126,22 @@ int main(int argc, char* argv[]) {
 
         Renderer renderer;
 
+        Matrix4 view_matrix { 1 };
+        view_matrix = translate(view_matrix, { 0.0, 0.0, -3.0f });
+        shader_program.set_uniform("view_matrix", view_matrix);
+
+        Matrix4 projection_matrix { Matrix4::create_perspective(to_radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f) };
+        shader_program.set_uniform("projection_matrix", projection_matrix);
+
         while (!glfwWindowShouldClose(window.native_handle())) {
             window.process_input();
 
             shader_program.use();
 
-            Matrix4 transform { 1 };
-            // transform = translate(transform, { 0.0, 0.0, -1.0 });
-            transform = rotate(transform, (float)glfwGetTime() * to_radians(50.0f), { 0.5, 1.0f, 0.0f });
-            shader_program.set_uniform("transform", transform);
+            Matrix4 model_matrix { 1 };
+            model_matrix
+                = rotate(model_matrix, static_cast<float>(glfwGetTime()) * to_radians(50.f), { 0.5, 1.0f, 0.0f });
+            shader_program.set_uniform("model_matrix", model_matrix);
 
             renderer.render(scene);
 

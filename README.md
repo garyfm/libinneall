@@ -34,7 +34,7 @@ Stage 1 - Draw scene
 - [x] DSA vertex array/buffer
 - [x] Element buffer
 - [x] Renderer class
-- [ ] Math
+- [x] Math
 - [ ] Camera
 
 Stage 2 - 3D model loader

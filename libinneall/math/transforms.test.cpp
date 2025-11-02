@@ -20,6 +20,8 @@ TEST_CASE("matrix4: Testing translation") {
 
     inl::Vector3 v2 { 1, 2, 3 };
     CHECK(inl::translate(v2, 2) == inl::Vector3 { 3, 4, 5 });
+
+    CHECK(inl::translate(v1, -2) == inl::Vector3 { -1, 0, 1 });
 }
 
 TEST_CASE("matrix4: Testing rotation") {

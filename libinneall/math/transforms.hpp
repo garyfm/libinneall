@@ -19,4 +19,6 @@ Matrix4 translate(Matrix4 const& matrix, float translation);
 
 Vector3 rotate(Vector3 const& vector, float angle_radians, Vector3 const& unit_axis);
 Matrix4 rotate(Matrix4 const& matrix, float angle_radians, Vector3 const& unit_axis);
+
+Matrix4 perspective(Matrix4 const& matrix, float fov_y, float aspect, float z_near, float z_far);
 }

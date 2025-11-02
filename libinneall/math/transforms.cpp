@@ -55,4 +55,10 @@ Matrix4 rotate(Matrix4 const& matrix, float angle_radians, Vector3 const& unit_a
     return result;
 }
 
+Matrix4 perspective(Matrix4 const& matrix, float fov_y, float aspect, float z_near, float z_far) {
+    const Matrix4 result = Matrix4::create_perspective(fov_y, aspect, z_near, z_far) * matrix;
+
+    return result;
+}
+
 } // namepsace inl

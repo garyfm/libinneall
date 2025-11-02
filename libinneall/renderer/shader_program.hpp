@@ -3,6 +3,7 @@
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
 #include <libinneall/glad/include/glad/glad.h>
+#include <libinneall/math/matrix4.hpp>
 #include <libinneall/renderer/color.hpp>
 
 #include <string_view>
@@ -20,7 +21,9 @@ public:
 
     void use() const { glUseProgram(m_handle); }
 
-    void set_uniform(std::string const& name, Color const& color) const;
+    void set_uniform(std::string_view name, Color const& color) const;
+    void set_uniform(std::string_view name, Matrix4 const& color) const;
+    GLuint uniform_location(std::string_view name) const;
 
 private:
     struct UniformInfo {

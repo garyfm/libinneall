@@ -2,6 +2,8 @@
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
+#include <libinneall/math/math.hpp>
+#include <libinneall/math/transforms.hpp>
 #include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/mesh.hpp>
@@ -53,12 +55,15 @@ int main(int argc, char* argv[]) {
 
         std::string basic_vert_shader_source = read_file(resource_path + "/basic.vert.glsl");
         ShaderStage vertex_stage { ShaderType::Vertex, basic_vert_shader_source };
+        log::debug("Created vertex shader");
 
         std::string basic_frag_shader_source = read_file(resource_path + "/basic.frag.glsl");
         ShaderStage fragment_stage { ShaderType::Fragment, basic_frag_shader_source };
+        log::debug("Created fragment shader");
 
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
+        log::debug("Created shader program");
 
         std::array<VertexData, 3> vertices { {
             { -0.5f, -0.5f, 0.0f },
@@ -83,6 +88,10 @@ int main(int argc, char* argv[]) {
             float varying_color = sin(glfwGetTime()) / 2.0f + 0.5f;
             Color color { 0.0f, varying_color, varying_color };
             model.shader->set_uniform("set_color", color);
+
+            Matrix4 transform { 1 };
+            transform = rotate(transform, (float)glfwGetTime(), { 0, 0, 1 });
+            shader_program.set_uniform("transform", transform);
 
             renderer.render(scene);
 

@@ -1,8 +1,7 @@
 #include <libinneall/base/log.hpp>
+#include <libinneall/math/matrix4.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
-
-#include <exception>
 
 namespace inl {
 
@@ -75,7 +74,7 @@ void ShaderProgram::retrieve_uniforms() {
     }
 }
 
-void ShaderProgram::set_uniform(std::string const& name, Color const& color) const {
+GLuint ShaderProgram::uniform_location(std::string_view name) const {
 
     if (m_uniforms.find(name.data()) == m_uniforms.end()) {
         log::error("Shader({}) - Failed to find uniform with name {}", static_cast<int>(m_handle), name.data());
@@ -83,7 +82,18 @@ void ShaderProgram::set_uniform(std::string const& name, Color const& color) con
     }
 
     int location = glGetUniformLocation(m_handle, name.data());
+    return location;
+}
+
+void ShaderProgram::set_uniform(std::string_view name, Color const& color) const {
+    const GLuint location = uniform_location(name);
     glProgramUniform3f(m_handle, location, color.r, color.g, color.b);
+}
+
+void ShaderProgram::set_uniform(std::string_view name, Matrix4 const& matrix) const {
+
+    const GLuint location = uniform_location(name);
+    glProgramUniformMatrix4fv(m_handle, location, 1, GL_FALSE, matrix.elements().data());
 }
 
 }

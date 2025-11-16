@@ -121,7 +121,10 @@ int main(int argc, char* argv[]) {
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
-        // TODO: Understand projection matrix
+        Scene scene;
+        scene.models.push_back(&model);
+
+        Renderer renderer;
 
         while (!glfwWindowShouldClose(window.native_handle())) {
             window.process_input();
@@ -147,15 +150,12 @@ int main(int argc, char* argv[]) {
             shader_program.set_uniform("projection_matrix", projection_matrix);
 
             Matrix4 model_matrix { 1 };
-            // model_matrix
-            //     = rotate(model_matrix, static_cast<float>(glfwGetTime()) * to_radians(50.f), { 0.5, 1.0f, 0.0f });
             shader_program.set_uniform("model_matrix", model_matrix);
 
-            Scene scene;
-            scene.models.push_back(&model);
-
-            Renderer renderer;
-            renderer.render(scene);
+            renderer.begin_frame();
+            for (auto const m : scene.models) {
+                renderer.render(*m);
+            }
 
             window.swap_buffers();
         }

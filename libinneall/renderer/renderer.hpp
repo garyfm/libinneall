@@ -6,9 +6,13 @@ namespace inl {
 
 class Renderer {
 public:
-    Renderer() { glEnable(GL_DEPTH_TEST); };
+    Renderer() {
+        // TODO: Not sure if this should go here ?
+        glEnable(GL_DEPTH_TEST);
+    };
 
-    void render(Scene const& scene) const;
+    void begin_frame() const;
+    void render(Model const& model) const;
 
 private:
 };

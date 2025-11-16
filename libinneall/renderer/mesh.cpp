@@ -30,5 +30,6 @@ Mesh::Mesh(MeshData const& data)
 }
 
 void Mesh::bind() const { m_vertex_array.bind(); }
+void Mesh::unbind() const { m_vertex_array.unbind(); }
 
 } // namepsace inl

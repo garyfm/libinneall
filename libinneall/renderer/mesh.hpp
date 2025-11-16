@@ -18,6 +18,7 @@ public:
     explicit Mesh(MeshData const& data);
 
     void bind() const;
+    void unbind() const;
 
     std::size_t vertext_count() const { return m_data.vertex_data.size(); };
     std::size_t index_count() const { return m_data.index_data.size(); };

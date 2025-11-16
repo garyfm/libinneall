@@ -79,9 +79,24 @@ std::array<inl::VertexData, 36> cube_vertices { {
     {-0.5f,  0.5f,  0.5f},
     {-0.5f,  0.5f, -0.5f},
 } };
+
+// world space positions of our cubes
+[[maybe_unused]] std::array<inl::Vector3, 10> cube_positions = { {
+    { 0.0f,  0.0f,  0.0f},
+    { 2.0f,  5.0f, -15.0f},
+    {-1.5f, -2.2f, -2.5f},
+    {-3.8f, -2.0f, -12.3f},
+    {2.4f, -0.4f, -3.5f},
+    {-1.7f,  3.0f, -7.5f},
+    { 1.3f, -2.0f, -2.5f},
+    { 1.5f,  2.0f, -2.5f},
+    { 1.5f,  0.2f, -1.5f},
+    {-1.3f,  1.0f, -1.5f},
+} };
+
 // clang-format on
 
-[[maybe_unused]] std::array<inl::VertexData, 3> trigangle_vertices { {
+[[maybe_unused]] std::array<inl::VertexData, 3> triangle_vertices { {
     { -0.5f, -0.5f, 0.0f },
     { 0.0f, 0.5f, 0.0f },
     { 0.5f, -0.5f, 0.0f },
@@ -121,9 +136,6 @@ int main(int argc, char* argv[]) {
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
-        Scene scene;
-        scene.models.push_back(&model);
-
         Renderer renderer;
 
         while (!glfwWindowShouldClose(window.native_handle())) {
@@ -131,13 +143,14 @@ int main(int argc, char* argv[]) {
 
             shader_program.use();
 
+            Matrix4 projection_matrix { Matrix4::create_perspective(to_radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f) };
+            shader_program.set_uniform("projection_matrix", projection_matrix);
+
             // Camera
             {
                 const float radius = 10.0f;
-
                 float camera_x = sinf(static_cast<float>(glfwGetTime())) * radius;
                 float camera_z = cosf(static_cast<float>(glfwGetTime())) * radius;
-
                 const Vector3 camera_position { camera_x, 0.0f, camera_z };
                 const Vector3 camera_target { 0.0f, 0.0f, 0.0f };
                 const Vector3 world_up { 0.0f, 1.0f, 0.0f };
@@ -146,15 +159,14 @@ int main(int argc, char* argv[]) {
                 shader_program.set_uniform("view_matrix", view_matrix);
             }
 
-            Matrix4 projection_matrix { Matrix4::create_perspective(to_radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f) };
-            shader_program.set_uniform("projection_matrix", projection_matrix);
-
-            Matrix4 model_matrix { 1 };
-            shader_program.set_uniform("model_matrix", model_matrix);
-
             renderer.begin_frame();
-            for (auto const m : scene.models) {
-                renderer.render(*m);
+            for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
+                Matrix4 model_matrix { 1 };
+                float angle = 20.0f * static_cast<float>(i);
+                model_matrix = rotate(model_matrix, to_radians(angle), { 1.0f, 0.3f, 0.5f });
+                model_matrix = translate(model_matrix, cube_positions[i]);
+                shader_program.set_uniform("model_matrix", model_matrix);
+                renderer.render(model);
             }
 
             window.swap_buffers();

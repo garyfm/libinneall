@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 
         std::string resource_path = argv[1];
 
-        Window window { 800, 600, "demo game" };
+        Window window { 800, 600, "libinneall demo" };
 
         log::debug("Creating vertex shader");
         std::string basic_vert_shader_source = read_file(resource_path + "/basic.vert.glsl");
@@ -121,28 +121,40 @@ int main(int argc, char* argv[]) {
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
-        Scene scene;
-        scene.models.push_back(&model);
-
-        Renderer renderer;
-
-        Matrix4 view_matrix { 1 };
-        view_matrix = translate(view_matrix, { 0.0, 0.0, -3.0f });
-        shader_program.set_uniform("view_matrix", view_matrix);
-
-        Matrix4 projection_matrix { Matrix4::create_perspective(to_radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f) };
-        shader_program.set_uniform("projection_matrix", projection_matrix);
+        // TODO: Understand projection matrix
 
         while (!glfwWindowShouldClose(window.native_handle())) {
             window.process_input();
 
             shader_program.use();
 
+            // Camera
+            {
+                const float radius = 10.0f;
+
+                float camera_x = sinf(static_cast<float>(glfwGetTime())) * radius;
+                float camera_z = cosf(static_cast<float>(glfwGetTime())) * radius;
+
+                const Vector3 camera_position { camera_x, 0.0f, camera_z };
+                const Vector3 camera_target { 0.0f, 0.0f, 0.0f };
+                const Vector3 world_up { 0.0f, 1.0f, 0.0f };
+
+                const Matrix4 view_matrix { Matrix4::create_look_at(camera_position, camera_target, world_up) };
+                shader_program.set_uniform("view_matrix", view_matrix);
+            }
+
+            Matrix4 projection_matrix { Matrix4::create_perspective(to_radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f) };
+            shader_program.set_uniform("projection_matrix", projection_matrix);
+
             Matrix4 model_matrix { 1 };
-            model_matrix
-                = rotate(model_matrix, static_cast<float>(glfwGetTime()) * to_radians(50.f), { 0.5, 1.0f, 0.0f });
+            // model_matrix
+            //     = rotate(model_matrix, static_cast<float>(glfwGetTime()) * to_radians(50.f), { 0.5, 1.0f, 0.0f });
             shader_program.set_uniform("model_matrix", model_matrix);
 
+            Scene scene;
+            scene.models.push_back(&model);
+
+            Renderer renderer;
             renderer.render(scene);
 
             window.swap_buffers();

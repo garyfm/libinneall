@@ -263,6 +263,38 @@ Matrix4 Matrix4::create_perspective(float fov_y, float aspect, float z_near, flo
     return perspecitve;
 }
 
+Matrix4 Matrix4::create_look_at(Vector3 position, Vector3 target, Vector3 world_up) {
+
+    const Vector3 direction { normalise(position - target) };
+    const Vector3 right { normalise(cross(world_up, direction)) };
+    const Vector3 up { cross(direction, right) };
+
+    // NOTE: Transposed as we want to rotate in the opposite direction of the camera movement
+    const Matrix4 rotation { {
+        right.x,
+        up.x,
+        direction.x,
+        0,
+        right.y,
+        up.y,
+        direction.y,
+        0,
+        right.z,
+        up.z,
+        direction.z,
+        0,
+        0,
+        0,
+        0,
+        1,
+    } };
+
+    // NOTE: Negated as we want to translate in the opposite direction of the camera movement
+    const Matrix4 translation { create_translation(-position) };
+    const Matrix4 look_at { rotation * translation };
+    return look_at;
+}
+
 float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col) {
 
     std::array<float, 9> minor { 0 };

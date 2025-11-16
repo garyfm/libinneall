@@ -22,7 +22,7 @@ Run:
 Test:
 
 ```bash
-build test -C build
+meson test -C build -v
 ```
 
 ## TODO

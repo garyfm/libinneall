@@ -4,6 +4,7 @@
 #include <subprojects/glad/include/glad/glad.h>
 #include <subprojects/glfw-3.4/include/GLFW/glfw3.h>
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -11,7 +12,8 @@ namespace inl {
 
 class Window {
 public:
-    Window(unsigned width, unsigned height, const std::string& title);
+    using InputCallback = std::function<void(GLFWwindow*)>;
+    Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback);
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
@@ -34,6 +36,9 @@ private:
     std::string m_title {};
 
     std::unique_ptr<GLFWwindow, void (*)(GLFWwindow*)> m_window { nullptr, glfwDestroyWindow };
+
+    // TODO: Temporary solution to allow game to handle input
+    InputCallback m_input_callback;
 };
 
 } // namespace inl

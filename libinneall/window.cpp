@@ -101,11 +101,11 @@ namespace {
     }
 }
 
-Window::Window(unsigned width, unsigned height, const std::string& title)
+Window::Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback)
     : m_width { width }
     , m_height { height }
-    , m_title { title } {
-
+    , m_title { title }
+    , m_input_callback { input_callback } {
     log::debug("Creating window: {} {}x{}", m_title, m_width, m_height);
 
     glfwSetErrorCallback(error_callback);
@@ -146,11 +146,12 @@ Window::Window(unsigned width, unsigned height, const std::string& title)
 Window::~Window() { glfwTerminate(); }
 
 void Window::process_input() {
-
     glfwPollEvents();
     if (glfwGetKey(m_window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(m_window.get(), true);
     }
+
+    m_input_callback(m_window.get());
 }
 
 void Window::swap_buffers() { glfwSwapBuffers(m_window.get()); }

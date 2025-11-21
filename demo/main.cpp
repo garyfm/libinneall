@@ -2,6 +2,7 @@
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
+#include <libinneall/camera.hpp>
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/transforms.hpp>
 #include <libinneall/renderer/color.hpp>
@@ -102,6 +103,30 @@ std::array<inl::VertexData, 36> cube_vertices { {
     { 0.5f, -0.5f, 0.0f },
 } };
 
+float delta_time = 0;
+float last_frame_time = 0;
+
+inl::Camera camera { { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, 2.5f };
+
+void process_input(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        camera.move(inl::Camera::Direction::Forward, delta_time);
+        inl::log::info("W");
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        camera.move(inl::Camera::Direction::Backward, delta_time);
+        inl::log::info("S");
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera.move(inl::Camera::Direction::Left, delta_time);
+        inl::log::info("A");
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera.move(inl::Camera::Direction::Right, delta_time);
+        inl::log::info("D");
+    }
+}
+
 }
 
 int main(int argc, char* argv[]) {
@@ -118,7 +143,7 @@ int main(int argc, char* argv[]) {
 
         std::string resource_path = argv[1];
 
-        Window window { 800, 600, "libinneall demo" };
+        Window window { 800, 600, "libinneall demo", &process_input };
 
         log::debug("Creating vertex shader");
         std::string basic_vert_shader_source = read_file(resource_path + "/basic.vert.glsl");
@@ -138,26 +163,20 @@ int main(int argc, char* argv[]) {
 
         Renderer renderer;
 
+        const Matrix4 projection_matrix { Matrix4::create_perspective(
+            to_radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f) };
+        shader_program.set_uniform("projection_matrix", projection_matrix);
+
         while (!glfwWindowShouldClose(window.native_handle())) {
+            float current_frame_time = static_cast<float>(glfwGetTime());
+            delta_time = current_frame_time - last_frame_time;
+            last_frame_time = current_frame_time;
+
             window.process_input();
 
             shader_program.use();
 
-            Matrix4 projection_matrix { Matrix4::create_perspective(to_radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f) };
-            shader_program.set_uniform("projection_matrix", projection_matrix);
-
-            // Camera
-            {
-                const float radius = 10.0f;
-                float camera_x = sinf(static_cast<float>(glfwGetTime())) * radius;
-                float camera_z = cosf(static_cast<float>(glfwGetTime())) * radius;
-                const Vector3 camera_position { camera_x, 0.0f, camera_z };
-                const Vector3 camera_target { 0.0f, 0.0f, 0.0f };
-                const Vector3 world_up { 0.0f, 1.0f, 0.0f };
-
-                const Matrix4 view_matrix { Matrix4::create_look_at(camera_position, camera_target, world_up) };
-                shader_program.set_uniform("view_matrix", view_matrix);
-            }
+            shader_program.set_uniform("view_matrix", camera.view_matrix());
 
             renderer.begin_frame();
             for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {

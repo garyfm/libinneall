@@ -1,4 +1,4 @@
-#include "renderer/gl_buffer.hpp"
+#include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/renderer.hpp>
 
 namespace inl {

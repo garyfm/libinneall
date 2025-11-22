@@ -3,7 +3,9 @@ include_dir = '..'
 source_files = files(
   'base/assert.cpp',
   'base/result.cpp',
+  'base/string.cpp',
   'camera.cpp',
+  'image/ppm.cpp',
   'math/math.cpp',
   'math/matrix3.cpp',
   'math/matrix4.cpp',
@@ -19,7 +21,6 @@ source_files = files(
   'renderer/vertex_array.cpp',
   'renderer/vertex_data.cpp',
   'window.cpp',
-
 )
 
 test_files = files(

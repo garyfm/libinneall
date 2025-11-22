@@ -5,8 +5,8 @@ namespace inl {
 
 Camera::Camera(Vector3 position, Vector3 world_up, Vector3 front, float yaw, float pitch)
     : m_position { position }
-    , m_front { front }
     , m_world_up { world_up }
+    , m_front { front }
     , m_right { normalise(cross(m_front, m_world_up)) }
     , m_up { normalise(cross(m_right, m_front)) }
     , m_yaw { yaw }

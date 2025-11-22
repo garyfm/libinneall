@@ -27,8 +27,9 @@ public:
 
 private:
     Vector3 m_position {};
-    Vector3 m_front {};
     Vector3 m_world_up {};
+    Vector3 m_front {};
+
     Vector3 m_right {};
     Vector3 m_up {};
 

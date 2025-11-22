@@ -4,6 +4,7 @@ source_files = files(
   'base/assert.cpp',
   'base/result.cpp',
   'camera.cpp',
+  'math/math.cpp',
   'math/matrix3.cpp',
   'math/matrix4.cpp',
   'math/transforms.cpp',

@@ -14,12 +14,16 @@ public:
         Right,
     };
 
-    Camera(Vector3 position, Vector3 world_up, Vector3 front, float movement_speed);
+    Camera(Vector3 position, Vector3 world_up, Vector3 front, float yaw, float pitch);
 
     void move(Direction dir, float delta_time);
-    void update();
+    void rotate(float yaw, float pitch);
 
     Matrix4 view_matrix() const { return Matrix4::create_look_at(m_position, m_position + m_front, m_up); }
+
+    Vector3 position() const { return m_position; }
+    float yaw() const { return m_yaw; }
+    float pitch() const { return m_pitch; }
 
 private:
     Vector3 m_position {};
@@ -28,8 +32,8 @@ private:
     Vector3 m_right {};
     Vector3 m_up {};
 
-    float m_movement_speed {};
-    float m_sensitivity {};
+    float m_yaw {};
+    float m_pitch {};
 };
 
 } // namespace

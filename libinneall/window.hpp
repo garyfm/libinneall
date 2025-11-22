@@ -13,7 +13,10 @@ namespace inl {
 class Window {
 public:
     using InputCallback = std::function<void(GLFWwindow*)>;
-    Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback);
+    using MouseCallback = void (*)(GLFWwindow*, double, double);
+    using ScrollCallback = void (*)(GLFWwindow*, double, double);
+    Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback,
+        MouseCallback mouse_callback, ScrollCallback scroll_callback);
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;

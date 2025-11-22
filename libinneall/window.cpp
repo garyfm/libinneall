@@ -101,7 +101,8 @@ namespace {
     }
 }
 
-Window::Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback)
+Window::Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback,
+    MouseCallback mouse_callback, ScrollCallback scroll_callback)
     : m_width { width }
     , m_height { height }
     , m_title { title }
@@ -139,8 +140,13 @@ Window::Window(unsigned width, unsigned height, const std::string& title, InputC
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(opengl_debug_callback, nullptr);
 
-    // note: This can be used to filter opengl debug messages
+    // NOTE: This can be used to filter opengl debug messages
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+    glfwSetInputMode(m_window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwSetCursorPosCallback(m_window.get(), mouse_callback);
+    glfwSetScrollCallback(m_window.get(), scroll_callback);
 }
 
 Window::~Window() { glfwTerminate(); }

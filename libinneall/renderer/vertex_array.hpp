@@ -12,7 +12,7 @@ public:
         std::size_t index;
         std::size_t binding_index;
         std::size_t n_components;
-        std::size_t stride_bytes;
+        std::size_t offset_bytes;
         GLenum type;
         bool normalise;
     };

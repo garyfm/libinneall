@@ -26,7 +26,7 @@ void VertexArray::set_attribute(Attribute const& attribute) const {
     // Attribute settings
     glVertexArrayAttribFormat(m_handle, static_cast<GLuint>(attribute.index),
         static_cast<GLint>(attribute.n_components), attribute.type, attribute.normalise,
-        static_cast<GLsizei>(attribute.stride_bytes));
+        static_cast<GLsizei>(attribute.offset_bytes));
 
     // Bind the attribute to a bind point
     glVertexArrayAttribBinding(

@@ -22,8 +22,17 @@ Mesh::Mesh(MeshData const& data)
     m_vertex_array.set_attribute({
         .index = 0,
         .binding_index = 0,
-        .n_components = sizeof(VertexData) / sizeof(float),
-        .stride_bytes = 0,
+        .n_components = sizeof(Vector3) / sizeof(float),
+        .offset_bytes = offsetof(VertexData, pos),
+        .type = GL_FLOAT,
+        .normalise = false,
+    });
+
+    m_vertex_array.set_attribute({
+        .index = 1,
+        .binding_index = 0,
+        .n_components = sizeof(Vector2) / sizeof(float),
+        .offset_bytes = offsetof(VertexData, uv),
         .type = GL_FLOAT,
         .normalise = false,
     });

@@ -6,9 +6,11 @@
 
 #define TRY(result)                                                                                                    \
     ({                                                                                                                 \
-        if (!(result).has_value()) {                                                                                   \
-            return std::unexpected((result).error());                                                                  \
+        auto __tmp = (result);                                                                                         \
+        if (!(__tmp).has_value()) {                                                                                    \
+            return std::unexpected((__tmp).error());                                                                   \
         }                                                                                                              \
+        __tmp.value();                                                                                                 \
     })
 
 namespace inl {

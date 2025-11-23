@@ -85,6 +85,11 @@ GLuint ShaderProgram::uniform_location(std::string_view name) const {
     return location;
 }
 
+void ShaderProgram::set_uniform(std::string_view name, int value) const {
+    const GLuint location = uniform_location(name);
+    glProgramUniform1i(m_handle, location, value);
+}
+
 void ShaderProgram::set_uniform(std::string_view name, Color const& color) const {
     const GLuint location = uniform_location(name);
     glProgramUniform3f(m_handle, location, color.r, color.g, color.b);

@@ -3,6 +3,7 @@
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
 #include <libinneall/camera.hpp>
+#include <libinneall/image/ppm.hpp>
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/transforms.hpp>
 #include <libinneall/renderer/color.hpp>
@@ -16,6 +17,7 @@
 #include <libinneall/renderer/vertex_array.hpp>
 #include <libinneall/renderer/vertex_data.hpp>
 #include <libinneall/window.hpp>
+#include <subprojects/glad/include/glad/glad.h>
 
 #include <array>
 #include <cmath>
@@ -29,6 +31,7 @@ static constexpr unsigned SCREEN_WIDTH = 800;
 static constexpr unsigned SCREEN_HEIGHT = 600;
 static constexpr float ASPECT_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT;
 
+// TODO: Implement these with proper error handling
 std::string read_file(std::filesystem::path path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     std::size_t file_size = std::filesystem::file_size(path);
@@ -40,49 +43,61 @@ std::string read_file(std::filesystem::path path) {
     return contents;
 }
 
+void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer) {
+    std::ifstream file(path, std::ios::binary);
+
+    if (!file.is_open()) {
+        inl::log::error("Failed to open file: {}", path.c_str());
+    }
+
+    std::size_t file_size = std::filesystem::file_size(path);
+    buffer.resize(file_size);
+    file.read(reinterpret_cast<char*>(buffer.data()), file_size);
+}
+
 // clang-format off
 std::array<inl::VertexData, 36> cube_vertices { {
-    {-0.5f, -0.5f, -0.5f},
-    { 0.5f, -0.5f, -0.5f},
-    { 0.5f,  0.5f, -0.5f},
-    { 0.5f,  0.5f, -0.5f},
-    {-0.5f,  0.5f, -0.5f},
-    {-0.5f, -0.5f, -0.5f},
+   {{-0.5f, -0.5f, -0.5f},  {0.0f, 0.0f}},
+   {{ 0.5f, -0.5f, -0.5f},  {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
+   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
+   {{-0.5f,  0.5f, -0.5f},  {0.0f, 1.0f}},
+   {{-0.5f, -0.5f, -0.5f},  {0.0f, 0.0f}},
+ 
+   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
+   {{ 0.5f, -0.5f,  0.5f},  {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 1.0f}},
+   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 1.0f}},
+   {{-0.5f,  0.5f,  0.5f},  {0.0f, 1.0f}},
+   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
+ 
+   {{-0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
+   {{-0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
+   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
+   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
+   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
+   {{-0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
 
-    {-0.5f, -0.5f,  0.5f},
-    { 0.5f, -0.5f,  0.5f},
-    { 0.5f,  0.5f,  0.5f},
-    { 0.5f,  0.5f,  0.5f},
-    {-0.5f,  0.5f,  0.5f},
-    {-0.5f, -0.5f,  0.5f},
+   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
+   {{ 0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
+   {{ 0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
+   {{ 0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
+   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
 
-    {-0.5f,  0.5f,  0.5f},
-    {-0.5f,  0.5f, -0.5f},
-    {-0.5f, -0.5f, -0.5f},
-    {-0.5f, -0.5f, -0.5f},
-    {-0.5f, -0.5f,  0.5f},
-    {-0.5f,  0.5f,  0.5f},
+   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
+   {{ 0.5f, -0.5f, -0.5f},  {1.0f, 1.0f}},
+   {{ 0.5f, -0.5f,  0.5f},  {1.0f, 0.0f}},
+   {{ 0.5f, -0.5f,  0.5f},  {1.0f, 0.0f}},
+   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
+   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
 
-    { 0.5f,  0.5f,  0.5f},
-    { 0.5f,  0.5f, -0.5f},
-    { 0.5f, -0.5f, -0.5f},
-    { 0.5f, -0.5f, -0.5f},
-    { 0.5f, -0.5f,  0.5f},
-    { 0.5f,  0.5f,  0.5f},
-
-    {-0.5f, -0.5f, -0.5f},
-    { 0.5f, -0.5f, -0.5f},
-    { 0.5f, -0.5f,  0.5f},
-    { 0.5f, -0.5f,  0.5f},
-    {-0.5f, -0.5f,  0.5f},
-    {-0.5f, -0.5f, -0.5f},
-
-    {-0.5f,  0.5f, -0.5f},
-    { 0.5f,  0.5f, -0.5f},
-    { 0.5f,  0.5f,  0.5f},
-    { 0.5f,  0.5f,  0.5f},
-    {-0.5f,  0.5f,  0.5f},
-    {-0.5f,  0.5f, -0.5f},
+   {{-0.5f,  0.5f, -0.5f},  {0.0f, 1.0f}},
+   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
+   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
+   {{-0.5f,  0.5f,  0.5f},  {0.0f, 0.0f}},
+   {{-0.5f,  0.5f, -0.5f},  {0.0f, 1.0f}},
 } };
 
 // world space positions of our cubes
@@ -101,22 +116,16 @@ std::array<inl::VertexData, 36> cube_vertices { {
 
 // clang-format on
 
-[[maybe_unused]] std::array<inl::VertexData, 3> triangle_vertices { {
-    { -0.5f, -0.5f, 0.0f },
-    { 0.0f, 0.5f, 0.0f },
-    { 0.5f, -0.5f, 0.0f },
-} };
+static float g_delta_time = 0;
+static float g_last_frame_time = 0;
 
-float delta_time = 0;
-float last_frame_time = 0;
-
-inl::Camera camera { { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, -90.0f, 0.0f };
+static inl::Camera camera { { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, -90.0f, 0.0f };
 
 void process_input(GLFWwindow* window) {
     // TODO: Pull this out
     static constexpr float movement_speed = 2.5f;
 
-    float velocity = movement_speed * delta_time;
+    float velocity = movement_speed * g_delta_time;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         camera.move(inl::Camera::Direction::Forward, velocity);
     }
@@ -165,7 +174,6 @@ void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] doubl
     g_fov = inl::clamp(g_fov, 1.0f, 45.0f);
     inl::log::info("FOV: {}", g_fov);
 }
-
 }
 
 int main(int argc, char* argv[]) {
@@ -201,12 +209,46 @@ int main(int argc, char* argv[]) {
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
+        std::vector<std::uint8_t> raw_image_data {};
+        read_file(resource_path + "/brickwall.ppm", raw_image_data);
+        // read_file(resource_path + "/brickwall.ppm", raw_image_data);
+        log::debug("Image size: {}", raw_image_data.size());
+
+        ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
+        if (!image_or_error) {
+            log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
+            return -1;
+        }
+
+        log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int>(image_or_error->format),
+            image_or_error->width, image_or_error->height, image_or_error->max_value, image_or_error->data.size());
+
         Renderer renderer;
+
+        unsigned int texture;
+        { // Texture
+
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(image_or_error->width),
+                static_cast<GLsizei>(image_or_error->height), 0, GL_RGB, GL_UNSIGNED_BYTE,
+                static_cast<GLvoid*>(image_or_error->data.data()));
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+
+        shader_program.use();
+        shader_program.set_uniform("texture_in", 0);
 
         while (!glfwWindowShouldClose(window.native_handle())) {
             float current_frame_time = static_cast<float>(glfwGetTime());
-            delta_time = current_frame_time - last_frame_time;
-            last_frame_time = current_frame_time;
+            g_delta_time = current_frame_time - g_last_frame_time;
+            g_last_frame_time = current_frame_time;
 
             window.process_input();
 
@@ -218,6 +260,7 @@ int main(int argc, char* argv[]) {
 
             shader_program.set_uniform("view_matrix", camera.view_matrix());
 
+            glBindTexture(GL_TEXTURE_2D, texture);
             renderer.begin_frame();
             for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
                 Matrix4 model_matrix { 1 };

@@ -36,15 +36,15 @@ Stage 1 - Draw scene
 - [x] Renderer class
 - [x] Math
 - [x] Camera
-- [ ] Textures
+- [x] Load images
+- [x] Textures
 
 Stage 2 - 3D model loader
-- [ ] Model class
 - [ ] Model format
+- [ ] Model class
 - [ ] Model loader
 
 Stage 3
-- [ ] Image format
 - [ ] Lighting
 
 Misc:

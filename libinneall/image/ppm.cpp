@@ -91,7 +91,7 @@ Result<Image> load(std::span<std::uint8_t> raw_data) {
         .width { static_cast<std::size_t>(width.value()) },
         .height { static_cast<std::size_t>(height.value()) },
         .max_value { static_cast<std::uint16_t>(max_value.value()) },
-        .data { raw_data.data() + cursor, raw_data.size() - cursor },
+        .pixel_data { raw_data.data() + cursor, raw_data.size() - cursor },
     };
 
     return image;

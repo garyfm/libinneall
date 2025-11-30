@@ -14,6 +14,7 @@
 #include <libinneall/renderer/scene.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
+#include <libinneall/renderer/texture.hpp>
 #include <libinneall/renderer/vertex_array.hpp>
 #include <libinneall/renderer/vertex_data.hpp>
 #include <libinneall/window.hpp>
@@ -172,7 +173,6 @@ static float g_fov { 45.0f };
 void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double x_offset, double y_offset) {
     g_fov -= static_cast<float>(y_offset);
     g_fov = inl::clamp(g_fov, 1.0f, 45.0f);
-    inl::log::info("FOV: {}", g_fov);
 }
 }
 
@@ -221,27 +221,19 @@ int main(int argc, char* argv[]) {
         }
 
         log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int>(image_or_error->format),
-            image_or_error->width, image_or_error->height, image_or_error->max_value, image_or_error->data.size());
+            image_or_error->width, image_or_error->height, image_or_error->max_value,
+            image_or_error->pixel_data.size());
 
         Renderer renderer;
 
-        unsigned int texture;
-        { // Texture
+        Texture texture { image_or_error->width, image_or_error->height, 3, image_or_error->pixel_data.data() };
 
-            glGenTextures(1, &texture);
-            glBindTexture(GL_TEXTURE_2D, texture);
+        glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(texture.native_handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTextureParameteri(texture.native_handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(image_or_error->width),
-                static_cast<GLsizei>(image_or_error->height), 0, GL_RGB, GL_UNSIGNED_BYTE,
-                static_cast<GLvoid*>(image_or_error->data.data()));
-            glGenerateMipmap(GL_TEXTURE_2D);
-        }
-
+        // TODO: Handle how texture get assigned to texture units
         shader_program.use();
         shader_program.set_uniform("texture_in", 0);
 
@@ -260,7 +252,7 @@ int main(int argc, char* argv[]) {
 
             shader_program.set_uniform("view_matrix", camera.view_matrix());
 
-            glBindTexture(GL_TEXTURE_2D, texture);
+            texture.bind(0);
             renderer.begin_frame();
             for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
                 Matrix4 model_matrix { 1 };

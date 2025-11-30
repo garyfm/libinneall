@@ -1,9 +1,9 @@
+#include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
 #include <libinneall/camera.hpp>
-#include <libinneall/image/ppm.hpp>
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/transforms.hpp>
 #include <libinneall/renderer/color.hpp>

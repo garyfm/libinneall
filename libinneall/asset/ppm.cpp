@@ -1,7 +1,7 @@
+#include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/string.hpp>
-#include <libinneall/image/ppm.hpp>
 
 #include <cctype>
 #include <charconv>

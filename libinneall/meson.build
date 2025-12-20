@@ -1,6 +1,7 @@
 include_dir = '..'
 
 source_files = files(
+  'asset/obj.cpp',
   'asset/ppm.cpp',
   'base/assert.cpp',
   'base/result.cpp',

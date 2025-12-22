@@ -93,11 +93,19 @@ Result<Model> load(std::string_view data) {
                         continue;
                     }
 
+                    // TODO: Handle models without texture/normals in a cleaner way
+                    // Parsing code is a mess
                     Result<float> vertex_index = TRY(extract_integer(line, cursor));
-                    // Skip '/'
-                    ++cursor;
-                    Result<float> texture_index = TRY(extract_integer(line, cursor));
-                    log::debug("f component: {}/{}", *vertex_index, *texture_index);
+                    float texture_index { 0 };
+                    if (line.contains('/')) {
+                        // Skip '/'
+                        ++cursor;
+                        Result<float> result = TRY(extract_integer(line, cursor));
+                        texture_index = *result;
+                        log::debug("f component: {}/{}", *vertex_index, texture_index);
+                    } else {
+                        log::debug("f component: {}", *vertex_index);
+                    }
 
                     auto map_index = [&model](float index) -> unsigned {
                         if (index < 0) {
@@ -108,7 +116,7 @@ Result<Model> load(std::string_view data) {
                         }
                     };
 
-                    model.indices.emplace_back(Face { map_index(*vertex_index), map_index(*texture_index) });
+                    model.indices.emplace_back(Face { map_index(*vertex_index), map_index(texture_index) });
                 }
 
                 if (model.indices.size() % 3 != 0) {

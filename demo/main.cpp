@@ -222,7 +222,7 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        std::string obj_data = read_file(resource_path + "/cube_textured.obj");
+        std::string obj_data = read_file(resource_path + "/teapot.obj");
         obj::Result<obj::Model> obj_model = obj::load(obj_data);
         if (!obj_model) {
             log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
@@ -289,14 +289,19 @@ int main(int argc, char* argv[]) {
             texture.bind(0);
             renderer.begin_frame();
 
-            for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
-                Matrix4 model_matrix { 1 };
-                float angle = 20.0f * static_cast<float>(i);
-                model_matrix = rotate(model_matrix, to_radians(angle), { 1.0f, 0.3f, 0.5f });
-                model_matrix = translate(model_matrix, cube_positions[i]);
-                shader_program.set_uniform("model_matrix", model_matrix);
-                renderer.render(model);
-            }
+            Matrix4 model_matrix { 1 };
+            model_matrix = scale(model_matrix, 0.01f);
+            shader_program.set_uniform("model_matrix", model_matrix);
+            renderer.render(model);
+
+            // for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
+            //     Matrix4 model_matrix { 1 };
+            //     float angle = 20.0f * static_cast<float>(i);
+            //     model_matrix = rotate(model_matrix, to_radians(angle), { 1.0f, 0.3f, 0.5f });
+            //     model_matrix = translate(model_matrix, cube_positions[i]);
+            //     shader_program.set_uniform("model_matrix", model_matrix);
+            //     renderer.render(model);
+            // }
 
             window.swap_buffers();
         }

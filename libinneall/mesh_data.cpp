@@ -7,11 +7,12 @@ MeshData to_mesh_data(obj::Model const& model) {
 
     MeshData mesh_data {};
     for (std::size_t i { 0 }; i < model.vertices.size(); ++i) {
-        mesh_data.vertex_data.emplace_back(model.vertices[i]);
+        mesh_data.vertex_data.emplace_back(VertexData { model.vertices[i], model.vertices_texture[i] });
     }
 
     for (std::size_t i { 0 }; i < model.indices.size(); ++i) {
-        mesh_data.index_data.emplace_back(model.indices[i]);
+        // OBJ is 1 indices are 1-based
+        mesh_data.index_data.emplace_back(model.indices[i].vertex_index - 1);
     }
 
     return mesh_data;

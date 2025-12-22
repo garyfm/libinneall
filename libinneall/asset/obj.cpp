@@ -19,10 +19,9 @@ inl::obj::Result<float> extract_integer(std::string_view line, std::size_t& curs
 namespace inl::obj {
 
 static constexpr std::string_view DATA_TYPE_VERTEX = "v ";
-static constexpr std::string_view DATA_TYPE_TEXTURE = "vt";
+static constexpr std::string_view DATA_TYPE_VERTEX_TEXTURE = "vt";
 static constexpr std::string_view DATA_TYPE_FACE = "f ";
 
-// check if model gets copied here?
 Result<Model> load(std::string_view data) {
     Model model {};
 
@@ -67,6 +66,24 @@ Result<Model> load(std::string_view data) {
                     vertex.elements[component_index++] = *component;
                 }
                 model.vertices.emplace_back(vertex);
+            } else if (data_type == DATA_TYPE_VERTEX_TEXTURE) {
+                // TODO: Reduce code dumplication
+                ++cursor;
+                ++cursor;
+                Vector2 uv {};
+                std::size_t component_index { 0 };
+                while (cursor < line.size()) {
+                    // skip whitespace
+                    if (std::isspace(line[cursor])) {
+                        ++cursor;
+                        continue;
+                    }
+
+                    Result<float> component = TRY(extract_integer(line, cursor));
+                    log::debug("vt component: {}", *component);
+                    uv.elements[component_index++] = *component;
+                }
+                model.vertices_texture.emplace_back(uv);
             } else if (data_type == DATA_TYPE_FACE) {
                 ++cursor;
                 while (cursor < line.size()) {
@@ -76,16 +93,22 @@ Result<Model> load(std::string_view data) {
                         continue;
                     }
 
-                    Result<float> index = TRY(extract_integer(line, cursor));
-                    log::debug("f component: {}", *index);
+                    Result<float> vertex_index = TRY(extract_integer(line, cursor));
+                    // Skip '/'
+                    ++cursor;
+                    Result<float> texture_index = TRY(extract_integer(line, cursor));
+                    log::debug("f component: {}/{}", *vertex_index, *texture_index);
 
-                    if (*index < 0) {
-                        // handle negative index
-                        model.indices.emplace_back((model.vertices.size()) + static_cast<unsigned>(*index));
-                    } else {
-                        // obj index's from 1 so this needs to convert to zero index
-                        model.indices.emplace_back(static_cast<unsigned>(*index) - 1);
-                    }
+                    auto map_index = [&model](float index) -> unsigned {
+                        if (index < 0) {
+                            // handle negative index
+                            return static_cast<unsigned>(model.vertices.size() + static_cast<unsigned>(index) + 1);
+                        } else {
+                            return static_cast<unsigned>(index);
+                        }
+                    };
+
+                    model.indices.emplace_back(Face { map_index(*vertex_index), map_index(*texture_index) });
                 }
 
                 if (model.indices.size() % 3 != 0) {

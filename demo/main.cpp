@@ -1,3 +1,4 @@
+#include <libinneall/asset/obj.hpp>
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/log.hpp>
@@ -6,6 +7,7 @@
 #include <libinneall/camera.hpp>
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/transforms.hpp>
+#include <libinneall/mesh_data.hpp>
 #include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/mesh.hpp>
@@ -16,7 +18,7 @@
 #include <libinneall/renderer/shader_stage.hpp>
 #include <libinneall/renderer/texture.hpp>
 #include <libinneall/renderer/vertex_array.hpp>
-#include <libinneall/renderer/vertex_data.hpp>
+#include <libinneall/vertex_data.hpp>
 #include <libinneall/window.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
@@ -35,8 +37,11 @@ static constexpr float ASPECT_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT;
 // TODO: Implement these with proper error handling
 std::string read_file(std::filesystem::path path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
-    std::size_t file_size = std::filesystem::file_size(path);
+    if (!file.is_open()) {
+        inl::log::error("Failed to open file: {}", path.c_str());
+    }
 
+    std::size_t file_size = std::filesystem::file_size(path);
     std::string contents(file_size, '\0');
 
     file.read(contents.data(), file_size);
@@ -57,7 +62,7 @@ void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer) {
 }
 
 // clang-format off
-std::array<inl::VertexData, 36> cube_vertices { {
+[[maybe_unused]] std::array<inl::VertexData, 36> cube_vertices { {
    {{-0.5f, -0.5f, -0.5f},  {0.0f, 0.0f}},
    {{ 0.5f, -0.5f, -0.5f},  {1.0f, 0.0f}},
    {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
@@ -115,6 +120,18 @@ std::array<inl::VertexData, 36> cube_vertices { {
     {-1.3f,  1.0f, -1.5f},
 } };
 
+[[maybe_unused]] std::array<inl::VertexData, 36> triangle_vertices { {
+   {{-1.0f, 0.0f, 0.0f},  {-1.0f, 0.0f}},
+   {{ 1.0f, 0.0f, 0.0f},  {1.0f, 0.0f}},
+   {{0.0f, 1.0f, 0.0f},  {0.0f, 1.0f}},
+}};
+
+[[maybe_unused]] std::array<inl::VertexData, 4> square_vertices { {
+   {{0.0f, 2.0f, 0.0f},  {0.0f, 2.0f}},
+   {{ 0.0f, 0.0f, 0.0f},  {0.0f, 0.0f}},
+   {{2.0f, 0.0f, 0.0f},  {2.0f, 0.0f}},
+   {{2.0f, 2.0f, 0.0f},  {2.0f, 2.0f}},
+}};
 // clang-format on
 
 static float g_delta_time = 0;
@@ -205,13 +222,30 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        MeshData mesh_data { std::span { cube_vertices }, {} };
+        std::string obj_data = read_file(resource_path + "/cube_textured.obj");
+        obj::Result<obj::Model> obj_model = obj::load(obj_data);
+        if (!obj_model) {
+            log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
+            return -1;
+        }
+
+        log::debug("OBJ model: vertices:{}, index:{},", obj_model->vertices.size(), obj_model->indices.size());
+
+        for (auto& vertex : obj_model->vertices) {
+            log::debug("OBJ vertex: {}", vertex);
+        }
+
+        for (auto& index : obj_model->indices) {
+            log::debug("OBJ index: {}/{}", index.vertex_index, index.texture_index);
+        }
+
+        MeshData mesh_data = to_mesh_data(*obj_model);
         Mesh mesh { mesh_data };
+        log::debug("Mesh: v count {}, i count {}", mesh.vertext_count(), mesh.index_count());
         Model model { &mesh, &shader_program };
 
         std::vector<std::uint8_t> raw_image_data {};
         read_file(resource_path + "/brickwall.ppm", raw_image_data);
-        // read_file(resource_path + "/brickwall.ppm", raw_image_data);
         log::debug("Image size: {}", raw_image_data.size());
 
         ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
@@ -254,6 +288,7 @@ int main(int argc, char* argv[]) {
 
             texture.bind(0);
             renderer.begin_frame();
+
             for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
                 Matrix4 model_matrix { 1 };
                 float angle = 20.0f * static_cast<float>(i);

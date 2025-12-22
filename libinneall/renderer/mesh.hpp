@@ -1,17 +1,12 @@
 #pragma once
 
+#include <libinneall/mesh_data.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/vertex_array.hpp>
-#include <libinneall/renderer/vertex_data.hpp>
 
-#include <span>
+#include <vector>
 
 namespace inl {
-
-struct MeshData {
-    std::span<VertexData const> vertex_data;
-    std::span<unsigned const> index_data;
-};
 
 class Mesh {
 public:

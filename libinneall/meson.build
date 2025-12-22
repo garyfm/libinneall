@@ -6,7 +6,6 @@ source_files = files(
   'base/assert.cpp',
   'base/result.cpp',
   'base/string.cpp',
-  'camera.cpp',
   'math/math.cpp',
   'math/matrix3.cpp',
   'math/matrix4.cpp',
@@ -21,7 +20,9 @@ source_files = files(
   'renderer/shader_stage.cpp',
   'renderer/texture.cpp',
   'renderer/vertex_array.cpp',
-  'renderer/vertex_data.cpp',
+  'camera.cpp',
+  'mesh_data.cpp',
+  'vertex_data.cpp',
   'window.cpp',
 )
 

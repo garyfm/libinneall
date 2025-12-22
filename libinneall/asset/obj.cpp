@@ -18,6 +18,10 @@ inl::obj::Result<float> extract_integer(std::string_view line, std::size_t& curs
 }
 namespace inl::obj {
 
+static constexpr std::string_view DATA_TYPE_VERTEX = "v ";
+static constexpr std::string_view DATA_TYPE_TEXTURE = "vt";
+static constexpr std::string_view DATA_TYPE_FACE = "f ";
+
 // check if model gets copied here?
 Result<Model> load(std::string_view data) {
     Model model {};
@@ -45,9 +49,11 @@ Result<Model> load(std::string_view data) {
         {
             std::size_t cursor { 0 };
 
-            if (line[cursor] == 'v') {
+            std::string_view data_type = line.substr(cursor, 2);
+
+            if (data_type == DATA_TYPE_VERTEX) {
                 ++cursor;
-                VertexData vertex {};
+                Vector3 vertex {};
                 std::size_t component_index { 0 };
                 while (cursor < line.size()) {
                     // skip whitespace
@@ -58,10 +64,10 @@ Result<Model> load(std::string_view data) {
 
                     Result<float> component = TRY(extract_integer(line, cursor));
                     log::debug("v component: {}", *component);
-                    vertex.pos.elements[component_index++] = *component;
+                    vertex.elements[component_index++] = *component;
                 }
                 model.vertices.emplace_back(vertex);
-            } else if (line[cursor] == 'f') {
+            } else if (data_type == DATA_TYPE_FACE) {
                 ++cursor;
                 while (cursor < line.size()) {
                     // skip whitespace

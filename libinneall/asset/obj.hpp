@@ -1,18 +1,14 @@
-
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
 #include <expected>
 #include <libinneall/math/vector3.hpp>
-#include <libinneall/renderer/vertex_data.hpp>
 #include <string_view>
 #include <vector>
 
 namespace inl::obj {
 
 struct Model {
-    std::vector<VertexData> vertices;
+    std::vector<Vector3> vertices;
     std::vector<unsigned> indices;
 };
 

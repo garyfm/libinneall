@@ -1,15 +1,27 @@
 #pragma once
 
+#include <libinneall/math/math.hpp>
+
+#include <cmath>
 #include <format>
 
 namespace inl {
 
 struct Vector2 {
 
-    float x;
-    float y;
+    union {
+        struct {
+            float x;
+            float y;
+        };
 
-    bool operator==(const Vector2& vector) const = default;
+        float elements[2];
+    };
+
+    bool operator==(const Vector2& other) const {
+        return std::fabs(x - other.x) < EPSILON && std::fabs(y - other.y) < EPSILON && std::fabs(y - other.y) < EPSILON;
+    }
+
     Vector2 operator-() const;
 
     Vector2& operator+=(float scalar);

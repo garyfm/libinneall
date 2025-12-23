@@ -1,5 +1,4 @@
 #include <libinneall/asset/obj.hpp>
-#include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/string.hpp>
 
@@ -26,9 +25,26 @@ unsigned map_index(inl::obj::Model const& model, float index) {
     }
 }
 
-constexpr std::string_view DATA_TYPE_VERTEX = "v";
-constexpr std::string_view DATA_TYPE_VERTEX_TEXTURE = "vt";
+constexpr std::string_view DATA_TYPE_GEOMETRIC_VERTICES = "v";
+constexpr std::string_view DATA_TYPE_TEXTURE_VERTICES = "vt";
+constexpr std::string_view DATA_TYPE_VERTEX_NORMALS = "vn";
 constexpr std::string_view DATA_TYPE_FACE = "f";
+
+inl::obj::Result<inl::Vector3> parse_vector3(std::string_view data_values) {
+    inl::Vector3 vector {};
+    inl::Cut cut_vertex = inl::cut(data_values, ' ');
+
+    inl::obj::Result<float> x = TRY(extract_float(cut_vertex.left));
+    vector.x = *x;
+
+    cut_vertex = inl::cut(inl::trim(cut_vertex.right), ' ');
+    inl::obj::Result<float> y = TRY(extract_float(cut_vertex.left));
+    vector.y = *y;
+
+    inl::obj::Result<float> z = TRY(extract_float(cut_vertex.right));
+    vector.z = *z;
+    return vector;
+}
 
 }
 
@@ -51,49 +67,29 @@ Result<Model> load(std::string_view buffer) {
             continue;
         }
 
-        log::debug("line: {}", line);
-
         {
             Cut cut_data = cut(line, ' ');
 
             std::string_view data_type = trim(cut_data.left);
             std::string_view data_values = trim(cut_data.right);
 
-            log::debug("data_type: {}", data_type);
-            log::debug("data_values: {}", data_values);
-            if (data_type == DATA_TYPE_VERTEX) {
-                Vector3 vertex {};
-                Cut cut_vertex = cut(data_values, ' ');
-
-                log::debug("cut_vertex left: {}", cut_vertex.left);
-                log::debug("cut_vertex right: {}", cut_vertex.right);
-                Result<float> x = TRY(extract_float(cut_vertex.left));
-                log::debug("v component: {}", *x);
-                vertex.x = *x;
-
-                cut_vertex = cut(trim(cut_vertex.right), ' ');
-                Result<float> y = TRY(extract_float(cut_vertex.left));
-                log::debug("v component: {}", *y);
-                vertex.y = *y;
-
-                Result<float> z = TRY(extract_float(cut_vertex.right));
-                log::debug("v component: {}", *z);
-                vertex.z = *z;
-
-                model.geometric_vertices.emplace_back(vertex);
-            } else if (data_type == DATA_TYPE_VERTEX_TEXTURE) {
+            if (data_type == DATA_TYPE_GEOMETRIC_VERTICES) {
+                Result<Vector3> vector = TRY(parse_vector3(data_values));
+                model.geometric_vertices.emplace_back(*vector);
+            } else if (data_type == DATA_TYPE_TEXTURE_VERTICES) {
                 Vector2 vertex_texture {};
                 Cut cut_vertex_texture = cut(data_values, ' ');
 
                 Result<float> x = TRY(extract_float(cut_vertex_texture.left));
-                log::debug("vt component: {}", *x);
                 vertex_texture.x = *x;
 
                 Result<float> y = TRY(extract_float(cut_vertex_texture.right));
-                log::debug("v component: {}", *y);
                 vertex_texture.y = *y;
 
                 model.texture_vertices.emplace_back(vertex_texture);
+            } else if (data_type == DATA_TYPE_VERTEX_NORMALS) {
+                Result<Vector3> vector = TRY(parse_vector3(data_values));
+                model.vertex_normals.emplace_back(*vector);
             } else if (data_type == DATA_TYPE_FACE) {
                 Cut cut_face { .left = {}, .right = data_values, .success = true };
                 while (cut_face.right.size() > 0) {
@@ -104,12 +100,20 @@ Result<Model> load(std::string_view buffer) {
                     Result<float> vertex_index = TRY(extract_float(cut_index.left));
                     face.vertex_index = map_index(model, *vertex_index);
 
+                    // Cut successfull, proces next index
                     if (cut_index.success) {
-                        Result<float> texture_index = TRY(extract_float(cut_index.right));
+                        cut_index = cut(cut_index.right, '/');
+
+                        Result<float> texture_index = TRY(extract_float(cut_index.left));
                         face.texture_index = map_index(model, *texture_index);
+
+                        // Cut successfull, process next index
+                        if (cut_index.success) {
+                            Result<float> normal_index = TRY(extract_float(cut_index.right));
+                            face.normal_index = map_index(model, *normal_index);
+                        }
                     }
 
-                    log::debug("f component: {}/{}", face.vertex_index, face.texture_index);
                     model.faces.emplace_back(face);
                 }
             }

@@ -222,22 +222,15 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        std::string obj_data = read_file(resource_path + "/teapot.obj");
+        std::string obj_data = read_file(resource_path + "/cube_textured.obj");
         obj::Result<obj::Model> obj_model = obj::load(obj_data);
         if (!obj_model) {
             log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
             return -1;
         }
 
-        log::debug("OBJ model: vertices:{}, index:{},", obj_model->vertices.size(), obj_model->indices.size());
-
-        for (auto& vertex : obj_model->vertices) {
-            log::debug("OBJ vertex: {}", vertex);
-        }
-
-        for (auto& index : obj_model->indices) {
-            log::debug("OBJ index: {}/{}", index.vertex_index, index.texture_index);
-        }
+        log::debug("OBJ model: vertices:{}, textures: {}, normals: {}, faces:{},", obj_model->geometric_vertices.size(),
+            obj_model->texture_vertices.size(), obj_model->vertex_normals.size(), obj_model->faces.size());
 
         MeshData mesh_data = to_mesh_data(*obj_model);
         Mesh mesh { mesh_data };
@@ -289,19 +282,16 @@ int main(int argc, char* argv[]) {
             texture.bind(0);
             renderer.begin_frame();
 
-            Matrix4 model_matrix { 1 };
-            model_matrix = scale(model_matrix, 0.01f);
-            shader_program.set_uniform("model_matrix", model_matrix);
             renderer.render(model);
 
-            // for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
-            //     Matrix4 model_matrix { 1 };
-            //     float angle = 20.0f * static_cast<float>(i);
-            //     model_matrix = rotate(model_matrix, to_radians(angle), { 1.0f, 0.3f, 0.5f });
-            //     model_matrix = translate(model_matrix, cube_positions[i]);
-            //     shader_program.set_uniform("model_matrix", model_matrix);
-            //     renderer.render(model);
-            // }
+            for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
+                Matrix4 model_matrix { 1 };
+                float angle = 20.0f * static_cast<float>(i);
+                model_matrix = rotate(model_matrix, to_radians(angle), { 1.0f, 0.3f, 0.5f });
+                model_matrix = translate(model_matrix, cube_positions[i]);
+                shader_program.set_uniform("model_matrix", model_matrix);
+                renderer.render(model);
+            }
 
             window.swap_buffers();
         }

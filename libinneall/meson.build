@@ -28,6 +28,7 @@ source_files = files(
 
 test_files = files(
     'doctest.cpp',
+    'base/string.test.cpp',
     'math/matrix3.test.cpp',
     'math/matrix4.test.cpp',
     'math/transforms.test.cpp',

@@ -1,11 +1,21 @@
 #pragma once
 
-#include <string>
+#include <libinneall/base/result.hpp>
+
+#include <string_view>
 
 namespace inl {
 
-void trim_left(std::string& str);
-void trim_right(std::string& str);
-void trim(std::string& str);
+struct Cut {
+    std::string_view left;
+    std::string_view right;
+    bool success;
+};
+
+std::string_view trim_left(std::string_view sv);
+std::string_view trim_right(std::string_view sv);
+std::string_view trim(std::string_view sv);
+
+Cut cut(std::string_view sv, char deliminator);
 
 } // namespace

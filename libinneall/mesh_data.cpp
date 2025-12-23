@@ -6,19 +6,17 @@ namespace inl {
 MeshData to_mesh_data(obj::Model const& model) {
 
     MeshData mesh_data {};
-    for (std::size_t i { 0 }; i < model.vertices.size(); ++i) {
-
-        // TODO: Handle models without texture/normals in a cleaner way
-        if (model.vertices_texture.empty()) {
-            mesh_data.vertex_data.emplace_back(VertexData { model.vertices[i], {} });
+    for (std::size_t i { 0 }; i < model.geometric_vertices.size(); ++i) {
+        if (model.texture_vertices.empty()) {
+            mesh_data.vertex_data.emplace_back(VertexData { model.geometric_vertices[i], {} });
         } else {
-            mesh_data.vertex_data.emplace_back(VertexData { model.vertices[i], model.vertices_texture[i] });
+            mesh_data.vertex_data.emplace_back(VertexData { model.geometric_vertices[i], model.texture_vertices[i] });
         }
     }
 
-    for (std::size_t i { 0 }; i < model.indices.size(); ++i) {
-        // OBJ is 1 indices are 1-based
-        mesh_data.index_data.emplace_back(model.indices[i].vertex_index - 1);
+    for (std::size_t i { 0 }; i < model.faces.size(); ++i) {
+        // OBJ is 1 faces are 1-based
+        mesh_data.index_data.emplace_back(model.faces[i].vertex_index - 1);
     }
 
     return mesh_data;

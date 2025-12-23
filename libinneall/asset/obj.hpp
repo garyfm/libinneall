@@ -15,9 +15,9 @@ struct Face {
 };
 
 struct Model {
-    std::vector<Vector3> vertices;
-    std::vector<Vector2> vertices_texture;
-    std::vector<Face> indices;
+    std::vector<Vector3> geometric_vertices;
+    std::vector<Vector2> texture_vertices;
+    std::vector<Face> faces;
 };
 
 enum class Error {
@@ -25,6 +25,7 @@ enum class Error {
     UnsupportedFormat,
     EOFReachedUnexpectedly,
     FailedToExtractInteger,
+    FailedToExtractFloat,
     FaceNotTriangulated,
 };
 

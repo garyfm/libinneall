@@ -22,6 +22,7 @@ struct Model {
     std::vector<Face> faces;
 };
 
+// TODO: Add structured error so the failed line can be reported
 enum class Error {
     InvalidFormat,
     UnsupportedFormat,

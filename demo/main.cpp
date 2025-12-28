@@ -232,8 +232,14 @@ int main(int argc, char* argv[]) {
         log::debug("OBJ model: vertices:{}, textures: {}, normals: {}, faces:{},", obj_model->geometric_vertices.size(),
             obj_model->texture_vertices.size(), obj_model->vertex_normals.size(), obj_model->faces.size());
 
-        MeshData mesh_data = to_mesh_data(*obj_model);
-        Mesh mesh { mesh_data };
+        std::expected<MeshData, MeshDataError> mesh_data = to_mesh_data(*obj_model);
+
+        if (!mesh_data) {
+            log::error("Failed to extract mesh data: {}", static_cast<int>(mesh_data.error()));
+            return -1;
+        }
+
+        Mesh mesh { *mesh_data };
         log::debug("Mesh: v count {}, i count {}", mesh.vertext_count(), mesh.index_count());
         Model model { &mesh, &shader_program };
 

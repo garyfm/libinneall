@@ -40,7 +40,7 @@ Stage 1 - Draw scene
 - [x] Textures
 
 Stage 2 - 3D model loader
-- [x] Model format
+- [x] OBJ format
 - [x] Model loader
 
 Stage 3

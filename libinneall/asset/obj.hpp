@@ -9,7 +9,7 @@
 
 namespace inl::obj {
 
-struct Face {
+struct FaceCorner {
     unsigned vertex_index;
     unsigned texture_index;
     unsigned normal_index;
@@ -19,7 +19,7 @@ struct Model {
     std::vector<Vector3> geometric_vertices;
     std::vector<Vector2> texture_vertices;
     std::vector<Vector3> vertex_normals;
-    std::vector<Face> faces;
+    std::vector<FaceCorner> face_corners;
 };
 
 // TODO: Add structured error so the failed line can be reported

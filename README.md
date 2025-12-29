@@ -39,12 +39,15 @@ Stage 1 - Draw scene
 - [x] Load images
 - [x] Textures
 
-Stage 2 - 3D model loader
+Stage 2 - 3D mesh loader
 - [x] OBJ format
-- [x] Model loader
+- [x] Load mesh
+- [x] Handle duplicated vertices 
+- [ ] Load materials
 
 Stage 3
 - [ ] Lighting
+- [ ] Material
 
 Misc:
 - [x] Error handing

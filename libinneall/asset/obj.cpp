@@ -1,6 +1,9 @@
 #include <libinneall/asset/obj.hpp>
+#include <libinneall/base/assert.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/string.hpp>
+
+#include <format>
 
 namespace {
 
@@ -96,25 +99,31 @@ Result<Model> load(std::string_view buffer) {
                     cut_face = cut(trim(cut_face.right), ' ');
                     Cut cut_index = cut(cut_face.left, '/');
 
-                    Face face {};
+                    FaceCorner corner {};
                     Result<float> vertex_index = TRY(extract_float(cut_index.left));
-                    face.vertex_index = map_index(model, *vertex_index);
+                    corner.vertex_index = map_index(model, *vertex_index);
+                    INL_ASSERT(corner.vertex_index - 1 < model.geometric_vertices.size(),
+                        std::format("Invalid obj vertex index: {}", corner.vertex_index));
 
-                    // Cut successfull, proces next index
+                    // Cut successful, process next index
                     if (cut_index.success) {
                         cut_index = cut(cut_index.right, '/');
 
                         Result<float> texture_index = TRY(extract_float(cut_index.left));
-                        face.texture_index = map_index(model, *texture_index);
+                        corner.texture_index = map_index(model, *texture_index);
+                        INL_ASSERT(corner.texture_index - 1 < model.texture_vertices.size(),
+                            std::format("Invalid obj texture index: {}", corner.texture_index));
 
                         // Cut successfull, process next index
                         if (cut_index.success) {
                             Result<float> normal_index = TRY(extract_float(cut_index.right));
-                            face.normal_index = map_index(model, *normal_index);
+                            corner.normal_index = map_index(model, *normal_index);
+                            INL_ASSERT(corner.normal_index - 1 < model.vertex_normals.size(),
+                                std::format("Invalid obj normal index: {}", corner.normal_index));
                         }
                     }
 
-                    model.faces.emplace_back(face);
+                    model.face_corners.emplace_back(corner);
                 }
             }
         }

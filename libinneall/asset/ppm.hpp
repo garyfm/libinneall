@@ -23,8 +23,8 @@ struct Image {
     std::size_t width;
     std::size_t height;
     std::uint16_t max_value;
-    // TODO should this own the data ?
-    std::span<std::uint8_t> pixel_data;
+    // TODO: should this own the data ?
+    std::vector<std::uint8_t> pixel_data;
 };
 
 enum class Error {

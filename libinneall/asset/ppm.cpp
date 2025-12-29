@@ -1,8 +1,10 @@
 #include <libinneall/asset/ppm.hpp>
+#include <libinneall/base/assert.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/string.hpp>
 
+#include <algorithm>
 #include <cctype>
 #include <charconv>
 
@@ -98,4 +100,34 @@ Result<Image> load(std::span<std::uint8_t> raw_data) {
     return image;
 }
 
+Image flip_vertically(Image const& image) {
+    Image flipped {
+        .format { image.format },
+        .width { image.width },
+        .height { image.height },
+        .max_value { image.max_value },
+        .pixel_data {},
+    };
+
+    log::debug("pixel_data: {}, width: {}, height: {}", image.pixel_data.size(), image.width, image.height);
+
+    const uint8_t n_channels { 3 };
+    const std::size_t row_size_bytes { image.width * n_channels };
+
+    flipped.pixel_data.resize(image.pixel_data.size());
+    log::debug("flipped size: {}", flipped.pixel_data.size());
+
+    for (std::size_t row = 0; row < image.height; ++row) {
+
+        std::size_t row_start { row * row_size_bytes };
+        std::size_t row_end { row_start + row_size_bytes };
+        std::size_t flipped_cursor { (image.height - 1 - row) * row_size_bytes };
+
+        // log::debug("row: {}", row);
+        std::copy(image.pixel_data.begin() + row_start, image.pixel_data.begin() + row_end,
+            flipped.pixel_data.begin() + flipped_cursor);
+    }
+
+    return flipped;
+}
 } // namespace inl

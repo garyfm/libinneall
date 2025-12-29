@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <expected>
 #include <span>
+#include <vector>
 
 namespace inl::ppm {
 
@@ -38,5 +39,7 @@ enum class Error {
 
 template <typename T> using Result = std::expected<T, Error>;
 Result<Image> load(std::span<std::uint8_t> raw_data);
+
+Image flip_vertically(Image const& image);
 
 } // namespace inl

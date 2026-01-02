@@ -45,9 +45,10 @@ Stage 2 - 3D mesh loader
 - [x] Handle duplicated vertices 
 - [ ] Load materials
 
-Stage 3
-- [ ] Lighting
-- [ ] Material
+Stage 3 - Lighting
+- [x] Basic Phong Lighting
+- [ ] Materials
+- [ ] Light casters
 
 Misc:
 - [x] Error handing

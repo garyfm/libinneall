@@ -23,6 +23,7 @@
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -60,79 +61,6 @@ void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer) {
     buffer.resize(file_size);
     file.read(reinterpret_cast<char*>(buffer.data()), file_size);
 }
-
-// clang-format off
-[[maybe_unused]] std::array<inl::VertexData, 36> cube_vertices { {
-   {{-0.5f, -0.5f, -0.5f},  {0.0f, 0.0f}},
-   {{ 0.5f, -0.5f, -0.5f},  {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
-   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
-   {{-0.5f,  0.5f, -0.5f},  {0.0f, 1.0f}},
-   {{-0.5f, -0.5f, -0.5f},  {0.0f, 0.0f}},
- 
-   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
-   {{ 0.5f, -0.5f,  0.5f},  {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 1.0f}},
-   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 1.0f}},
-   {{-0.5f,  0.5f,  0.5f},  {0.0f, 1.0f}},
-   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
- 
-   {{-0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
-   {{-0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
-   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
-   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
-   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
-   {{-0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
-
-   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
-   {{ 0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
-   {{ 0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
-   {{ 0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
-   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
-
-   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
-   {{ 0.5f, -0.5f, -0.5f},  {1.0f, 1.0f}},
-   {{ 0.5f, -0.5f,  0.5f},  {1.0f, 0.0f}},
-   {{ 0.5f, -0.5f,  0.5f},  {1.0f, 0.0f}},
-   {{-0.5f, -0.5f,  0.5f},  {0.0f, 0.0f}},
-   {{-0.5f, -0.5f, -0.5f},  {0.0f, 1.0f}},
-
-   {{-0.5f,  0.5f, -0.5f},  {0.0f, 1.0f}},
-   {{ 0.5f,  0.5f, -0.5f},  {1.0f, 1.0f}},
-   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f,  0.5f},  {1.0f, 0.0f}},
-   {{-0.5f,  0.5f,  0.5f},  {0.0f, 0.0f}},
-   {{-0.5f,  0.5f, -0.5f},  {0.0f, 1.0f}},
-} };
-
-// world space positions of our cubes
-[[maybe_unused]] std::array<inl::Vector3, 10> cube_positions = { {
-    { 0.0f,  0.0f,  0.0f},
-    { 2.0f,  5.0f, -15.0f},
-    {-1.5f, -2.2f, -2.5f},
-    {-3.8f, -2.0f, -12.3f},
-    {2.4f, -0.4f, -3.5f},
-    {-1.7f,  3.0f, -7.5f},
-    { 1.3f, -2.0f, -2.5f},
-    { 1.5f,  2.0f, -2.5f},
-    { 1.5f,  0.2f, -1.5f},
-    {-1.3f,  1.0f, -1.5f},
-} };
-
-[[maybe_unused]] std::array<inl::VertexData, 36> triangle_vertices { {
-   {{-1.0f, 0.0f, 0.0f},  {-1.0f, 0.0f}},
-   {{ 1.0f, 0.0f, 0.0f},  {1.0f, 0.0f}},
-   {{0.0f, 1.0f, 0.0f},  {0.0f, 1.0f}},
-}};
-
-[[maybe_unused]] std::array<inl::VertexData, 4> square_vertices { {
-   {{0.0f, 2.0f, 0.0f},  {0.0f, 2.0f}},
-   {{ 0.0f, 0.0f, 0.0f},  {0.0f, 0.0f}},
-   {{2.0f, 0.0f, 0.0f},  {2.0f, 0.0f}},
-   {{2.0f, 2.0f, 0.0f},  {2.0f, 2.0f}},
-}};
-// clang-format on
 
 static float g_delta_time = 0;
 static float g_last_frame_time = 0;
@@ -191,6 +119,12 @@ void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] doubl
     g_fov -= static_cast<float>(y_offset);
     g_fov = inl::clamp(g_fov, 1.0f, 45.0f);
 }
+
+// static constexpr std::string obj_file = "/sword-sting/sting-sword.obj";
+// static constexpr std::string texture_file = "/sword-sting/Sting_Base_Color.ppm";
+static const std::string obj_file = "/backpack/backpack.obj";
+static const std::string texture_file = "/backpack/diffuse.ppm";
+bool flip_texture = false;
 }
 
 int main(int argc, char* argv[]) {
@@ -198,6 +132,7 @@ int main(int argc, char* argv[]) {
 
     try {
 
+        auto start_init = std::chrono::steady_clock::now();
         log::debug("libinneall demo game");
 
         if (argc < 2) {
@@ -211,40 +146,44 @@ int main(int argc, char* argv[]) {
             scroll_callback };
 
         log::debug("Creating vertex shader");
-        std::string basic_vert_shader_source = read_file(resource_path + "/basic.vert.glsl");
+        std::string basic_vert_shader_source = read_file(resource_path + "/shaders/basic_lighting.vert.glsl");
         ShaderStage vertex_stage { ShaderType::Vertex, basic_vert_shader_source };
 
         log::debug("Creating fragment shader");
-        std::string basic_frag_shader_source = read_file(resource_path + "/basic.frag.glsl");
+        std::string basic_frag_shader_source = read_file(resource_path + "/shaders/basic_lighting.frag.glsl");
         ShaderStage fragment_stage { ShaderType::Fragment, basic_frag_shader_source };
 
         log::debug("Creating shader program");
         ShaderProgram shader_program { vertex_stage, fragment_stage };
         shader_program.use();
 
-        std::string obj_data = read_file(resource_path + "/cube_textured.obj");
+        auto start_load = std::chrono::steady_clock::now();
+        std::string obj_data = read_file(resource_path + obj_file);
+
         obj::Result<obj::Model> obj_model = obj::load(obj_data);
+        auto end_load = std::chrono::steady_clock::now();
         if (!obj_model) {
             log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
             return -1;
         }
 
-        log::debug("OBJ model: vertices:{}, textures: {}, normals: {}, faces:{},", obj_model->geometric_vertices.size(),
-            obj_model->texture_vertices.size(), obj_model->vertex_normals.size(), obj_model->faces.size());
+        log::debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}, time:{}",
+            obj_model->geometric_vertices.size(), obj_model->texture_vertices.size(), obj_model->vertex_normals.size(),
+            obj_model->face_corners.size(),
+            std::chrono::duration_cast<std::chrono::milliseconds>(end_load - start_load));
 
-        std::expected<MeshData, MeshDataError> mesh_data = to_mesh_data(*obj_model);
+        auto start_mesh = std::chrono::steady_clock::now();
+        MeshData mesh_data = to_mesh_data(*obj_model);
+        auto end_mesh = std::chrono::steady_clock::now();
+        log::debug("MeshData: vertices:{}, indices:{}, time:{}", mesh_data.vertex_data.size(),
+            mesh_data.index_data.size(), std::chrono::duration_cast<std::chrono::milliseconds>(end_mesh - start_mesh));
 
-        if (!mesh_data) {
-            log::error("Failed to extract mesh data: {}", static_cast<int>(mesh_data.error()));
-            return -1;
-        }
-
-        Mesh mesh { *mesh_data };
-        log::debug("Mesh: v count {}, i count {}", mesh.vertext_count(), mesh.index_count());
+        Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
         std::vector<std::uint8_t> raw_image_data {};
-        read_file(resource_path + "/brickwall.ppm", raw_image_data);
+        auto start_image = std::chrono::steady_clock::now();
+        read_file(resource_path + texture_file, raw_image_data);
         log::debug("Image size: {}", raw_image_data.size());
 
         ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
@@ -253,23 +192,37 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
-        log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int>(image_or_error->format),
-            image_or_error->width, image_or_error->height, image_or_error->max_value,
-            image_or_error->pixel_data.size());
+        auto end_image = std::chrono::steady_clock::now();
+        log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}, time:{} ", static_cast<int>(image_or_error->format),
+            image_or_error->width, image_or_error->height, image_or_error->max_value, image_or_error->pixel_data.size(),
+            std::chrono::duration_cast<std::chrono::milliseconds>(end_image - start_image));
 
-        Renderer renderer;
+        ppm::Image image;
+        if (flip_texture) {
+            image = ppm::flip_vertically(*image_or_error);
+        } else {
+            image = *image_or_error;
+        }
 
-        Texture texture { image_or_error->width, image_or_error->height, 3, image_or_error->pixel_data.data() };
+        Texture texture { image.width, image.height, 3, image.pixel_data.data() };
 
         glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTextureParameteri(texture.native_handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTextureParameteri(texture.native_handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        Renderer renderer;
+
         // TODO: Handle how texture get assigned to texture units
         shader_program.use();
-        shader_program.set_uniform("texture_in", 0);
 
+        // Wireframe
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        auto end_init = std::chrono::steady_clock::now();
+
+        log::debug(
+            "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
         while (!glfwWindowShouldClose(window.native_handle())) {
             float current_frame_time = static_cast<float>(glfwGetTime());
             g_delta_time = current_frame_time - g_last_frame_time;
@@ -281,23 +234,26 @@ int main(int argc, char* argv[]) {
 
             const Matrix4 projection_matrix { Matrix4::create_perspective(
                 to_radians(g_fov), ASPECT_RATIO, 0.1f, 100.0f) };
-            shader_program.set_uniform("projection_matrix", projection_matrix);
+            shader_program.set_uniform("u_projection", projection_matrix);
 
-            shader_program.set_uniform("view_matrix", camera.view_matrix());
+            shader_program.set_uniform("u_view", camera.view_matrix());
+            shader_program.set_uniform("u_light_pos", Vector3 { 1.2f, 1.0f, 2.0f });
+            shader_program.set_uniform("u_light_color", Vector3 { 1.0f, 1.0f, 1.0f });
+            shader_program.set_uniform("u_albedo", 0);
+            shader_program.set_uniform("u_view_pos", camera.position());
 
             texture.bind(0);
             renderer.begin_frame();
 
-            renderer.render(model);
+            Matrix4 model_matrix { 1 };
+            model_matrix = scale(model_matrix, 0.2f);
+            shader_program.set_uniform("u_model", model_matrix);
 
-            for (std::size_t i { 0 }; i < cube_positions.size(); ++i) {
-                Matrix4 model_matrix { 1 };
-                float angle = 20.0f * static_cast<float>(i);
-                model_matrix = rotate(model_matrix, to_radians(angle), { 1.0f, 0.3f, 0.5f });
-                model_matrix = translate(model_matrix, cube_positions[i]);
-                shader_program.set_uniform("model_matrix", model_matrix);
-                renderer.render(model);
-            }
+            Matrix3 normal_matrix { 1 };
+            normal_matrix = Matrix3(transpose(inverse(model_matrix)));
+            shader_program.set_uniform("u_normal_matrix", normal_matrix);
+
+            renderer.render(model);
 
             window.swap_buffers();
         }

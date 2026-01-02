@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libinneall/base/assert.hpp>
+#include <libinneall/math/matrix3.hpp>
 #include <libinneall/math/vector3.hpp>
 #include <libinneall/math/vector4.hpp>
 
@@ -56,6 +57,8 @@ public:
 
     std::span<const float> elements() const { return m_elements; };
     float element(std::size_t row, std::size_t col) const { return m_elements[(col * 4) + row]; };
+
+    operator Matrix3() const;
 
 private:
     std::array<float, 16> m_elements {};

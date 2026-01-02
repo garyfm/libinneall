@@ -295,6 +295,20 @@ Matrix4 Matrix4::create_look_at(Vector3 position, Vector3 target, Vector3 world_
     return look_at;
 }
 
+Matrix4::operator Matrix3() const {
+    return Matrix3 { {
+        m_elements[0],
+        m_elements[1],
+        m_elements[2],
+        m_elements[4],
+        m_elements[5],
+        m_elements[6],
+        m_elements[8],
+        m_elements[9],
+        m_elements[10],
+    } };
+}
+
 float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col) {
 
     std::array<float, 9> minor { 0 };

@@ -95,6 +95,17 @@ void ShaderProgram::set_uniform(std::string_view name, Color const& color) const
     glProgramUniform3f(m_handle, location, color.r, color.g, color.b);
 }
 
+void ShaderProgram::set_uniform(std::string_view name, Vector3 const& vector) const {
+    const GLuint location = uniform_location(name);
+    glProgramUniform3f(m_handle, location, vector.x, vector.y, vector.z);
+}
+
+void ShaderProgram::set_uniform(std::string_view name, Matrix3 const& matrix) const {
+
+    const GLuint location = uniform_location(name);
+    glProgramUniformMatrix3fv(m_handle, location, 1, GL_FALSE, matrix.elements().data());
+}
+
 void ShaderProgram::set_uniform(std::string_view name, Matrix4 const& matrix) const {
 
     const GLuint location = uniform_location(name);

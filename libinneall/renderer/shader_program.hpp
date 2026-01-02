@@ -23,6 +23,8 @@ public:
 
     void set_uniform(std::string_view name, int value) const;
     void set_uniform(std::string_view name, Color const& color) const;
+    void set_uniform(std::string_view name, Vector3 const& vector) const;
+    void set_uniform(std::string_view name, Matrix3 const& matrix) const;
     void set_uniform(std::string_view name, Matrix4 const& color) const;
 
     GLuint uniform_location(std::string_view name) const;

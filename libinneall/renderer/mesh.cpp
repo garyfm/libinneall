@@ -37,6 +37,15 @@ Mesh::Mesh(MeshData const& data)
         .type = GL_FLOAT,
         .normalise = false,
     });
+
+    m_vertex_array.set_attribute({
+        .index = 2,
+        .binding_index = 0,
+        .n_components = sizeof(Vector3) / sizeof(float),
+        .offset_bytes = offsetof(VertexData, normal),
+        .type = GL_FLOAT,
+        .normalise = false,
+    });
 }
 
 void Mesh::bind() const { m_vertex_array.bind(); }

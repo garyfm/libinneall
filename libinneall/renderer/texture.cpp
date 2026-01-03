@@ -30,7 +30,10 @@ Texture::Texture(std::size_t width, std::size_t height, std::uint8_t n_component
     glGenerateTextureMipmap(m_handle);
 }
 
-void Texture::bind(GLuint texture_unit) { glBindTextureUnit(texture_unit, m_handle); }
+void Texture::bind(GLuint texture_unit) {
+    m_unit = texture_unit;
+    glBindTextureUnit(m_unit, m_handle);
+}
 
 void Texture::delete_texture(GLuint buffer) { glDeleteTextures(1, &buffer); }
 

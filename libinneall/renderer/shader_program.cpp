@@ -90,6 +90,11 @@ void ShaderProgram::set_uniform(std::string_view name, int value) const {
     glProgramUniform1i(m_handle, location, value);
 }
 
+void ShaderProgram::set_uniform(std::string_view name, float value) const {
+    const GLuint location = uniform_location(name);
+    glProgramUniform1f(m_handle, location, value);
+}
+
 void ShaderProgram::set_uniform(std::string_view name, Color const& color) const {
     const GLuint location = uniform_location(name);
     glProgramUniform3f(m_handle, location, color.r, color.g, color.b);
@@ -112,4 +117,20 @@ void ShaderProgram::set_uniform(std::string_view name, Matrix4 const& matrix) co
     glProgramUniformMatrix4fv(m_handle, location, 1, GL_FALSE, matrix.elements().data());
 }
 
+void ShaderProgram::set_uniform(std::string_view name, Material const& material) const {
+    // TODO: Replace with static string
+    std::string full_name { name };
+    // NOTE: samplers must use glProgramUniform1i, explicit cast here to ensure interger is ued
+    set_uniform("u_material.albedo", static_cast<int>(material.albedo->unit()));
+    set_uniform("u_material.specular", static_cast<int>(material.specular->unit()));
+    set_uniform("u_material.shininess", material.shininess);
+}
+void ShaderProgram::set_uniform(std::string_view name, Light const& light) const {
+    // TODO: Replace with static string
+    std::string full_name { name };
+    set_uniform(full_name + ".pos", light.pos);
+    set_uniform(full_name + ".ambient", light.ambient);
+    set_uniform(full_name + ".diffuse", light.diffuse);
+    set_uniform(full_name + ".specular", light.specular);
+}
 }

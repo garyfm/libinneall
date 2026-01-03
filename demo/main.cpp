@@ -5,6 +5,8 @@
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
 #include <libinneall/camera.hpp>
+#include <libinneall/light.hpp>
+#include <libinneall/material.hpp>
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/transforms.hpp>
 #include <libinneall/mesh_data.hpp>
@@ -120,11 +122,52 @@ void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] doubl
     g_fov = inl::clamp(g_fov, 1.0f, 45.0f);
 }
 
-// static constexpr std::string obj_file = "/sword-sting/sting-sword.obj";
-// static constexpr std::string texture_file = "/sword-sting/Sting_Base_Color.ppm";
+std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically) {
+
+    using namespace inl;
+
+    std::vector<std::uint8_t> raw_image_data {};
+    auto start_image = std::chrono::steady_clock::now();
+    read_file(path, raw_image_data);
+    log::debug("Image size: {}", raw_image_data.size());
+
+    ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
+    if (!image_or_error) {
+        log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
+        return std::nullopt;
+    }
+
+    auto end_image = std::chrono::steady_clock::now();
+    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}, time:{} ", static_cast<int>(image_or_error->format),
+        image_or_error->width, image_or_error->height, image_or_error->max_value, image_or_error->pixel_data.size(),
+        std::chrono::duration_cast<std::chrono::milliseconds>(end_image - start_image));
+
+    ppm::Image image;
+    if (flip_vertically) {
+        image = ppm::flip_vertically(*image_or_error);
+    } else {
+        image = *image_or_error;
+    }
+
+    Texture texture { image.width, image.height, 3, image.pixel_data.data() };
+
+    glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(texture.native_handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTextureParameteri(texture.native_handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    return texture;
+}
+
+// static const std::string obj_file = "/sword-sting/sting-sword.obj";
+// static const std::string texture_albedo_file = "/sword-sting/Sting_Base_Color.ppm";
+// static const std::string texture_specular_file = "/sword-sting/Sting_Metallic.ppm";
+// bool flip_image = true;
+
 static const std::string obj_file = "/backpack/backpack.obj";
-static const std::string texture_file = "/backpack/diffuse.ppm";
-bool flip_texture = false;
+static const std::string texture_albedo_file = "/backpack/diffuse.ppm";
+static const std::string texture_specular_file = "/backpack/specular.ppm";
+bool flip_image = false;
 }
 
 int main(int argc, char* argv[]) {
@@ -181,39 +224,22 @@ int main(int argc, char* argv[]) {
         Mesh mesh { mesh_data };
         Model model { &mesh, &shader_program };
 
-        std::vector<std::uint8_t> raw_image_data {};
-        auto start_image = std::chrono::steady_clock::now();
-        read_file(resource_path + texture_file, raw_image_data);
-        log::debug("Image size: {}", raw_image_data.size());
+        std::optional<Texture> texture_albedo { load_texture(resource_path + texture_albedo_file, flip_image) };
+        INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
-        if (!image_or_error) {
-            log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
-            return -1;
-        }
+        std::optional<Texture> texture_specular { load_texture(resource_path + texture_specular_file, flip_image) };
+        INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        auto end_image = std::chrono::steady_clock::now();
-        log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}, time:{} ", static_cast<int>(image_or_error->format),
-            image_or_error->width, image_or_error->height, image_or_error->max_value, image_or_error->pixel_data.size(),
-            std::chrono::duration_cast<std::chrono::milliseconds>(end_image - start_image));
-
-        ppm::Image image;
-        if (flip_texture) {
-            image = ppm::flip_vertically(*image_or_error);
-        } else {
-            image = *image_or_error;
-        }
-
-        Texture texture { image.width, image.height, 3, image.pixel_data.data() };
-
-        glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTextureParameteri(texture.native_handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTextureParameteri(texture.native_handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        Material material { &texture_albedo.value(), &texture_specular.value(), 32 };
+        Light light {
+            .pos = { 1.2f, 1.0f, 2.0f },
+            .ambient = { 0.5f, 0.5f, 0.5f },
+            .diffuse = { 0.8f, 0.8f, 0.8f },
+            .specular = { 1.0f, 1.0f, 1.0f },
+        };
 
         Renderer renderer;
 
-        // TODO: Handle how texture get assigned to texture units
         shader_program.use();
 
         // Wireframe
@@ -237,16 +263,17 @@ int main(int argc, char* argv[]) {
             shader_program.set_uniform("u_projection", projection_matrix);
 
             shader_program.set_uniform("u_view", camera.view_matrix());
-            shader_program.set_uniform("u_light_pos", Vector3 { 1.2f, 1.0f, 2.0f });
-            shader_program.set_uniform("u_light_color", Vector3 { 1.0f, 1.0f, 1.0f });
-            shader_program.set_uniform("u_albedo", 0);
             shader_program.set_uniform("u_view_pos", camera.position());
 
-            texture.bind(0);
+            texture_albedo->bind(0);
+            texture_specular->bind(1);
+
+            shader_program.set_uniform("u_material", material);
+            shader_program.set_uniform("u_light", light);
+
             renderer.begin_frame();
 
             Matrix4 model_matrix { 1 };
-            model_matrix = scale(model_matrix, 0.2f);
             shader_program.set_uniform("u_model", model_matrix);
 
             Matrix3 normal_matrix { 1 };

@@ -13,7 +13,10 @@ public:
     GLuint native_handle() const { return m_handle; }
     void bind(GLuint texture_unit);
 
+    GLuint unit() { return m_unit; }
+
 private:
+    GLuint m_unit {};
     static void delete_texture(GLuint buffer);
     UniqueResource<GLuint, decltype(&delete_texture)> m_handle { 0, delete_texture };
 };

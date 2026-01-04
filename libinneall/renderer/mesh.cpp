@@ -3,9 +3,10 @@
 
 namespace inl {
 
-Mesh::Mesh(MeshData const& data)
-    : m_data { data }
-    , m_vertex_buffer { as_bytes(m_data.vertex_data.data(), m_data.vertex_data.size()) } {
+Mesh::Mesh(MeshData const& mesh_data)
+    : m_vertex_count { mesh_data.vertex_data.size() }
+    , m_index_count { mesh_data.index_data.size() }
+    , m_vertex_buffer { as_bytes(mesh_data.vertex_data.data(), mesh_data.vertex_data.size()) } {
 
     m_vertex_array.bind_vertex_buffer({
         .index = 0,
@@ -14,9 +15,9 @@ Mesh::Mesh(MeshData const& data)
         .stride_bytes = sizeof(VertexData),
     });
 
-    if (m_data.index_data.size() != 0) {
-        m_index_buffer
-            = GlBuffer(std::as_bytes(std::span<unsigned> { m_data.index_data.data(), m_data.index_data.size() }));
+    if (mesh_data.index_data.size() != 0) {
+        m_index_buffer = GlBuffer(
+            std::as_bytes(std::span<std::uint32_t const> { mesh_data.index_data.data(), mesh_data.index_data.size() }));
         m_vertex_array.bind_element_buffer(m_index_buffer);
     }
 

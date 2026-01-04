@@ -5,7 +5,7 @@
 namespace inl {
 
 GlBuffer::GlBuffer(std::span<std::byte const> data)
-    : m_data { data } {
+    : m_size { data.size() } {
 
     // Allocate a buffer handle
     glCreateBuffers(1, &m_handle);

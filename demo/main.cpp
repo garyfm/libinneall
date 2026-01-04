@@ -242,10 +242,10 @@ int main(int argc, char* argv[]) {
 
         Renderer renderer;
 
+        auto end_init = std::chrono::steady_clock::now();
+
         // Wireframe
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        auto end_init = std::chrono::steady_clock::now();
 
         log::debug(
             "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
@@ -260,9 +260,10 @@ int main(int argc, char* argv[]) {
 
             const Matrix4 projection_matrix { Matrix4::create_perspective(
                 to_radians(g_fov), ASPECT_RATIO, 0.1f, 100.0f) };
-            set_uniform(shader_program, "u_projection", projection_matrix);
 
+            set_uniform(shader_program, "u_projection", projection_matrix);
             set_uniform(shader_program, "u_view", camera.view_matrix());
+
             set_uniform(shader_program, "u_view_pos", camera.position());
 
             set_uniform(shader_program, "u_light", light);

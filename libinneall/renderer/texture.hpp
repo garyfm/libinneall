@@ -13,7 +13,7 @@ public:
     GLuint native_handle() const { return m_handle; }
     void bind(GLuint texture_unit);
 
-    GLuint unit() { return m_unit; }
+    GLuint unit() const { return m_unit; }
 
 private:
     GLuint m_unit {};

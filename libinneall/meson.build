@@ -18,6 +18,7 @@ source_files = files(
   'renderer/renderer.cpp',
   'renderer/shader_program.cpp',
   'renderer/shader_stage.cpp',
+  'renderer/shader_uniform.cpp',
   'renderer/texture.cpp',
   'renderer/vertex_array.cpp',
   'camera.cpp',

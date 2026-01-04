@@ -1,13 +1,9 @@
 #pragma once
 
-#include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
-#include <libinneall/light.hpp>
-#include <libinneall/material.hpp>
-#include <libinneall/math/matrix4.hpp>
-#include <libinneall/renderer/color.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
+#include <string>
 #include <string_view>
 #include <unordered_map>
 
@@ -22,16 +18,6 @@ public:
     GLuint native_handle() const { return m_handle; }
 
     void use() const { glUseProgram(m_handle); }
-
-    void set_uniform(std::string_view name, int value) const;
-    void set_uniform(std::string_view name, float value) const;
-    void set_uniform(std::string_view name, GLuint value) const;
-    void set_uniform(std::string_view name, Color const& color) const;
-    void set_uniform(std::string_view name, Vector3 const& vector) const;
-    void set_uniform(std::string_view name, Matrix3 const& matrix) const;
-    void set_uniform(std::string_view name, Matrix4 const& matrix) const;
-    void set_uniform(std::string_view name, Material const& material) const;
-    void set_uniform(std::string_view name, Light const& light) const;
 
     GLuint uniform_location(std::string_view name) const;
 

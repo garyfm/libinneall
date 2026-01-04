@@ -19,6 +19,7 @@ public:
     std::size_t index_count() const { return m_data.index_data.size(); };
 
 private:
+    // TODO: Remove copy of data here
     MeshData m_data {};
     GlBuffer m_vertex_buffer {};
     GlBuffer m_index_buffer {};

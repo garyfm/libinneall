@@ -6,18 +6,19 @@
 #include <libinneall/base/unique_resource.hpp>
 #include <libinneall/camera.hpp>
 #include <libinneall/light.hpp>
-#include <libinneall/material.hpp>
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/transforms.hpp>
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
+#include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/mesh.hpp>
 #include <libinneall/renderer/model.hpp>
 #include <libinneall/renderer/renderer.hpp>
 #include <libinneall/renderer/scene.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
+#include <libinneall/renderer/shader_uniform.hpp>
 #include <libinneall/renderer/texture.hpp>
 #include <libinneall/renderer/vertex_array.hpp>
 #include <libinneall/vertex_data.hpp>
@@ -222,7 +223,6 @@ int main(int argc, char* argv[]) {
             mesh_data.index_data.size(), std::chrono::duration_cast<std::chrono::milliseconds>(end_mesh - start_mesh));
 
         Mesh mesh { mesh_data };
-        Model model { &mesh, &shader_program };
 
         std::optional<Texture> texture_albedo { load_texture(resource_path + texture_albedo_file, flip_image) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
         std::optional<Texture> texture_specular { load_texture(resource_path + texture_specular_file, flip_image) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        Material material { &texture_albedo.value(), &texture_specular.value(), 32 };
+        Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program };
         Light light {
             .pos = { 1.2f, 1.0f, 2.0f },
             .ambient = { 0.5f, 0.5f, 0.5f },
@@ -238,9 +238,9 @@ int main(int argc, char* argv[]) {
             .specular = { 1.0f, 1.0f, 1.0f },
         };
 
-        Renderer renderer;
+        Model model { &mesh, &material };
 
-        shader_program.use();
+        Renderer renderer;
 
         // Wireframe
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -260,25 +260,14 @@ int main(int argc, char* argv[]) {
 
             const Matrix4 projection_matrix { Matrix4::create_perspective(
                 to_radians(g_fov), ASPECT_RATIO, 0.1f, 100.0f) };
-            shader_program.set_uniform("u_projection", projection_matrix);
+            set_uniform(shader_program, "u_projection", projection_matrix);
 
-            shader_program.set_uniform("u_view", camera.view_matrix());
-            shader_program.set_uniform("u_view_pos", camera.position());
+            set_uniform(shader_program, "u_view", camera.view_matrix());
+            set_uniform(shader_program, "u_view_pos", camera.position());
 
-            texture_albedo->bind(0);
-            texture_specular->bind(1);
-
-            shader_program.set_uniform("u_material", material);
-            shader_program.set_uniform("u_light", light);
+            set_uniform(shader_program, "u_light", light);
 
             renderer.begin_frame();
-
-            Matrix4 model_matrix { 1 };
-            shader_program.set_uniform("u_model", model_matrix);
-
-            Matrix3 normal_matrix { 1 };
-            normal_matrix = Matrix3(transpose(inverse(model_matrix)));
-            shader_program.set_uniform("u_normal_matrix", normal_matrix);
 
             renderer.render(model);
 

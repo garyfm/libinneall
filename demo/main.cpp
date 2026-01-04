@@ -199,7 +199,6 @@ int main(int argc, char* argv[]) {
 
         log::debug("Creating shader program");
         ShaderProgram shader_program { vertex_stage, fragment_stage };
-        shader_program.use();
 
         auto start_load = std::chrono::steady_clock::now();
         std::string obj_data = read_file(resource_path + obj_file);
@@ -231,6 +230,11 @@ int main(int argc, char* argv[]) {
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
         Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program };
+
+        Matrix4 model_matrix { 1 };
+
+        Model model { &mesh, &material, model_matrix };
+
         Light light {
             .pos = { 1.2f, 1.0f, 2.0f },
             .ambient = { 0.5f, 0.5f, 0.5f },
@@ -238,14 +242,9 @@ int main(int argc, char* argv[]) {
             .specular = { 1.0f, 1.0f, 1.0f },
         };
 
-        Model model { &mesh, &material };
-
-        Renderer renderer;
-
         auto end_init = std::chrono::steady_clock::now();
 
-        // Wireframe
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        Renderer renderer;
 
         log::debug(
             "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
@@ -256,20 +255,21 @@ int main(int argc, char* argv[]) {
 
             window.process_input();
 
-            shader_program.use();
-
+            // TODO: Move to camera
             const Matrix4 projection_matrix { Matrix4::create_perspective(
                 to_radians(g_fov), ASPECT_RATIO, 0.1f, 100.0f) };
 
-            set_uniform(shader_program, "u_projection", projection_matrix);
-            set_uniform(shader_program, "u_view", camera.view_matrix());
+            set_uniform(*model.material->shader, "u_light", light);
 
-            set_uniform(shader_program, "u_view_pos", camera.position());
-
-            set_uniform(shader_program, "u_light", light);
+            RenderView render_view {
+                .view = camera.view_matrix(),
+                .projection = projection_matrix,
+                .pos = camera.position(),
+            };
 
             renderer.begin_frame();
 
+            renderer.set_render_view(render_view, *model.material->shader);
             renderer.render(model);
 
             window.swap_buffers();

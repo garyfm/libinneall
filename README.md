@@ -47,7 +47,7 @@ Stage 2 - 3D mesh loader
 
 Stage 3 - Lighting
 - [x] Basic Phong Lighting
-- [ ] Materials
+- [x] Materials
 - [ ] Light casters
 
 Misc:

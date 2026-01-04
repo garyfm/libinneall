@@ -1,22 +1,41 @@
-#include <libinneall/renderer/gl_buffer.hpp>
+#include <libinneall/base/assert.hpp>
 #include <libinneall/renderer/renderer.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
 
 namespace inl {
 
 void Renderer::begin_frame() const {
-    glClearColor(0.0f, 0.0, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Wireframe
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void Renderer::render(Model const& model) const {
+void Renderer::set_render_view(RenderView const& render_view, ShaderProgram& shader) {
+    // TODO: This should be UBO which would remove the need for the shader to be passed in
+    set_uniform(shader, "u_view", render_view.view);
+    set_uniform(shader, "u_projection", render_view.projection);
+    set_uniform(shader, "u_view_pos", render_view.pos);
+}
+
+void Renderer::render(Model const& model) {
+
+    INL_ASSERT(model.mesh != nullptr, "Empty mesh");
+    INL_ASSERT(model.material != nullptr, "Empty material");
+    INL_ASSERT(model.material->shader != nullptr, "Empty shader");
 
     model.mesh->bind();
     model.material->shader->use();
 
     // TODO: texture unit is hardcoded here. Add some way to allocate these
-    model.material->albedo->bind(0);
-    model.material->specular->bind(1);
+    if (model.material->albedo != nullptr) {
+        model.material->albedo->bind(0);
+    }
+
+    if (model.material->albedo != nullptr) {
+        model.material->specular->bind(1);
+    }
 
     set_uniform(*model.material->shader, "u_material", *model.material);
 

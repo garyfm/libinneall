@@ -34,9 +34,8 @@
 
 namespace {
 
-static constexpr unsigned SCREEN_WIDTH = 800;
-static constexpr unsigned SCREEN_HEIGHT = 600;
-static constexpr float ASPECT_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT;
+static constexpr unsigned DEFAULT_SCREEN_WIDTH = 800;
+static constexpr unsigned DEFAULT_SCREEN_HEIGHT = 600;
 
 // TODO: Implement these with proper error handling
 std::string read_file(std::filesystem::path path) {
@@ -68,7 +67,15 @@ void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer) {
 static float g_delta_time = 0;
 static float g_last_frame_time = 0;
 
-static inl::Camera camera { { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, -90.0f, 0.0f };
+static float g_fov { 45.0f };
+static inl::Camera g_camera { { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, -90.0f, 0.0f };
+
+void process_input(GLFWwindow* g_window);
+void mouse_callback(GLFWwindow* g_window, double x_pos, double y_pos);
+void scroll_callback(GLFWwindow* g_window, double x_offset, double y_offset);
+void resize_callback(GLFWwindow* window, int width, int height);
+inl::Window g_window { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo", process_input, mouse_callback,
+    scroll_callback, resize_callback };
 
 void process_input(GLFWwindow* window) {
     // TODO: Pull this out
@@ -76,16 +83,16 @@ void process_input(GLFWwindow* window) {
 
     float velocity = movement_speed * g_delta_time;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera.move(inl::Camera::Direction::Forward, velocity);
+        g_camera.move(inl::Camera::Direction::Forward, velocity);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera.move(inl::Camera::Direction::Backward, velocity);
+        g_camera.move(inl::Camera::Direction::Backward, velocity);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera.move(inl::Camera::Direction::Left, velocity);
+        g_camera.move(inl::Camera::Direction::Left, velocity);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera.move(inl::Camera::Direction::Right, velocity);
+        g_camera.move(inl::Camera::Direction::Right, velocity);
     }
 }
 
@@ -93,8 +100,8 @@ void mouse_callback([[maybe_unused]] GLFWwindow* window, double x_pos, double y_
     // TODO: Pull this out
     static const float sensitivity { 0.1f };
 
-    static float x_prev { SCREEN_WIDTH / 2 };
-    static float y_prev { SCREEN_HEIGHT / 2 };
+    static float x_prev { static_cast<float>(g_window.width()) / 2 };
+    static float y_prev { static_cast<float>(g_window.width()) / 2 };
     static bool first_mouse_movement { false };
 
     const float x_pos_f = static_cast<float>(x_pos);
@@ -113,14 +120,17 @@ void mouse_callback([[maybe_unused]] GLFWwindow* window, double x_pos, double y_
     x_prev = static_cast<float>(x_pos);
     y_prev = static_cast<float>(y_pos);
 
-    camera.rotate(x_offset, y_offset);
+    g_camera.rotate(x_offset, y_offset);
 }
-
-static float g_fov { 45.0f };
 
 void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double x_offset, double y_offset) {
     g_fov -= static_cast<float>(y_offset);
     g_fov = inl::clamp(g_fov, 1.0f, 45.0f);
+}
+
+void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height) {
+    inl::log::debug("Window resized w: {} h: {}", width, height);
+    g_window.resize(width, height);
 }
 
 std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically) {
@@ -169,6 +179,7 @@ static const std::string obj_file = "/backpack/backpack.obj";
 static const std::string texture_albedo_file = "/backpack/diffuse.ppm";
 static const std::string texture_specular_file = "/backpack/specular.ppm";
 bool flip_image = false;
+
 }
 
 int main(int argc, char* argv[]) {
@@ -185,9 +196,6 @@ int main(int argc, char* argv[]) {
         }
 
         std::string resource_path = argv[1];
-
-        Window window { SCREEN_WIDTH, SCREEN_HEIGHT, "libinneall demo", process_input, mouse_callback,
-            scroll_callback };
 
         log::debug("Creating vertex shader");
         std::string basic_vert_shader_source = read_file(resource_path + "/shaders/basic_lighting.vert.glsl");
@@ -248,23 +256,23 @@ int main(int argc, char* argv[]) {
 
         log::debug(
             "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
-        while (!glfwWindowShouldClose(window.native_handle())) {
+        while (!glfwWindowShouldClose(g_window.native_handle())) {
             float current_frame_time = static_cast<float>(glfwGetTime());
             g_delta_time = current_frame_time - g_last_frame_time;
             g_last_frame_time = current_frame_time;
 
-            window.process_input();
+            g_window.process_input();
 
-            // TODO: Move to camera
+            // TODO: Move to g_camera
             const Matrix4 projection_matrix { Matrix4::create_perspective(
-                to_radians(g_fov), ASPECT_RATIO, 0.1f, 100.0f) };
+                to_radians(g_fov), g_window.aspect_ratio(), 0.1f, 100.0f) };
 
             set_uniform(*model.material->shader, "u_light", light);
 
             RenderView render_view {
-                .view = camera.view_matrix(),
+                .view = g_camera.view_matrix(),
                 .projection = projection_matrix,
-                .pos = camera.position(),
+                .pos = g_camera.position(),
             };
 
             renderer.begin_frame();
@@ -272,7 +280,7 @@ int main(int argc, char* argv[]) {
             renderer.set_render_view(render_view, *model.material->shader);
             renderer.render(model);
 
-            window.swap_buffers();
+            g_window.swap_buffers();
         }
     } catch (const std::exception& e) {
         log::error("Exception: {}", e.what());

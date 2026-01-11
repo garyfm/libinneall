@@ -7,9 +7,6 @@ namespace inl {
 
 namespace {
     void error_callback(int error, const char* description) { log::error("GLFW error: {}({})", description, error); }
-    void framebuffer_resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height) {
-        glViewport(0, 0, width, height);
-    }
 
     void APIENTRY opengl_debug_callback(GLenum source, GLenum type, unsigned int id, GLenum severity,
         [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
@@ -102,7 +99,7 @@ namespace {
 }
 
 Window::Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback,
-    MouseCallback mouse_callback, ScrollCallback scroll_callback)
+    MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback)
     : m_width { width }
     , m_height { height }
     , m_title { title }
@@ -133,7 +130,7 @@ Window::Window(unsigned width, unsigned height, const std::string& title, InputC
         throw std::runtime_error("Failed to load GLAD");
     }
 
-    glfwSetFramebufferSizeCallback(m_window.get(), framebuffer_resize_callback);
+    glfwSetFramebufferSizeCallback(m_window.get(), resize_callback);
     glViewport(0, 0, m_width, m_height);
 
     glEnable(GL_DEBUG_OUTPUT);
@@ -162,4 +159,9 @@ void Window::process_input() {
 
 void Window::swap_buffers() { glfwSwapBuffers(m_window.get()); }
 
+void Window::resize(uint32_t width, uint32_t height) {
+    m_width = width;
+    m_height = height;
+    glViewport(0, 0, m_width, m_height);
+}
 } // namespace inl

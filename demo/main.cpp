@@ -67,8 +67,18 @@ void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer) {
 static float g_delta_time = 0;
 static float g_last_frame_time = 0;
 
-static float g_fov { 45.0f };
-static inl::Camera g_camera { { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, -90.0f, 0.0f };
+static inl::CameraInitialSettings camera_settings {
+    .position = { 0.0f, 0.0f, 3.0f },
+    .world_up = { 0.0f, 1.0f, 0.0f },
+    .front = { 0.0f, 0.0f, -1.0f },
+    .yaw = -90.0f,
+    .pitch = 0.0f,
+    .fov = 45.0f,
+    .z_near = 0.1f,
+    .z_far = 100.0f,
+};
+
+static inl::Camera g_camera(camera_settings);
 
 void process_input(GLFWwindow* g_window);
 void mouse_callback(GLFWwindow* g_window, double x_pos, double y_pos);
@@ -124,8 +134,7 @@ void mouse_callback([[maybe_unused]] GLFWwindow* window, double x_pos, double y_
 }
 
 void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double x_offset, double y_offset) {
-    g_fov -= static_cast<float>(y_offset);
-    g_fov = inl::clamp(g_fov, 1.0f, 45.0f);
+    g_camera.zoom(static_cast<float>(y_offset));
 }
 
 void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height) {
@@ -179,7 +188,6 @@ static const std::string obj_file = "/backpack/backpack.obj";
 static const std::string texture_albedo_file = "/backpack/diffuse.ppm";
 static const std::string texture_specular_file = "/backpack/specular.ppm";
 bool flip_image = false;
-
 }
 
 int main(int argc, char* argv[]) {
@@ -263,15 +271,11 @@ int main(int argc, char* argv[]) {
 
             g_window.process_input();
 
-            // TODO: Move to g_camera
-            const Matrix4 projection_matrix { Matrix4::create_perspective(
-                to_radians(g_fov), g_window.aspect_ratio(), 0.1f, 100.0f) };
-
             set_uniform(*model.material->shader, "u_light", light);
 
             RenderView render_view {
                 .view = g_camera.view_matrix(),
-                .projection = projection_matrix,
+                .projection = g_camera.perspective_matrix(g_window.aspect_ratio()),
                 .pos = g_camera.position(),
             };
 

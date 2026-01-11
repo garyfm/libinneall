@@ -3,14 +3,17 @@
 
 namespace inl {
 
-Camera::Camera(Vector3 position, Vector3 world_up, Vector3 front, float yaw, float pitch)
-    : m_position { position }
-    , m_world_up { world_up }
-    , m_front { front }
+Camera::Camera(CameraInitialSettings settings)
+    : m_position { settings.position }
+    , m_world_up { settings.world_up }
+    , m_front { settings.front }
     , m_right { normalise(cross(m_front, m_world_up)) }
     , m_up { normalise(cross(m_right, m_front)) }
-    , m_yaw { yaw }
-    , m_pitch { pitch } { }
+    , m_yaw { settings.yaw }
+    , m_pitch { settings.pitch }
+    , m_fov { settings.fov }
+    , m_z_near { settings.z_near }
+    , m_z_far { settings.z_far } { }
 
 void Camera::move(Direction dir, float velocity) {
     switch (dir) {
@@ -47,5 +50,9 @@ void Camera::rotate(float xoffset, float yoffset) {
     m_right = normalise(cross(m_front, m_world_up));
     m_up = normalise(cross(m_right, m_front));
 }
-
+void Camera::zoom(float zoom_value) {
+    float fov = m_fov - zoom_value;
+    fov = inl::clamp(fov, min_zoom, max_zoom);
+    m_fov = fov;
+};
 }

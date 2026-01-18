@@ -251,8 +251,8 @@ int main(int argc, char* argv[]) {
 
         Model model { &mesh, &material, model_matrix };
 
-        Light light {
-            .pos = { 1.2f, 1.0f, 2.0f },
+        LightDirectional light {
+            .dir = { -0.2f, -1.0f, -0.3f },
             .ambient = { 0.5f, 0.5f, 0.5f },
             .diffuse = { 0.8f, 0.8f, 0.8f },
             .specular = { 1.0f, 1.0f, 1.0f },
@@ -271,7 +271,7 @@ int main(int argc, char* argv[]) {
 
             g_window.process_input();
 
-            set_uniform(*model.material->shader, "u_light", light);
+            set_uniform(*model.material->shader, "u_light_dir", light);
 
             RenderView render_view {
                 .view = g_camera.view_matrix(),

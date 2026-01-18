@@ -11,4 +11,11 @@ struct Light {
     Vector3 specular;
 };
 
+struct LightDirectional {
+    Vector3 dir;
+    Vector3 ambient;
+    Vector3 diffuse;
+    Vector3 specular;
+};
+
 } // namespace inl

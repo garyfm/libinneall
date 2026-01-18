@@ -1,3 +1,4 @@
+#include "light.hpp"
 #include <libinneall/renderer/shader_uniform.hpp>
 
 namespace inl {
@@ -46,6 +47,15 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Light const& ligh
     // TODO: Replace with static string
     std::string full_name { name };
     set_uniform(shader, full_name + ".pos", light.pos);
+    set_uniform(shader, full_name + ".ambient", light.ambient);
+    set_uniform(shader, full_name + ".diffuse", light.diffuse);
+    set_uniform(shader, full_name + ".specular", light.specular);
+}
+
+void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional const& light) {
+    // TODO: Replace with static string
+    std::string full_name { name };
+    set_uniform(shader, full_name + ".dir", light.dir);
     set_uniform(shader, full_name + ".ambient", light.ambient);
     set_uniform(shader, full_name + ".diffuse", light.diffuse);
     set_uniform(shader, full_name + ".specular", light.specular);

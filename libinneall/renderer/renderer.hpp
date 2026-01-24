@@ -2,6 +2,7 @@
 
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/math/vector3.hpp>
+#include <libinneall/renderer/light_source.hpp>
 #include <libinneall/renderer/model.hpp>
 
 #include <subprojects/glad/include/glad/glad.h>
@@ -24,6 +25,7 @@ public:
     void begin_frame() const;
     void set_render_view(RenderView const& render_view, ShaderProgram& shader);
     void render(Model const& model);
+    void render(LightSource const& light);
 
 private:
 };

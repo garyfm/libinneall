@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libinneall/math/vector3.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/texture.hpp>
 

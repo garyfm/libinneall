@@ -11,6 +11,7 @@
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
+#include <libinneall/renderer/light_source.hpp>
 #include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/mesh.hpp>
 #include <libinneall/renderer/model.hpp>
@@ -205,17 +206,31 @@ int main(int argc, char* argv[]) {
 
         std::string resource_path = argv[1];
 
-        log::debug("Creating vertex shader");
-        std::string basic_vert_shader_source = read_file(resource_path + "/shaders/basic_lighting.vert.glsl");
-        ShaderStage vertex_stage { ShaderType::Vertex, basic_vert_shader_source };
+        // Lighting/Material shader
+        std::string vert_shader_source_lighting = read_file(resource_path + "/shaders/basic_lighting.vert.glsl");
+        ShaderStage vertex_stage_lighting { ShaderType::Vertex, vert_shader_source_lighting };
+        log::debug("Created vertex shader lighting");
 
-        log::debug("Creating fragment shader");
-        std::string basic_frag_shader_source = read_file(resource_path + "/shaders/basic_lighting.frag.glsl");
-        ShaderStage fragment_stage { ShaderType::Fragment, basic_frag_shader_source };
+        std::string frag_shader_source_lighting = read_file(resource_path + "/shaders/basic_lighting.frag.glsl");
+        ShaderStage fragment_stage_lighting { ShaderType::Fragment, frag_shader_source_lighting };
+        log::debug("Created fragment shader lighting");
 
-        log::debug("Creating shader program");
-        ShaderProgram shader_program { vertex_stage, fragment_stage };
+        ShaderProgram shader_program_lighting { vertex_stage_lighting, fragment_stage_lighting };
+        log::debug("Created shader program lighting");
 
+        // Color shader
+        std::string vert_shader_source_color = read_file(resource_path + "/shaders/basic.vert.glsl");
+        ShaderStage vertex_stage_color { ShaderType::Vertex, vert_shader_source_color };
+        log::debug("Created vertex shader color");
+
+        std::string frag_shader_source_color = read_file(resource_path + "/shaders/basic.frag.glsl");
+        ShaderStage fragment_stage_color { ShaderType::Fragment, frag_shader_source_color };
+        log::debug("Created fragment shader color");
+
+        ShaderProgram shader_program_color { vertex_stage_lighting, fragment_stage_color };
+        log::debug("Created shader program color");
+
+        // Object
         auto start_load = std::chrono::steady_clock::now();
         std::string obj_data = read_file(resource_path + obj_file);
 
@@ -245,12 +260,25 @@ int main(int argc, char* argv[]) {
         std::optional<Texture> texture_specular { load_texture(resource_path + texture_specular_file, flip_image) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program };
+        Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program_lighting };
 
         Matrix4 model_matrix { 1 };
 
         Model model { &mesh, &material, model_matrix };
 
+        // Light source
+        std::string obj_data_cube = read_file(resource_path + "/cube.obj");
+        obj::Result<obj::Model> obj_model_cube = obj::load(obj_data_cube);
+        if (!obj_model) {
+            log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
+            return -1;
+        }
+
+        MeshData mesh_data_cube = to_mesh_data(*obj_model_cube);
+
+        Mesh mesh_cube { mesh_data_cube };
+
+        // TODO: This is will probably be set per scene ?
         [[maybe_unused]] LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
             .ambient = { 0.5f, 0.5f, 0.5f },
@@ -258,16 +286,22 @@ int main(int argc, char* argv[]) {
             .specular = { 1.0f, 1.0f, 1.0f },
         };
 
+        // TODO: Should this be bundled with the light source ?
         LightPoint light_point {
-            .pos = { -0.2f, -1.0f, -0.3f },
-            .ambient = { 0.5f, 0.5f, 0.5f },
-            .diffuse = { 0.8f, 0.8f, 0.8f },
+            .pos = { -0.2f, 7.0f, 10.0f },
+            .ambient = { 0.1f, 0.1f, 0.1f },
+            .diffuse = { 0.5f, 0.5f, 0.5f },
             .specular = { 1.0f, 1.0f, 1.0f },
             // TODO: Use a table based on distance for these values
             .atten_constant = 1.0f,
-            .atten_linear = 0.09f,
-            .atten_quadratic = 0.032f,
+            .atten_linear = 0.045f,
+            .atten_quadratic = 0.0075f,
         };
+
+        Matrix4 model_matrix_light { 1 };
+        model_matrix_light = translate(model_matrix_light, light_point.pos);
+        model_matrix_light = scale(model_matrix_light, 0.1f);
+        LightSource light_source { &mesh_cube, light_point.specular, &shader_program_color, model_matrix_light };
 
         auto end_init = std::chrono::steady_clock::now();
 
@@ -275,6 +309,7 @@ int main(int argc, char* argv[]) {
 
         log::debug(
             "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
+
         while (!glfwWindowShouldClose(g_window.native_handle())) {
             float current_frame_time = static_cast<float>(glfwGetTime());
             g_delta_time = current_frame_time - g_last_frame_time;
@@ -282,8 +317,17 @@ int main(int argc, char* argv[]) {
 
             g_window.process_input();
 
-            shader_program.use();
+            shader_program_lighting.use();
             // set_uniform(*model.material->shader, "u_light_dir", light_directional);
+            Vector3 light_source_pos = light_point.pos;
+
+            float time = static_cast<float>(glfwGetTime());
+            float radius = 20.0f;
+
+            light_source_pos.x = cosf(time) * radius;
+            light_source_pos.z = sinf(time) * radius;
+
+            light_point.pos = light_source_pos;
             set_uniform(*model.material->shader, "u_light_point", light_point);
 
             RenderView render_view {
@@ -296,6 +340,18 @@ int main(int argc, char* argv[]) {
 
             renderer.set_render_view(render_view, *model.material->shader);
             renderer.render(model);
+
+            // TODO: Render view doesnt work with light source as it doesnt have view_dir in the shaders
+            // UBO should fix this
+            light_source.shader->use();
+            set_uniform(*light_source.shader, "u_view", render_view.view);
+            set_uniform(*light_source.shader, "u_projection", render_view.projection);
+
+            model_matrix_light = Matrix4 { 1 };
+            model_matrix_light = translate(model_matrix_light, light_source_pos);
+            model_matrix_light = scale(model_matrix_light, 0.1f);
+            light_source.model_matrix = model_matrix_light;
+            renderer.render(light_source);
 
             g_window.swap_buffers();
         }

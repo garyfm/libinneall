@@ -1,3 +1,4 @@
+#include "renderer/light_source.hpp"
 #include <libinneall/base/assert.hpp>
 #include <libinneall/renderer/renderer.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
@@ -51,6 +52,26 @@ void Renderer::render(Model const& model) {
         glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(model.mesh->vertext_count()));
     }
     model.mesh->unbind();
+}
+
+void Renderer::render(LightSource const& light) {
+
+    INL_ASSERT(light.mesh != nullptr, "Empty mesh");
+    INL_ASSERT(light.shader != nullptr, "Empty shader");
+
+    light.mesh->bind();
+    light.shader->use();
+
+    set_uniform(*light.shader, "u_color", light.color);
+    set_uniform(*light.shader, "u_model", light.model_matrix);
+
+    if (light.mesh->index_count() != 0) {
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(light.mesh->index_count()), GL_UNSIGNED_INT, 0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(light.mesh->vertext_count()));
+    }
+
+    light.mesh->unbind();
 }
 
 };

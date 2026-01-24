@@ -4,11 +4,15 @@
 
 namespace inl {
 
-struct Light {
+struct LightPoint {
     Vector3 pos;
     Vector3 ambient;
     Vector3 diffuse;
     Vector3 specular;
+
+    float atten_constant;
+    float atten_linear;
+    float atten_quadratic;
 };
 
 struct LightDirectional {

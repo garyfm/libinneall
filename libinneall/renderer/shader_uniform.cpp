@@ -43,13 +43,17 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Material const& m
     set_uniform(shader, "u_material.shininess", material.shininess);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, Light const& light) {
+void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light) {
     // TODO: Replace with static string
     std::string full_name { name };
     set_uniform(shader, full_name + ".pos", light.pos);
     set_uniform(shader, full_name + ".ambient", light.ambient);
     set_uniform(shader, full_name + ".diffuse", light.diffuse);
     set_uniform(shader, full_name + ".specular", light.specular);
+
+    set_uniform(shader, full_name + ".atten_constant", light.atten_constant);
+    set_uniform(shader, full_name + ".atten_linear", light.atten_linear);
+    set_uniform(shader, full_name + ".atten_quadratic", light.atten_quadratic);
 }
 
 void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional const& light) {

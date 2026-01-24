@@ -19,7 +19,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Vector3 const& ve
 void set_uniform(ShaderProgram& shader, std::string_view name, Matrix3 const& matrix);
 void set_uniform(ShaderProgram& shader, std::string_view name, Matrix4 const& matrix);
 void set_uniform(ShaderProgram& shader, std::string_view name, Material const& material);
-void set_uniform(ShaderProgram& shader, std::string_view name, Light const& light);
+void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light);
 void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional const& light);
 
 }; // namespace inl

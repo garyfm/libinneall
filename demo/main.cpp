@@ -251,11 +251,22 @@ int main(int argc, char* argv[]) {
 
         Model model { &mesh, &material, model_matrix };
 
-        LightDirectional light {
+        [[maybe_unused]] LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
             .ambient = { 0.5f, 0.5f, 0.5f },
             .diffuse = { 0.8f, 0.8f, 0.8f },
             .specular = { 1.0f, 1.0f, 1.0f },
+        };
+
+        LightPoint light_point {
+            .pos = { -0.2f, -1.0f, -0.3f },
+            .ambient = { 0.5f, 0.5f, 0.5f },
+            .diffuse = { 0.8f, 0.8f, 0.8f },
+            .specular = { 1.0f, 1.0f, 1.0f },
+            // TODO: Use a table based on distance for these values
+            .atten_constant = 1.0f,
+            .atten_linear = 0.09f,
+            .atten_quadratic = 0.032f,
         };
 
         auto end_init = std::chrono::steady_clock::now();
@@ -271,7 +282,9 @@ int main(int argc, char* argv[]) {
 
             g_window.process_input();
 
-            set_uniform(*model.material->shader, "u_light_dir", light);
+            shader_program.use();
+            // set_uniform(*model.material->shader, "u_light_dir", light_directional);
+            set_uniform(*model.material->shader, "u_light_point", light_point);
 
             RenderView render_view {
                 .view = g_camera.view_matrix(),

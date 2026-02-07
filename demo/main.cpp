@@ -288,14 +288,14 @@ int main(int argc, char* argv[]) {
 
         // TODO: Should this be bundled with the light source ?
         LightPoint light_point {
-            .pos = { -0.2f, 7.0f, 10.0f },
+            .pos = { -0.2f, 5.0f, 10.0f },
             .ambient = { 0.1f, 0.1f, 0.1f },
             .diffuse = { 0.5f, 0.5f, 0.5f },
             .specular = { 1.0f, 1.0f, 1.0f },
             // TODO: Use a table based on distance for these values
             .atten_constant = 1.0f,
-            .atten_linear = 0.045f,
-            .atten_quadratic = 0.0075f,
+            .atten_linear = 0.09f,
+            .atten_quadratic = 0.032f,
         };
 
         Matrix4 model_matrix_light { 1 };
@@ -329,6 +329,17 @@ int main(int argc, char* argv[]) {
 
             light_point.pos = light_source_pos;
             set_uniform(*model.material->shader, "u_light_point", light_point);
+
+            LightSpot light_spot {
+                .pos = g_camera.position(),
+                .dir = g_camera.front(),
+                .ambient = { 0.1f, 0.1f, 0.1f },
+                .diffuse = { 0.5f, 0.5f, 0.5f },
+                .specular = { 1.0f, 1.0f, 1.0f },
+                .inner_cutoff_cosine = cosf(to_radians(12.5f)),
+                .outer_cutoff_cosine = cosf(to_radians(17.5f)),
+            };
+            set_uniform(*model.material->shader, "u_light_spot", light_spot);
 
             RenderView render_view {
                 .view = g_camera.view_matrix(),

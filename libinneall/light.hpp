@@ -4,6 +4,13 @@
 
 namespace inl {
 
+struct LightDirectional {
+    Vector3 dir;
+    Vector3 ambient;
+    Vector3 diffuse;
+    Vector3 specular;
+};
+
 struct LightPoint {
     Vector3 pos;
     Vector3 ambient;
@@ -15,11 +22,14 @@ struct LightPoint {
     float atten_quadratic;
 };
 
-struct LightDirectional {
+struct LightSpot {
+    Vector3 pos;
     Vector3 dir;
     Vector3 ambient;
     Vector3 diffuse;
     Vector3 specular;
+    float inner_cutoff_cosine;
+    float outer_cutoff_cosine;
 };
 
 } // namespace inl

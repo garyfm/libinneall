@@ -37,6 +37,7 @@ public:
     }
 
     Vector3 position() const { return m_position; }
+    Vector3 front() const { return m_front; }
     float yaw() const { return m_yaw; }
     float pitch() const { return m_pitch; }
 

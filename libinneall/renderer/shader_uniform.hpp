@@ -21,6 +21,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Matrix4 const& ma
 void set_uniform(ShaderProgram& shader, std::string_view name, Material const& material);
 void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional const& light);
 void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light);
+void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, std::size_t index);
 void set_uniform(ShaderProgram& shader, std::string_view name, LightSpot const& light);
 
 }; // namespace inl

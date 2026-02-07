@@ -65,6 +65,20 @@ void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const&
     set_uniform(shader, full_name + ".atten_quadratic", light.atten_quadratic);
 }
 
+void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, std::size_t index) {
+    // TODO: Replace with static string
+    std::string full_name { name };
+    std::string index_str = std::to_string(index);
+    set_uniform(shader, full_name + "[" + index_str + "].pos", light.pos);
+    set_uniform(shader, full_name + "[" + index_str + "].ambient", light.ambient);
+    set_uniform(shader, full_name + "[" + index_str + "].diffuse", light.diffuse);
+    set_uniform(shader, full_name + "[" + index_str + "].specular", light.specular);
+
+    set_uniform(shader, full_name + "[" + index_str + "].atten_constant", light.atten_constant);
+    set_uniform(shader, full_name + "[" + index_str + "].atten_linear", light.atten_linear);
+    set_uniform(shader, full_name + "[" + index_str + "].atten_quadratic", light.atten_quadratic);
+}
+
 void set_uniform(ShaderProgram& shader, std::string_view name, LightSpot const& light) {
     // TODO: Replace with static string
     std::string full_name { name };

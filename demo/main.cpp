@@ -279,18 +279,18 @@ int main(int argc, char* argv[]) {
         Mesh mesh_cube { mesh_data_cube };
 
         // TODO: This is will probably be set per scene ?
-        [[maybe_unused]] LightDirectional light_directional {
+        LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
-            .ambient = { 0.5f, 0.5f, 0.5f },
-            .diffuse = { 0.8f, 0.8f, 0.8f },
-            .specular = { 1.0f, 1.0f, 1.0f },
+            .ambient = { 0.01f, 0.01f, 0.01f },
+            .diffuse = { 0.1f, 0.1f, 0.1f },
+            .specular = { 0.2f, 0.2f, 0.2f },
         };
 
         // TODO: Should this be bundled with the light source ?
         LightPoint light_point {
-            .pos = { -0.2f, 5.0f, 10.0f },
-            .ambient = { 0.1f, 0.1f, 0.1f },
-            .diffuse = { 0.5f, 0.5f, 0.5f },
+            .pos = { 0.5f, 5.0f, 10.0f },
+            .ambient = { 0.5f, 0.5f, 0.5f },
+            .diffuse = { 1.0f, 1.0f, 1.0f },
             .specular = { 1.0f, 1.0f, 1.0f },
             // TODO: Use a table based on distance for these values
             .atten_constant = 1.0f,
@@ -318,17 +318,10 @@ int main(int argc, char* argv[]) {
             g_window.process_input();
 
             shader_program_lighting.use();
-            // set_uniform(*model.material->shader, "u_light_dir", light_directional);
-            Vector3 light_source_pos = light_point.pos;
+            set_uniform(*model.material->shader, "u_light_dir", light_directional);
 
-            float time = static_cast<float>(glfwGetTime());
-            float radius = 20.0f;
-
-            light_source_pos.x = cosf(time) * radius;
-            light_source_pos.z = sinf(time) * radius;
-
-            light_point.pos = light_source_pos;
-            set_uniform(*model.material->shader, "u_light_point", light_point);
+            set_uniform(*model.material->shader, "u_num_light_points", 1);
+            set_uniform(*model.material->shader, "u_light_points", light_point, 0);
 
             LightSpot light_spot {
                 .pos = g_camera.position(),
@@ -340,6 +333,7 @@ int main(int argc, char* argv[]) {
                 .outer_cutoff_cosine = cosf(to_radians(17.5f)),
             };
             set_uniform(*model.material->shader, "u_light_spot", light_spot);
+            set_uniform(*model.material->shader, "u_use_light_spot", false);
 
             RenderView render_view {
                 .view = g_camera.view_matrix(),
@@ -358,10 +352,6 @@ int main(int argc, char* argv[]) {
             set_uniform(*light_source.shader, "u_view", render_view.view);
             set_uniform(*light_source.shader, "u_projection", render_view.projection);
 
-            model_matrix_light = Matrix4 { 1 };
-            model_matrix_light = translate(model_matrix_light, light_source_pos);
-            model_matrix_light = scale(model_matrix_light, 0.1f);
-            light_source.model_matrix = model_matrix_light;
             renderer.render(light_source);
 
             g_window.swap_buffers();

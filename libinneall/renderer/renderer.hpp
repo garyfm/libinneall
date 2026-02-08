@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libinneall/light.hpp>
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/math/vector3.hpp>
 #include <libinneall/renderer/light_source.hpp>
@@ -15,6 +16,13 @@ struct RenderView {
     Vector3 pos;
 };
 
+struct RenderScene {
+    std::span<Model> models;
+    LightDirectional* light_directional;
+    std::span<LightPoint> light_points;
+    LightSpot* light_spot;
+};
+
 class Renderer {
 public:
     Renderer() {
@@ -23,11 +31,13 @@ public:
     };
 
     void begin_frame() const;
-    void set_render_view(RenderView const& render_view, ShaderProgram& shader);
+    void render(RenderScene const& scene, RenderView const& view);
     void render(Model const& model);
+    // TODO: Make this draw_debug_cube
     void render(LightSource const& light);
 
 private:
+    void set_render_view(RenderView const& render_view, ShaderProgram& shader);
 };
 
 } // namespace inl

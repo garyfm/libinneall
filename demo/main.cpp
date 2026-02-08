@@ -16,7 +16,6 @@
 #include <libinneall/renderer/mesh.hpp>
 #include <libinneall/renderer/model.hpp>
 #include <libinneall/renderer/renderer.hpp>
-#include <libinneall/renderer/scene.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
@@ -278,7 +277,6 @@ int main(int argc, char* argv[]) {
 
         Mesh mesh_cube { mesh_data_cube };
 
-        // TODO: This is will probably be set per scene ?
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
             .ambient = { 0.01f, 0.01f, 0.01f },
@@ -286,7 +284,6 @@ int main(int argc, char* argv[]) {
             .specular = { 0.2f, 0.2f, 0.2f },
         };
 
-        // TODO: Should this be bundled with the light source ?
         LightPoint light_point {
             .pos = { 0.5f, 5.0f, 10.0f },
             .ambient = { 0.5f, 0.5f, 0.5f },
@@ -305,6 +302,23 @@ int main(int argc, char* argv[]) {
 
         auto end_init = std::chrono::steady_clock::now();
 
+        LightSpot light_spot {
+            .pos = g_camera.position(),
+            .dir = g_camera.front(),
+            .ambient = { 0.1f, 0.1f, 0.1f },
+            .diffuse = { 0.5f, 0.5f, 0.5f },
+            .specular = { 1.0f, 1.0f, 1.0f },
+            .inner_cutoff_cosine = cosf(to_radians(12.5f)),
+            .outer_cutoff_cosine = cosf(to_radians(17.5f)),
+        };
+
+        RenderScene render_scene {
+            .models = { &model, 1 },
+            .light_directional = &light_directional,
+            .light_points = { &light_point, 1 },
+            .light_spot = &light_spot,
+        };
+
         Renderer renderer;
 
         log::debug(
@@ -317,23 +331,8 @@ int main(int argc, char* argv[]) {
 
             g_window.process_input();
 
-            shader_program_lighting.use();
-            set_uniform(*model.material->shader, "u_light_dir", light_directional);
-
-            set_uniform(*model.material->shader, "u_num_light_points", 1);
-            set_uniform(*model.material->shader, "u_light_points", light_point, 0);
-
-            LightSpot light_spot {
-                .pos = g_camera.position(),
-                .dir = g_camera.front(),
-                .ambient = { 0.1f, 0.1f, 0.1f },
-                .diffuse = { 0.5f, 0.5f, 0.5f },
-                .specular = { 1.0f, 1.0f, 1.0f },
-                .inner_cutoff_cosine = cosf(to_radians(12.5f)),
-                .outer_cutoff_cosine = cosf(to_radians(17.5f)),
-            };
-            set_uniform(*model.material->shader, "u_light_spot", light_spot);
-            set_uniform(*model.material->shader, "u_use_light_spot", false);
+            render_scene.light_spot->pos = g_camera.position();
+            render_scene.light_spot->dir = g_camera.front();
 
             RenderView render_view {
                 .view = g_camera.view_matrix(),
@@ -343,8 +342,7 @@ int main(int argc, char* argv[]) {
 
             renderer.begin_frame();
 
-            renderer.set_render_view(render_view, *model.material->shader);
-            renderer.render(model);
+            renderer.render(render_scene, render_view);
 
             // TODO: Render view doesnt work with light source as it doesnt have view_dir in the shaders
             // UBO should fix this
@@ -352,6 +350,7 @@ int main(int argc, char* argv[]) {
             set_uniform(*light_source.shader, "u_view", render_view.view);
             set_uniform(*light_source.shader, "u_projection", render_view.projection);
 
+            // TODO: light source should be a debug model
             renderer.render(light_source);
 
             g_window.swap_buffers();

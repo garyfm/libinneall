@@ -11,7 +11,7 @@ struct Material {
     Texture* specular {};
     float shininess {};
 
-    ShaderProgram* shader {};
+    ShaderProgram* const shader {};
 };
 
 } // namespace inl

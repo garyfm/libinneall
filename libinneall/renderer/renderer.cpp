@@ -13,11 +13,30 @@ void Renderer::begin_frame() const {
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void Renderer::set_render_view(RenderView const& render_view, ShaderProgram& shader) {
-    // TODO: This should be UBO which would remove the need for the shader to be passed in
-    set_uniform(shader, "u_view", render_view.view);
-    set_uniform(shader, "u_projection", render_view.projection);
-    set_uniform(shader, "u_view_pos", render_view.pos);
+void Renderer::render(RenderScene const& scene, RenderView const& view) {
+
+    for (const auto& model : scene.models) {
+        ShaderProgram* const shader = model.material->shader;
+        shader->use();
+
+        set_render_view(view, *shader);
+
+        if (scene.light_directional != nullptr) {
+            set_uniform(*shader, "u_light_dir", *scene.light_directional);
+        }
+
+        set_uniform(*shader, "u_num_light_points", static_cast<int>(scene.light_points.size()));
+        for (size_t i = 0; i < scene.light_points.size(); ++i) {
+            set_uniform(*shader, "u_light_points", scene.light_points[i], i);
+        }
+
+        if (scene.light_spot != nullptr) {
+            set_uniform(*shader, "u_use_light_spot", true);
+            set_uniform(*shader, "u_light_spot", *scene.light_spot);
+        }
+
+        render(model);
+    }
 }
 
 void Renderer::render(Model const& model) {
@@ -54,6 +73,7 @@ void Renderer::render(Model const& model) {
     model.mesh->unbind();
 }
 
+// TODO: This should be render debug model
 void Renderer::render(LightSource const& light) {
 
     INL_ASSERT(light.mesh != nullptr, "Empty mesh");
@@ -74,4 +94,11 @@ void Renderer::render(LightSource const& light) {
     light.mesh->unbind();
 }
 
-};
+void Renderer::set_render_view(RenderView const& render_view, ShaderProgram& shader) {
+    // TODO: This should be UBO which would remove the need for the shader to be passed in
+    set_uniform(shader, "u_view", render_view.view);
+    set_uniform(shader, "u_projection", render_view.projection);
+    set_uniform(shader, "u_view_pos", render_view.pos);
+}
+
+}

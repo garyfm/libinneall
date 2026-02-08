@@ -7,8 +7,8 @@
 namespace inl {
 
 struct Model {
-    Mesh const* mesh {};
-    Material const* material {};
+    Mesh* const mesh {};
+    Material* const material {};
 
     // TODO: Move this out to an entity class
     Matrix4 model_matrix { 1 };

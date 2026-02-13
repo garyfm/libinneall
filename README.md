@@ -55,6 +55,7 @@ Misc:
 - [x] Logging
 - [x] Unique Resource
 - [x] Setup testing
+- [x] Debug meshs
 - [ ] Static String
 - [ ] Add platform layer (Remove GLFW)
 - [ ] Remove GLAD

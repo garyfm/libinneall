@@ -3,8 +3,8 @@
 #include <libinneall/light.hpp>
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/math/vector3.hpp>
-#include <libinneall/renderer/light_source.hpp>
 #include <libinneall/renderer/model.hpp>
+#include <libinneall/renderer/shader_program.hpp>
 
 #include <subprojects/glad/include/glad/glad.h>
 
@@ -25,19 +25,18 @@ struct RenderScene {
 
 class Renderer {
 public:
-    Renderer() {
-        // TODO: Not sure if this should go here ?
-        glEnable(GL_DEPTH_TEST);
-    };
-
     void begin_frame() const;
     void render(RenderScene const& scene, RenderView const& view);
     void render(Model const& model);
-    // TODO: Make this draw_debug_cube
-    void render(LightSource const& light);
+    void set_debug_shader(ShaderProgram& shader) { debug_shader = &shader; };
+    void draw_debug_mesh(Mesh const& mesh, Matrix4 model_matrix, Vector3 color);
+    void draw_debug_triangle(Matrix4 model_matrix, Vector3 color);
+    void draw_debug_quad(Matrix4 model_matrix, Vector3 color);
+    void draw_debug_cube(Matrix4 model_matrix, Vector3 color);
 
 private:
     void set_render_view(RenderView const& render_view, ShaderProgram& shader);
+    ShaderProgram* debug_shader { nullptr };
 };
 
 } // namespace inl

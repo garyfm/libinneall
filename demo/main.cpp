@@ -11,7 +11,6 @@
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
-#include <libinneall/renderer/light_source.hpp>
 #include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/mesh.hpp>
 #include <libinneall/renderer/model.hpp>
@@ -217,17 +216,17 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program_lighting { vertex_stage_lighting, fragment_stage_lighting };
         log::debug("Created shader program lighting");
 
-        // Color shader
-        std::string vert_shader_source_color = read_file(resource_path + "/shaders/basic.vert.glsl");
-        ShaderStage vertex_stage_color { ShaderType::Vertex, vert_shader_source_color };
-        log::debug("Created vertex shader color");
+        // Debug shader
+        std::string vert_shader_source_debug = read_file(resource_path + "/shaders/debug.vert.glsl");
+        ShaderStage vertex_stage_debug { ShaderType::Vertex, vert_shader_source_debug };
+        log::debug("Created vertex shader debug");
 
-        std::string frag_shader_source_color = read_file(resource_path + "/shaders/basic.frag.glsl");
-        ShaderStage fragment_stage_color { ShaderType::Fragment, frag_shader_source_color };
-        log::debug("Created fragment shader color");
+        std::string frag_shader_source_debug = read_file(resource_path + "/shaders/debug.frag.glsl");
+        ShaderStage fragment_stage_debug { ShaderType::Fragment, frag_shader_source_debug };
+        log::debug("Created fragment shader debug");
 
-        ShaderProgram shader_program_color { vertex_stage_lighting, fragment_stage_color };
-        log::debug("Created shader program color");
+        ShaderProgram shader_program_debug { vertex_stage_debug, fragment_stage_debug };
+        log::debug("Created shader program debug");
 
         // Object
         auto start_load = std::chrono::steady_clock::now();
@@ -265,18 +264,6 @@ int main(int argc, char* argv[]) {
 
         Model model { &mesh, &material, model_matrix };
 
-        // Light source
-        std::string obj_data_cube = read_file(resource_path + "/cube.obj");
-        obj::Result<obj::Model> obj_model_cube = obj::load(obj_data_cube);
-        if (!obj_model) {
-            log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
-            return -1;
-        }
-
-        MeshData mesh_data_cube = to_mesh_data(*obj_model_cube);
-
-        Mesh mesh_cube { mesh_data_cube };
-
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
             .ambient = { 0.01f, 0.01f, 0.01f },
@@ -298,9 +285,6 @@ int main(int argc, char* argv[]) {
         Matrix4 model_matrix_light { 1 };
         model_matrix_light = translate(model_matrix_light, light_point.pos);
         model_matrix_light = scale(model_matrix_light, 0.1f);
-        LightSource light_source { &mesh_cube, light_point.specular, &shader_program_color, model_matrix_light };
-
-        auto end_init = std::chrono::steady_clock::now();
 
         LightSpot light_spot {
             .pos = g_camera.position(),
@@ -320,7 +304,9 @@ int main(int argc, char* argv[]) {
         };
 
         Renderer renderer;
+        renderer.set_debug_shader(shader_program_debug);
 
+        auto end_init = std::chrono::steady_clock::now();
         log::debug(
             "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
 
@@ -346,12 +332,11 @@ int main(int argc, char* argv[]) {
 
             // TODO: Render view doesnt work with light source as it doesnt have view_dir in the shaders
             // UBO should fix this
-            light_source.shader->use();
-            set_uniform(*light_source.shader, "u_view", render_view.view);
-            set_uniform(*light_source.shader, "u_projection", render_view.projection);
+            shader_program_debug.use();
+            set_uniform(shader_program_debug, "u_view", render_view.view);
+            set_uniform(shader_program_debug, "u_projection", render_view.projection);
 
-            // TODO: light source should be a debug model
-            renderer.render(light_source);
+            renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 
             g_window.swap_buffers();
         }

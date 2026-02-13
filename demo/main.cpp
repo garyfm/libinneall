@@ -206,11 +206,11 @@ int main(int argc, char* argv[]) {
         std::string resource_path = argv[1];
 
         // Lighting/Material shader
-        std::string vert_shader_source_lighting = read_file(resource_path + "/shaders/basic_lighting.vert.glsl");
+        std::string vert_shader_source_lighting = read_file(resource_path + "/shaders/lighting_phong.vert.glsl");
         ShaderStage vertex_stage_lighting { ShaderType::Vertex, vert_shader_source_lighting };
         log::debug("Created vertex shader lighting");
 
-        std::string frag_shader_source_lighting = read_file(resource_path + "/shaders/basic_lighting.frag.glsl");
+        std::string frag_shader_source_lighting = read_file(resource_path + "/shaders/lighting_phong.frag.glsl");
         ShaderStage fragment_stage_lighting { ShaderType::Fragment, frag_shader_source_lighting };
         log::debug("Created fragment shader lighting");
 

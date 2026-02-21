@@ -40,11 +40,13 @@ struct LightSpot {
     float outer_cutoff_cosine;
 };
 
-out vec4 frag_color;
+in VS_OUT {
+    vec3 frag_pos;
+    vec3 normal;
+    vec2 uv;
+} i_frag;
 
-in vec3 v_normal;  
-in vec3 v_frag_pos;  
-in vec2 v_uv;
+out vec4 v_frag_color;
   
 uniform Material u_material; 
 
@@ -136,22 +138,22 @@ vec3 CalculateLightSpot(LightSpot light, vec3 frag_pos, vec3 material_albedo, ve
 
 void main()
 {
-    vec3 normal = normalize(v_normal);
-    vec3 view_dir = normalize(u_view_pos - v_frag_pos);
-    vec3 material_albedo = vec3(texture(u_material.albedo, v_uv));
-    vec3 material_specular = vec3(texture(u_material.specular, v_uv));
+    vec3 normal = normalize(i_frag.normal);
+    vec3 view_dir = normalize(u_view_pos - i_frag.frag_pos);
+    vec3 material_albedo = vec3(texture(u_material.albedo, i_frag.uv));
+    vec3 material_specular = vec3(texture(u_material.specular, i_frag.uv));
 
-    vec3 result = CalculateLightDirectional(u_light_dir, v_frag_pos, material_albedo, material_specular, u_material.shininess, normal, view_dir);
+    vec3 result = CalculateLightDirectional(u_light_dir, i_frag.frag_pos, material_albedo, material_specular, u_material.shininess, normal, view_dir);
 
     for(int i = 0; i < min(u_num_light_points, N_MAX_LIGHT_POINTS); ++i)
     {
-        result += CalculateLightPoint(u_light_points[i], v_frag_pos, material_albedo, material_specular, u_material.shininess, normal, view_dir);
+        result += CalculateLightPoint(u_light_points[i], i_frag.frag_pos, material_albedo, material_specular, u_material.shininess, normal, view_dir);
     }
 
     if(u_use_light_spot)
     {
-        result += CalculateLightSpot(u_light_spot, v_frag_pos, material_albedo, material_specular, u_material.shininess, normal, view_dir);
+        result += CalculateLightSpot(u_light_spot, i_frag.frag_pos, material_albedo, material_specular, u_material.shininess, normal, view_dir);
     }
 
-    frag_color = vec4(result, 1.0);
+    v_frag_color = vec4(result, 1.0);
 } 

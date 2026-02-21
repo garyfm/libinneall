@@ -47,8 +47,14 @@ Stage 2 - 3D mesh loader
 
 Stage 3 - Lighting
 - [x] Basic Phong Lighting
-- [x] Materials
+- [x] Basic Materials
 - [x] Light casters
+
+Stage 4 - Advanced OpenGL
+
+- [x] GLSL Interface blocks
+- [ ] GLSL UBO's
+- [ ] CubeMaps
 
 Misc:
 - [x] Error handing

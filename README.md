@@ -51,9 +51,8 @@ Stage 3 - Lighting
 - [x] Light casters
 
 Stage 4 - Advanced OpenGL
-
 - [x] GLSL Interface blocks
-- [ ] GLSL UBO's
+- [x] GLSL UBO's
 - [ ] CubeMaps
 
 Misc:

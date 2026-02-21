@@ -2,9 +2,13 @@
 
 layout (location = 0) in vec3 a_pos;
 
+layout (std140, binding = 0) uniform RenderView {
+    mat4 u_view;
+    mat4 u_projection;
+    vec3 u_view_pos;
+};
+
 uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_projection;
 
 void main()
 {

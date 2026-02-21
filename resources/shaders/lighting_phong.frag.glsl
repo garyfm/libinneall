@@ -2,6 +2,12 @@
 
 #define N_MAX_LIGHT_POINTS 4
 
+layout (std140, binding = 0) uniform RenderView {
+    mat4 u_view;
+    mat4 u_projection;
+    vec3 u_view_pos;
+};
+
 struct Material {
     sampler2D albedo;
     sampler2D specular;
@@ -57,8 +63,6 @@ uniform int u_num_light_points = 0;
 
 uniform LightSpot u_light_spot; 
 uniform bool u_use_light_spot = false;
-
-uniform vec3 u_view_pos; 
 
 vec3 CalculateLightDirectional(LightDirectional light, vec3 frag_pos, vec3 material_albedo, vec3 material_specular, 
                             float material_shininess, vec3 normal, vec3 view_dir)

@@ -329,13 +329,6 @@ int main(int argc, char* argv[]) {
             renderer.begin_frame();
 
             renderer.render(render_scene, render_view);
-
-            // TODO: Render view doesnt work with light source as it doesnt have view_dir in the shaders
-            // UBO should fix this
-            shader_program_debug.use();
-            set_uniform(shader_program_debug, "u_view", render_view.view);
-            set_uniform(shader_program_debug, "u_projection", render_view.projection);
-
             renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 
             g_window.swap_buffers();

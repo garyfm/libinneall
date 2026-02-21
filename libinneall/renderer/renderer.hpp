@@ -8,6 +8,8 @@
 
 #include <subprojects/glad/include/glad/glad.h>
 
+#include <span>
+
 namespace inl {
 
 struct RenderView {
@@ -15,6 +17,10 @@ struct RenderView {
     Matrix4 projection;
     Vector3 pos;
 };
+
+inline std::span<std::byte const> as_bytes(RenderView const& render_view) {
+    return std::as_bytes(std::span<RenderView const>(&render_view, 1));
+}
 
 struct RenderScene {
     std::span<Model> models;
@@ -25,6 +31,7 @@ struct RenderScene {
 
 class Renderer {
 public:
+    Renderer();
     void begin_frame() const;
     void render(RenderScene const& scene, RenderView const& view);
     void render(Model const& model);
@@ -35,8 +42,10 @@ public:
     void draw_debug_cube(Matrix4 model_matrix, Vector3 color);
 
 private:
-    void set_render_view(RenderView const& render_view, ShaderProgram& shader);
+    static constexpr uint32_t ubo_bindpoint_render_view = 0;
+
     ShaderProgram* debug_shader { nullptr };
+    GlBuffer ubo_render_view { sizeof(RenderView) };
 };
 
 } // namespace inl

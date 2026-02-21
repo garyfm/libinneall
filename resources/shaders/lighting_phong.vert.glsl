@@ -4,10 +4,13 @@ layout (location = 0) in vec3 a_pos;
 layout (location = 1) in vec2 a_uv;
 layout (location = 2) in vec3 a_normal;
 
-// TODO: Use  UBO's
+layout (std140, binding = 0) uniform RenderView {
+    mat4 u_view;
+    mat4 u_projection;
+    vec3 u_view_pos;
+};
+
 uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_projection;
 uniform mat3 u_normal_matrix;
 
 out VS_OUT {

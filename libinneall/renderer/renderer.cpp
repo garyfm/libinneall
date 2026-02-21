@@ -5,6 +5,10 @@
 
 namespace inl {
 
+Renderer::Renderer() {
+    glBindBufferBase(GL_UNIFORM_BUFFER, ubo_bindpoint_render_view, ubo_render_view.native_handle());
+}
+
 void Renderer::begin_frame() const {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -21,7 +25,7 @@ void Renderer::render(RenderScene const& scene, RenderView const& view) {
         ShaderProgram* const shader = model.material->shader;
         shader->use();
 
-        set_render_view(view, *shader);
+        ubo_render_view.upload(0, as_bytes(view));
 
         if (scene.light_directional != nullptr) {
             set_uniform(*shader, "u_light_dir", *scene.light_directional);
@@ -73,13 +77,6 @@ void Renderer::render(Model const& model) {
         glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(model.mesh->vertext_count()));
     }
     model.mesh->unbind();
-}
-
-void Renderer::set_render_view(RenderView const& render_view, ShaderProgram& shader) {
-    // TODO: This should be UBO which would remove the need for the shader to be passed in
-    set_uniform(shader, "u_view", render_view.view);
-    set_uniform(shader, "u_projection", render_view.projection);
-    set_uniform(shader, "u_view_pos", render_view.pos);
 }
 
 void Renderer::draw_debug_mesh(Mesh const& mesh, Matrix4 model_matrix, Vector3 color) {

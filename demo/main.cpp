@@ -141,6 +141,7 @@ void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height)
     g_window.resize(width, height);
 }
 
+// TODO: Pull these into a ResourceManager
 std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically) {
 
     using namespace inl;
@@ -178,10 +179,46 @@ std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_v
     return texture;
 }
 
-// static const std::string obj_file = "/sword-sting/sting-sword.obj";
-// static const std::string texture_albedo_file = "/sword-sting/Sting_Base_Color.ppm";
-// static const std::string texture_specular_file = "/sword-sting/Sting_Metallic.ppm";
-// bool flip_image = true;
+// std::optional<std::array<inl::Texture, 6>> load_skybox(std::array<std::string_view, 6> paths, bool flip_vertically) {
+//
+//     using namespace inl;
+//
+//     for (std::size_t i = 0; i < paths.size(); ++i) {
+//         std::vector<std::uint8_t> raw_image_data {};
+//         read_file(paths[i], raw_image_data);
+//         log::debug("Image size: {}", raw_image_data.size());
+//
+//         ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
+//         if (!image_or_error) {
+//             log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
+//             return std::nullopt;
+//         }
+//
+//         log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{} ", static_cast<int>(image_or_error->format),
+//             image_or_error->width, image_or_error->height, image_or_error->max_value,
+//             image_or_error->pixel_data.size());
+//
+//         ppm::Image image;
+//         if (flip_vertically) {
+//             image = ppm::flip_vertically(*image_or_error);
+//         } else {
+//             image = *image_or_error;
+//         }
+//
+//         Texture texture { image.width, image.height, 3, image.pixel_data.data() };
+//     }
+//
+//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
+//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
+//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//     return texture;
+// }
+//  static const std::string obj_file = "/sword-sting/sting-sword.obj";
+//  static const std::string texture_albedo_file = "/sword-sting/Sting_Base_Color.ppm";
+//  static const std::string texture_specular_file = "/sword-sting/Sting_Metallic.ppm";
+//  bool flip_image = true;
 
 static const std::string obj_file = "/backpack/backpack.obj";
 static const std::string texture_albedo_file = "/backpack/diffuse.ppm";
@@ -228,7 +265,7 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program_debug { vertex_stage_debug, fragment_stage_debug };
         log::debug("Created shader program debug");
 
-        // Object
+        // 3D model
         auto start_load = std::chrono::steady_clock::now();
         std::string obj_data = read_file(resource_path + obj_file);
 
@@ -263,6 +300,24 @@ int main(int argc, char* argv[]) {
         Matrix4 model_matrix { 1 };
 
         Model model { &mesh, &material, model_matrix };
+
+        // Skybox
+        std::array<std::string, 6> skybox_files { {
+            { resource_path + "/skybox/right.ppm" },
+            { resource_path + "/skybox/left.ppm" },
+            { resource_path + "/skybox/top.ppm" },
+            { resource_path + "/skybox/bottom.ppm" },
+            { resource_path + "/skybox/front.ppm" },
+            { resource_path + "/skybox/back.ppm" },
+        } };
+        std::array<Texture, 6> skybox_textures;
+
+        for (std::size_t i = 0; i < skybox_textures.size(); ++i) {
+
+            std::optional<Texture> texture { load_texture(skybox_files[i], flip_image) };
+            INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
+            skybox_textures[i] = std::move(texture.value());
+        }
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },

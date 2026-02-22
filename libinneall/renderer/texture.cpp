@@ -30,11 +30,28 @@ Texture::Texture(std::size_t width, std::size_t height, std::uint8_t n_component
     glGenerateTextureMipmap(m_handle);
 }
 
+Texture::Texture(Texture&& other) noexcept
+    : m_handle { std::move(other.m_handle) }
+    , m_unit { other.m_unit } {
+    other.m_unit = 0;
+}
+
+Texture& Texture::operator=(Texture&& other) noexcept {
+
+    if (this != std::addressof(other)) {
+        m_handle = std::move(other.m_handle);
+        m_unit = other.m_unit;
+
+        other.m_unit = 0;
+    }
+
+    return *this;
+}
+
 void Texture::bind(GLuint texture_unit) {
     m_unit = texture_unit;
     glBindTextureUnit(m_unit, m_handle);
 }
 
 void Texture::delete_texture(GLuint buffer) { glDeleteTextures(1, &buffer); }
-
 }

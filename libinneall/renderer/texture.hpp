@@ -8,7 +8,14 @@
 namespace inl {
 class Texture {
 public:
-    Texture(std::size_t width, std::size_t height, std::uint8_t n_components, std::uint8_t const* data);
+    Texture() = default;
+    explicit Texture(std::size_t width, std::size_t height, std::uint8_t n_components, std::uint8_t const* data);
+
+    Texture(const Texture&) = delete;
+    Texture operator=(const Texture&) = delete;
+
+    Texture(Texture&& other) noexcept;
+    Texture& operator=(Texture&& other) noexcept;
 
     GLuint native_handle() const { return m_handle; }
     void bind(GLuint texture_unit);
@@ -16,9 +23,9 @@ public:
     GLuint unit() const { return m_unit; }
 
 private:
-    GLuint m_unit {};
     static void delete_texture(GLuint buffer);
     UniqueResource<GLuint, decltype(&delete_texture)> m_handle { 0, delete_texture };
+    GLuint m_unit {};
 };
 
 }

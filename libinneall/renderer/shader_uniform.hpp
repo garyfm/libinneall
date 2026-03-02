@@ -11,6 +11,7 @@
 
 namespace inl {
 
+void set_uniform(ShaderProgram& shader, std::string_view name, unsigned value);
 void set_uniform(ShaderProgram& shader, std::string_view name, int value);
 void set_uniform(ShaderProgram& shader, std::string_view name, float value);
 void set_uniform(ShaderProgram& shader, std::string_view name, GLuint value);

@@ -11,6 +11,7 @@
 #include <libinneall/math/transforms.hpp>
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/renderer/color.hpp>
+#include <libinneall/renderer/cubemap.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/mesh.hpp>
@@ -135,18 +136,20 @@ int main(int argc, char* argv[]) {
         log::debug("libinneall demo game");
 
         if (argc < 2) {
-            log::error("Usage: game <resource_path>");
+            log::error("Usage: game <assets_path>");
             return -1;
         }
 
-        std::string resource_path = argv[1];
+        std::string assets_path = argv[1];
 
+        // TODO: Make loading shaders easier
+        // ShaderProgram should own the stages
         // Lighting/Material shader
-        std::string vert_shader_source_lighting = read_file(resource_path + "/shaders/lighting_phong.vert.glsl");
+        std::string vert_shader_source_lighting = read_file(assets_path + "/shaders/lighting_phong.vert.glsl");
         ShaderStage vertex_stage_lighting { ShaderType::Vertex, vert_shader_source_lighting };
         log::debug("Created vertex shader lighting");
 
-        std::string frag_shader_source_lighting = read_file(resource_path + "/shaders/lighting_phong.frag.glsl");
+        std::string frag_shader_source_lighting = read_file(assets_path + "/shaders/lighting_phong.frag.glsl");
         ShaderStage fragment_stage_lighting { ShaderType::Fragment, frag_shader_source_lighting };
         log::debug("Created fragment shader lighting");
 
@@ -154,20 +157,32 @@ int main(int argc, char* argv[]) {
         log::debug("Created shader program lighting");
 
         // Debug shader
-        std::string vert_shader_source_debug = read_file(resource_path + "/shaders/debug.vert.glsl");
+        std::string vert_shader_source_debug = read_file(assets_path + "/shaders/debug.vert.glsl");
         ShaderStage vertex_stage_debug { ShaderType::Vertex, vert_shader_source_debug };
         log::debug("Created vertex shader debug");
 
-        std::string frag_shader_source_debug = read_file(resource_path + "/shaders/debug.frag.glsl");
+        std::string frag_shader_source_debug = read_file(assets_path + "/shaders/debug.frag.glsl");
         ShaderStage fragment_stage_debug { ShaderType::Fragment, frag_shader_source_debug };
         log::debug("Created fragment shader debug");
 
         ShaderProgram shader_program_debug { vertex_stage_debug, fragment_stage_debug };
         log::debug("Created shader program debug");
 
+        // Skybox shader
+        std::string vert_shader_source_skybox = read_file(assets_path + "/shaders/skybox.vert.glsl");
+        ShaderStage vertex_stage_skybox { ShaderType::Vertex, vert_shader_source_skybox };
+        log::debug("Created vertex shader debug");
+
+        std::string frag_shader_source_skybox = read_file(assets_path + "/shaders/skybox.frag.glsl");
+        ShaderStage fragment_stage_skybox { ShaderType::Fragment, frag_shader_source_skybox };
+        log::debug("Created fragment shader debug");
+
+        ShaderProgram shader_program_skybox { vertex_stage_skybox, fragment_stage_skybox };
+        log::debug("Created shader program debug");
+
         // 3D model
         auto start_load = std::chrono::steady_clock::now();
-        std::string obj_data = read_file(resource_path + obj_file);
+        std::string obj_data = read_file(assets_path + obj_file);
 
         obj::Result<obj::Model> obj_model = obj::load(obj_data);
         auto end_load = std::chrono::steady_clock::now();
@@ -189,10 +204,10 @@ int main(int argc, char* argv[]) {
 
         Mesh mesh { mesh_data };
 
-        std::optional<Texture> texture_albedo { load_texture(resource_path + texture_albedo_file, flip_image) };
+        std::optional<Texture> texture_albedo { load_texture(assets_path + texture_albedo_file, flip_image) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        std::optional<Texture> texture_specular { load_texture(resource_path + texture_specular_file, flip_image) };
+        std::optional<Texture> texture_specular { load_texture(assets_path + texture_specular_file, flip_image) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
         Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program_lighting };
@@ -202,22 +217,31 @@ int main(int argc, char* argv[]) {
         Model model { &mesh, &material, model_matrix };
 
         // Skybox
-        std::array<std::string, 6> skybox_files { {
-            { resource_path + "/skybox/right.ppm" },
-            { resource_path + "/skybox/left.ppm" },
-            { resource_path + "/skybox/top.ppm" },
-            { resource_path + "/skybox/bottom.ppm" },
-            { resource_path + "/skybox/front.ppm" },
-            { resource_path + "/skybox/back.ppm" },
+        std::array<std::string, 6> cubemap_files { {
+            { assets_path + "/skybox/right.ppm" },
+            { assets_path + "/skybox/left.ppm" },
+            { assets_path + "/skybox/top.ppm" },
+            { assets_path + "/skybox/bottom.ppm" },
+            { assets_path + "/skybox/front.ppm" },
+            { assets_path + "/skybox/back.ppm" },
         } };
-        std::array<Texture, 6> skybox_textures;
 
-        for (std::size_t i = 0; i < skybox_textures.size(); ++i) {
-
-            std::optional<Texture> texture { load_texture(skybox_files[i], flip_image) };
-            INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
-            skybox_textures[i] = std::move(texture.value());
+        std::optional<std::array<ppm::Image, 6>> cubemap_data = load_cubemap(cubemap_files, false);
+        if (!cubemap_data) {
+            log::error("Failed to load cubemap");
+            return -1;
         }
+
+        std::array<uint8_t const*, 6> skybox_faces { {
+            cubemap_data.value()[0].pixel_data.data(),
+            cubemap_data.value()[1].pixel_data.data(),
+            cubemap_data.value()[2].pixel_data.data(),
+            cubemap_data.value()[3].pixel_data.data(),
+            cubemap_data.value()[4].pixel_data.data(),
+            cubemap_data.value()[5].pixel_data.data(),
+        } };
+
+        Cubemap skybox { cubemap_data.value()[0].width, cubemap_data.value()[0].height, 3, skybox_faces };
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
@@ -260,6 +284,7 @@ int main(int argc, char* argv[]) {
 
         Renderer renderer;
         renderer.set_debug_shader(shader_program_debug);
+        renderer.set_skybox_shader(shader_program_skybox);
 
         auto end_init = std::chrono::steady_clock::now();
         log::debug(
@@ -283,6 +308,7 @@ int main(int argc, char* argv[]) {
 
             renderer.begin_frame();
 
+            renderer.draw_skybox(skybox);
             renderer.render(render_scene, render_view);
             renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 

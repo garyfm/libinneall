@@ -3,6 +3,11 @@
 
 namespace inl {
 
+void set_uniform(ShaderProgram& shader, std::string_view name, unsigned value) {
+    const GLuint location = shader.uniform_location(name);
+    glProgramUniform1i(shader.native_handle(), location, value);
+}
+
 void set_uniform(ShaderProgram& shader, std::string_view name, int value) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform1i(shader.native_handle(), location, value);

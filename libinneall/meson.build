@@ -14,6 +14,7 @@ source_files = files(
   'math/vector2.cpp',
   'math/vector3.cpp',
   'math/vector4.cpp',
+  'renderer/cubemap.cpp',
   'renderer/debug_mesh.cpp',
   'renderer/gl_buffer.cpp',
   'renderer/mesh.cpp',

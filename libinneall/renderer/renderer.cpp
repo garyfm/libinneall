@@ -3,6 +3,17 @@
 #include <libinneall/renderer/renderer.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
 
+namespace {
+
+// TODO: texture unit is hardcoded here. Do these need to be dynamically allocated ?
+enum class TextureUnit : GLuint {
+    Albedo = 0,
+    Specular = 1,
+    Skybox = 2,
+};
+
+}
+
 namespace inl {
 
 Renderer::Renderer() {
@@ -54,13 +65,12 @@ void Renderer::render(Model const& model) {
     model.mesh->bind();
     model.material->shader->use();
 
-    // TODO: texture unit is hardcoded here. Add some way to allocate these
     if (model.material->albedo != nullptr) {
-        model.material->albedo->bind(0);
+        model.material->albedo->bind(static_cast<GLuint>(TextureUnit::Albedo));
     }
 
     if (model.material->albedo != nullptr) {
-        model.material->specular->bind(1);
+        model.material->specular->bind(static_cast<GLuint>(TextureUnit::Specular));
     }
 
     set_uniform(*model.material->shader, "u_material", *model.material);
@@ -79,7 +89,7 @@ void Renderer::render(Model const& model) {
     model.mesh->unbind();
 }
 
-void Renderer::draw_debug_mesh(Mesh const& mesh, Matrix4 model_matrix, Vector3 color) {
+void Renderer::draw_debug_mesh(Mesh const& mesh, const Matrix4& model_matrix, const Vector3& color) {
     INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
 
     mesh.bind();
@@ -90,25 +100,43 @@ void Renderer::draw_debug_mesh(Mesh const& mesh, Matrix4 model_matrix, Vector3 c
     mesh.unbind();
 }
 
-void Renderer::draw_debug_triangle(Matrix4 model_matrix, Vector3 color) {
+void Renderer::draw_debug_triangle(const Matrix4& model_matrix, const Vector3& color) {
     INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_triangle();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
-void Renderer::draw_debug_quad(Matrix4 model_matrix, Vector3 color) {
+void Renderer::draw_debug_quad(const Matrix4& model_matrix, const Vector3& color) {
     INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_quad();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
-void Renderer::draw_debug_cube(Matrix4 model_matrix, Vector3 color) {
+void Renderer::draw_debug_cube(const Matrix4& model_matrix, const Vector3& color) {
     INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_cube();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
+}
+
+void Renderer::draw_skybox(Cubemap& skybox) {
+    INL_ASSERT(skybox_shader != nullptr, "skybox shader not set");
+
+    glDepthMask(GL_FALSE);
+
+    Mesh* mesh = mesh_cubemap();
+    mesh->bind();
+
+    skybox_shader->use();
+    skybox.bind(static_cast<GLuint>(TextureUnit::Skybox));
+    set_uniform(*skybox_shader, "skybox", skybox.unit());
+
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mesh->vertext_count()));
+    mesh->unbind();
+
+    glDepthMask(GL_TRUE);
 }
 
 }

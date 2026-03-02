@@ -3,6 +3,7 @@
 #include <libinneall/light.hpp>
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/math/vector3.hpp>
+#include <libinneall/renderer/cubemap.hpp>
 #include <libinneall/renderer/model.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 
@@ -36,15 +37,18 @@ public:
     void render(RenderScene const& scene, RenderView const& view);
     void render(Model const& model);
     void set_debug_shader(ShaderProgram& shader) { debug_shader = &shader; };
-    void draw_debug_mesh(Mesh const& mesh, Matrix4 model_matrix, Vector3 color);
-    void draw_debug_triangle(Matrix4 model_matrix, Vector3 color);
-    void draw_debug_quad(Matrix4 model_matrix, Vector3 color);
-    void draw_debug_cube(Matrix4 model_matrix, Vector3 color);
+    void set_skybox_shader(ShaderProgram& shader) { skybox_shader = &shader; };
+    void draw_debug_mesh(Mesh const& mesh, const Matrix4& model_matrix, const Vector3& color);
+    void draw_debug_triangle(const Matrix4& model_matrix, const Vector3& color);
+    void draw_debug_quad(const Matrix4& model_matrix, const Vector3& color);
+    void draw_debug_cube(const Matrix4& model_matrix, const Vector3& color);
+    void draw_skybox(Cubemap& skybox);
 
 private:
     static constexpr uint32_t ubo_bindpoint_render_view = 0;
 
     ShaderProgram* debug_shader { nullptr };
+    ShaderProgram* skybox_shader { nullptr };
     GlBuffer ubo_render_view { sizeof(RenderView) };
 };
 

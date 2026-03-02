@@ -1,5 +1,4 @@
 #include <libinneall/asset/asset.hpp>
-#include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/renderer/texture.hpp>
 
@@ -8,7 +7,10 @@
 #include <span>
 
 namespace inl {
-// TODO: Implement these with proper error handling
+
+// TODO: These are quick and dirty implementaitons
+// Some kind of Asset manager should be used
+
 std::string read_file(std::filesystem::path path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
@@ -35,7 +37,6 @@ void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer) {
     file.read(reinterpret_cast<char*>(buffer.data()), file_size);
 }
 
-// TODO: Pull these into a ResourceManager
 std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically) {
 
     using namespace inl;
@@ -73,41 +74,36 @@ std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_v
     return texture;
 }
 
-// std::optional<std::array<inl::Texture, 6>> load_skybox(std::array<std::string_view, 6> paths, bool flip_vertically) {
-//
-//     using namespace inl;
-//
-//     for (std::size_t i = 0; i < paths.size(); ++i) {
-//         std::vector<std::uint8_t> raw_image_data {};
-//         read_file(paths[i], raw_image_data);
-//         log::debug("Image size: {}", raw_image_data.size());
-//
-//         ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
-//         if (!image_or_error) {
-//             log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
-//             return std::nullopt;
-//         }
-//
-//         log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{} ", static_cast<int>(image_or_error->format),
-//             image_or_error->width, image_or_error->height, image_or_error->max_value,
-//             image_or_error->pixel_data.size());
-//
-//         ppm::Image image;
-//         if (flip_vertically) {
-//             image = ppm::flip_vertically(*image_or_error);
-//         } else {
-//             image = *image_or_error;
-//         }
-//
-//         Texture texture { image.width, image.height, 3, image.pixel_data.data() };
-//     }
-//
-//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
-//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
-//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//     glTextureParameteri(texture.native_handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//     return texture;
-// }
+std::optional<std::array<ppm::Image, 6>> load_cubemap(std::array<std::string, 6> paths, bool flip_vertically) {
+
+    std::array<ppm::Image, 6> cubemap_data {};
+
+    for (std::size_t i = 0; i < cubemap_data.size(); ++i) {
+        std::vector<std::uint8_t> raw_image_data {};
+        read_file(paths[i], raw_image_data);
+        log::debug("Image size: {}", raw_image_data.size());
+
+        ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
+        if (!image_or_error) {
+            log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
+            return std::nullopt;
+        }
+
+        log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{} ", static_cast<int>(image_or_error->format),
+            image_or_error->width, image_or_error->height, image_or_error->max_value,
+            image_or_error->pixel_data.size());
+
+        ppm::Image image;
+        if (flip_vertically) {
+            image = ppm::flip_vertically(*image_or_error);
+        } else {
+            image = *image_or_error;
+        }
+
+        cubemap_data[i] = image;
+    }
+
+    return cubemap_data;
+}
 
 } // namespace inl

@@ -6,6 +6,9 @@
 #include <cstdint>
 
 namespace inl {
+
+void delete_texture(GLuint handle);
+
 class Texture {
 public:
     Texture() = default;
@@ -23,7 +26,6 @@ public:
     GLuint unit() const { return m_unit; }
 
 private:
-    static void delete_texture(GLuint buffer);
     UniqueResource<GLuint, decltype(&delete_texture)> m_handle { 0, delete_texture };
     GLuint m_unit {};
 };

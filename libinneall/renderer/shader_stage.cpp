@@ -42,6 +42,24 @@ ShaderStage::ShaderStage(ShaderType type, std::string_view source)
     log::info("Created shader stage id {}", m_handle.get());
 };
 
+ShaderStage::ShaderStage(ShaderStage&& other) noexcept
+    : m_handle { std::move(other.m_handle) }
+    , m_type { other.m_type } {
+    other.m_type = ShaderType {};
+}
+
+ShaderStage& ShaderStage::operator=(ShaderStage&& other) noexcept {
+
+    if (this != std::addressof(other)) {
+        m_handle = std::move(other.m_handle);
+        m_type = other.m_type;
+
+        other.m_type = ShaderType {};
+    }
+
+    return *this;
+}
+
 bool ShaderStage::compile(std::string_view source) {
 
     GLchar const* gl_source[] = { source.data() };

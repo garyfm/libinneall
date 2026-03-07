@@ -1,6 +1,8 @@
 #pragma once
 
+#include <libinneall/base/log.hpp>
 #include <libinneall/base/unique_resource.hpp>
+
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <string_view>
@@ -11,7 +13,14 @@ enum class ShaderType { Vertex, Fragment };
 
 class ShaderStage {
 public:
-    ShaderStage(ShaderType type, std::string_view source);
+    ShaderStage() = default;
+    explicit ShaderStage(ShaderType type, std::string_view source);
+
+    ShaderStage(const ShaderStage&) = delete;
+    ShaderStage operator=(const ShaderStage&) = delete;
+
+    ShaderStage(ShaderStage&& other) noexcept;
+    ShaderStage& operator=(ShaderStage&& other) noexcept;
 
     GLuint native_handle() const { return m_handle; }
 
@@ -21,7 +30,7 @@ private:
     static constexpr std::size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
 
     UniqueResource<GLuint, decltype(glDeleteShader)> m_handle { 0, glDeleteShader };
-    ShaderType m_type { ShaderType::Vertex };
+    ShaderType m_type {};
 };
 
 } // namespace inl

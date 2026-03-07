@@ -5,18 +5,38 @@
 
 namespace inl {
 
-ShaderProgram::ShaderProgram(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
+ShaderProgram::ShaderProgram(ShaderStage vertex_stage, ShaderStage fragment_stage)
+    : m_vertex { std::move(vertex_stage) }
+    , m_fragment { std::move(fragment_stage) } {
     m_handle.reset(glCreateProgram());
 
     if (!m_handle) {
         throw std::runtime_error("Failed to create program");
     }
 
-    link(vertex_stage, fragment_stage);
+    link(m_vertex, m_fragment);
 
     retrieve_uniforms();
 
     log::debug("Created shader program id {}", m_handle.get());
+}
+
+ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept
+    : m_handle { std::move(other.m_handle) }
+    , m_vertex { std::move(other.m_vertex) }
+    , m_fragment { std::move(other.m_fragment) }
+    , m_uniforms { std::move(other.m_uniforms) } { }
+
+ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
+
+    if (this != std::addressof(other)) {
+        m_handle = std::move(other.m_handle);
+        m_vertex = std::move(other.m_vertex);
+        m_fragment = std::move(other.m_fragment);
+        m_uniforms = std::move(other.m_uniforms);
+    }
+
+    return *this;
 }
 
 void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
@@ -84,5 +104,4 @@ GLuint ShaderProgram::uniform_location(std::string_view name) const {
     int location = glGetUniformLocation(m_handle, name.data());
     return location;
 }
-
 }

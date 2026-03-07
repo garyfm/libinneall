@@ -1,9 +1,11 @@
 #include <libinneall/asset/asset.hpp>
 #include <libinneall/base/log.hpp>
+#include <libinneall/renderer/shader_stage.hpp>
 #include <libinneall/renderer/texture.hpp>
 
 #include <chrono>
 #include <fstream>
+#include <optional>
 #include <span>
 
 namespace inl {
@@ -15,6 +17,7 @@ std::string read_file(std::filesystem::path path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         inl::log::error("Failed to open file: {}", path.c_str());
+        return std::string {};
     }
 
     std::size_t file_size = std::filesystem::file_size(path);
@@ -104,6 +107,36 @@ std::optional<std::array<ppm::Image, 6>> load_cubemap(std::array<std::string, 6>
     }
 
     return cubemap_data;
+}
+
+std::optional<inl::ShaderProgram> load_shader(
+    std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path) {
+    std::string vertex_source = read_file(vertex_shader_path);
+
+    std::string_view sv_path { vertex_shader_path.c_str() };
+    std::string_view::size_type name_start_pos = sv_path.find_last_of("/") + 1;
+    std::string_view::size_type name_end_pos = sv_path.find(".", name_start_pos);
+    std::string_view shader_name = sv_path.substr(name_start_pos, name_end_pos - name_start_pos);
+
+    log::info("Loading shader program: {}", shader_name);
+
+    if (vertex_source.empty()) {
+        log::error("Failed to load shader stage: {}", vertex_shader_path.c_str());
+        return std::nullopt;
+    }
+
+    std::string fragment_source = read_file(fragment_shader_path);
+    if (fragment_source.empty()) {
+        log::error("Failed to load shader stage: {}", fragment_shader_path.c_str());
+        return std::nullopt;
+    }
+
+    ShaderStage vertex_stage { ShaderType::Vertex, vertex_source };
+    ShaderStage fragment_stage { ShaderType::Fragment, fragment_source };
+
+    ShaderProgram shader_program { std::move(vertex_stage), std::move(fragment_stage) };
+
+    return shader_program;
 }
 
 } // namespace inl

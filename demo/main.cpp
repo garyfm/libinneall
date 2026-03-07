@@ -142,43 +142,18 @@ int main(int argc, char* argv[]) {
 
         std::string assets_path = argv[1];
 
-        // TODO: Make loading shaders easier
-        // ShaderProgram should own the stages
-        // Lighting/Material shader
-        std::string vert_shader_source_lighting = read_file(assets_path + "/shaders/lighting_phong.vert.glsl");
-        ShaderStage vertex_stage_lighting { ShaderType::Vertex, vert_shader_source_lighting };
-        log::debug("Created vertex shader lighting");
+        std::optional<ShaderProgram> shader_program_lighting { load_shader(
+            assets_path + "/shaders/lighting_phong.vert.glsl", assets_path + "/shaders/lighting_phong.frag.glsl") };
 
-        std::string frag_shader_source_lighting = read_file(assets_path + "/shaders/lighting_phong.frag.glsl");
-        ShaderStage fragment_stage_lighting { ShaderType::Fragment, frag_shader_source_lighting };
-        log::debug("Created fragment shader lighting");
+        std::optional<ShaderProgram> shader_program_debug { load_shader(
+            assets_path + "/shaders/debug.vert.glsl", assets_path + "/shaders/debug.frag.glsl") };
 
-        ShaderProgram shader_program_lighting { vertex_stage_lighting, fragment_stage_lighting };
-        log::debug("Created shader program lighting");
+        std::optional<ShaderProgram> shader_program_skybox { load_shader(
+            assets_path + "/shaders/skybox.vert.glsl", assets_path + "/shaders/skybox.frag.glsl") };
 
-        // Debug shader
-        std::string vert_shader_source_debug = read_file(assets_path + "/shaders/debug.vert.glsl");
-        ShaderStage vertex_stage_debug { ShaderType::Vertex, vert_shader_source_debug };
-        log::debug("Created vertex shader debug");
-
-        std::string frag_shader_source_debug = read_file(assets_path + "/shaders/debug.frag.glsl");
-        ShaderStage fragment_stage_debug { ShaderType::Fragment, frag_shader_source_debug };
-        log::debug("Created fragment shader debug");
-
-        ShaderProgram shader_program_debug { vertex_stage_debug, fragment_stage_debug };
-        log::debug("Created shader program debug");
-
-        // Skybox shader
-        std::string vert_shader_source_skybox = read_file(assets_path + "/shaders/skybox.vert.glsl");
-        ShaderStage vertex_stage_skybox { ShaderType::Vertex, vert_shader_source_skybox };
-        log::debug("Created vertex shader debug");
-
-        std::string frag_shader_source_skybox = read_file(assets_path + "/shaders/skybox.frag.glsl");
-        ShaderStage fragment_stage_skybox { ShaderType::Fragment, frag_shader_source_skybox };
-        log::debug("Created fragment shader debug");
-
-        ShaderProgram shader_program_skybox { vertex_stage_skybox, fragment_stage_skybox };
-        log::debug("Created shader program debug");
+        if (!shader_program_skybox || !shader_program_lighting || !shader_program_debug) {
+            return -1;
+        }
 
         // 3D model
         auto start_load = std::chrono::steady_clock::now();
@@ -210,7 +185,7 @@ int main(int argc, char* argv[]) {
         std::optional<Texture> texture_specular { load_texture(assets_path + texture_specular_file, flip_image) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program_lighting };
+        Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program_lighting.value() };
 
         Matrix4 model_matrix { 1 };
 
@@ -283,8 +258,8 @@ int main(int argc, char* argv[]) {
         };
 
         Renderer renderer;
-        renderer.set_debug_shader(shader_program_debug);
-        renderer.set_skybox_shader(shader_program_skybox);
+        renderer.set_debug_shader(shader_program_debug.value());
+        renderer.set_skybox_shader(shader_program_skybox.value());
 
         auto end_init = std::chrono::steady_clock::now();
         log::debug(

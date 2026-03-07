@@ -1,6 +1,8 @@
 #pragma once
 
 #include <libinneall/base/unique_resource.hpp>
+#include <libinneall/renderer/shader_stage.hpp>
+
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <string>
@@ -13,7 +15,13 @@ class ShaderStage;
 
 class ShaderProgram {
 public:
-    ShaderProgram(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);
+    ShaderProgram(ShaderStage vertex_stage, ShaderStage fragment_stage);
+
+    ShaderProgram(const ShaderProgram&) = delete;
+    ShaderProgram operator=(const ShaderProgram&) = delete;
+
+    ShaderProgram(ShaderProgram&& other) noexcept;
+    ShaderProgram& operator=(ShaderProgram&& other) noexcept;
 
     GLuint native_handle() const { return m_handle; }
 
@@ -33,6 +41,9 @@ private:
     static constexpr std::size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
 
     UniqueResource<GLuint, decltype(glDeleteProgram)> m_handle { 0, glDeleteProgram };
+
+    ShaderStage m_vertex {};
+    ShaderStage m_fragment {};
 
     std::unordered_map<std::string, UniformInfo> m_uniforms;
 };

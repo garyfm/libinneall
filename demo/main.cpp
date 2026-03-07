@@ -201,22 +201,11 @@ int main(int argc, char* argv[]) {
             { assets_path + "/skybox/back.ppm" },
         } };
 
-        std::optional<std::array<ppm::Image, 6>> cubemap_data = load_cubemap(cubemap_files, false);
-        if (!cubemap_data) {
-            log::error("Failed to load cubemap");
+        std::optional<Cubemap> skybox = load_cubemap(cubemap_files, false);
+        if (!skybox) {
+            log::error("Failed to load skybox");
             return -1;
         }
-
-        std::array<uint8_t const*, 6> skybox_faces { {
-            cubemap_data.value()[0].pixel_data.data(),
-            cubemap_data.value()[1].pixel_data.data(),
-            cubemap_data.value()[2].pixel_data.data(),
-            cubemap_data.value()[3].pixel_data.data(),
-            cubemap_data.value()[4].pixel_data.data(),
-            cubemap_data.value()[5].pixel_data.data(),
-        } };
-
-        Cubemap skybox { cubemap_data.value()[0].width, cubemap_data.value()[0].height, 3, skybox_faces };
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
@@ -283,7 +272,7 @@ int main(int argc, char* argv[]) {
 
             renderer.begin_frame();
 
-            renderer.draw_skybox(skybox);
+            renderer.draw_skybox(skybox.value());
             renderer.render(render_scene, render_view);
             renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 

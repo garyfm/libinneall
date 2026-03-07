@@ -77,13 +77,14 @@ std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_v
     return texture;
 }
 
-std::optional<std::array<ppm::Image, 6>> load_cubemap(std::array<std::string, 6> paths, bool flip_vertically) {
+std::optional<Cubemap> load_cubemap(std::array<std::string, 6> paths, bool flip_vertically) {
 
     std::array<ppm::Image, 6> cubemap_data {};
 
     for (std::size_t i = 0; i < cubemap_data.size(); ++i) {
         std::vector<std::uint8_t> raw_image_data {};
         read_file(paths[i], raw_image_data);
+
         log::debug("Image size: {}", raw_image_data.size());
 
         ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
@@ -106,7 +107,18 @@ std::optional<std::array<ppm::Image, 6>> load_cubemap(std::array<std::string, 6>
         cubemap_data[i] = image;
     }
 
-    return cubemap_data;
+    std::array<uint8_t const*, 6> skybox_faces { {
+        cubemap_data[0].pixel_data.data(),
+        cubemap_data[1].pixel_data.data(),
+        cubemap_data[2].pixel_data.data(),
+        cubemap_data[3].pixel_data.data(),
+        cubemap_data[4].pixel_data.data(),
+        cubemap_data[5].pixel_data.data(),
+    } };
+
+    Cubemap cubemap { cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces };
+
+    return cubemap;
 }
 
 std::optional<inl::ShaderProgram> load_shader(

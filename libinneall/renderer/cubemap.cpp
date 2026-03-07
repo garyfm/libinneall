@@ -3,6 +3,7 @@
 
 namespace inl {
 
+// TODO: This overlaps heavily with Texture. Possibly Texture could be generalised to handle multiple sub images??
 Cubemap::Cubemap(size_t width, size_t height, size_t n_components, std::array<uint8_t const*, 6> faces) {
 
     glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &m_handle);
@@ -30,12 +31,30 @@ Cubemap::Cubemap(size_t width, size_t height, size_t n_components, std::array<ui
             static_cast<GLsizei>(height), 1, base_format, GL_UNSIGNED_BYTE, faces[face]);
     }
 
-    // TODO: These should be settable
+    // TODO: These should be parameratised
     glTextureParameteri(m_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(m_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTextureParameteri(m_handle, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glTextureParameteri(m_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(m_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+Cubemap::Cubemap(Cubemap&& other) noexcept
+    : m_handle { std::move(other.m_handle) }
+    , m_unit { other.m_unit } {
+    other.m_unit = 0;
+}
+
+Cubemap& Cubemap::operator=(Cubemap&& other) noexcept {
+
+    if (this != std::addressof(other)) {
+        m_handle = std::move(other.m_handle);
+        m_unit = other.m_unit;
+
+        other.m_unit = 0;
+    }
+
+    return *this;
 }
 
 void Cubemap::bind(GLuint texture_unit) {

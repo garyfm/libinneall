@@ -12,8 +12,17 @@ class Mesh {
 public:
     explicit Mesh(MeshData const& data);
 
-    void bind() const;
-    void unbind() const;
+    Mesh(Mesh const&) = delete;
+    Mesh operator=(Mesh const&) = delete;
+
+    Mesh(Mesh&& other) noexcept;
+    Mesh& operator=(Mesh&& other) noexcept;
+
+    ~Mesh();
+
+    void bind();
+    void unbind();
+    bool is_bound() const { return m_is_bound; }
 
     std::size_t vertext_count() const { return m_vertex_count; };
     std::size_t index_count() const { return m_index_count; };
@@ -21,9 +30,12 @@ public:
 private:
     std::size_t m_vertex_count {};
     std::size_t m_index_count {};
+
     GlBuffer m_vertex_buffer {};
     GlBuffer m_index_buffer {};
     VertexArray m_vertex_array {};
+
+    bool m_is_bound { false };
 };
 
 } // namespace inl

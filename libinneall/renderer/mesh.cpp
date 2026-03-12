@@ -49,7 +49,49 @@ Mesh::Mesh(MeshData const& mesh_data)
     });
 }
 
-void Mesh::bind() const { m_vertex_array.bind(); }
-void Mesh::unbind() const { m_vertex_array.unbind(); }
+Mesh::Mesh(Mesh&& other) noexcept
+    : m_vertex_count { other.m_vertex_count }
+    , m_index_count { other.m_index_count }
+    , m_vertex_buffer { std::move(other.m_vertex_buffer) }
+    , m_index_buffer { std::move(other.m_index_buffer) }
+    , m_vertex_array { std::move(other.m_vertex_array) } {
+    other.m_vertex_count = 0;
+    other.m_index_count = 0;
+}
+
+Mesh& Mesh::operator=(Mesh&& other) noexcept {
+
+    if (this != std::addressof(other)) {
+        if (is_bound()) {
+            unbind();
+        }
+        m_vertex_count = other.m_vertex_count;
+        m_index_count = other.m_index_count;
+        m_vertex_buffer = std::move(other.m_vertex_buffer);
+        m_index_buffer = std::move(other.m_index_buffer);
+        m_vertex_array = std::move(other.m_vertex_array);
+
+        other.m_vertex_count = 0;
+        other.m_index_count = 0;
+    }
+
+    return *this;
+}
+
+Mesh::~Mesh() {
+    if (is_bound()) {
+        unbind();
+    }
+}
+
+void Mesh::bind() {
+    m_vertex_array.bind();
+    m_is_bound = true;
+}
+
+void Mesh::unbind() {
+    m_vertex_array.unbind();
+    m_is_bound = false;
+}
 
 } // namepsace inl

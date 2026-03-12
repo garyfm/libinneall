@@ -30,9 +30,9 @@ void Renderer::begin_frame() const {
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void Renderer::render(RenderScene const& scene, RenderView const& view) {
+void Renderer::render(RenderScene& scene, RenderView const& view) {
 
-    for (const auto& model : scene.models) {
+    for (auto& model : scene.models) {
         ShaderProgram* const shader = model.material->shader;
         shader->use();
 
@@ -56,7 +56,7 @@ void Renderer::render(RenderScene const& scene, RenderView const& view) {
     }
 }
 
-void Renderer::render(Model const& model) {
+void Renderer::render(Model& model) {
 
     INL_ASSERT(model.mesh != nullptr, "Empty mesh");
     INL_ASSERT(model.material != nullptr, "Empty material");
@@ -89,7 +89,7 @@ void Renderer::render(Model const& model) {
     model.mesh->unbind();
 }
 
-void Renderer::draw_debug_mesh(Mesh const& mesh, const Matrix4& model_matrix, const Vector3& color) {
+void Renderer::draw_debug_mesh(Mesh& mesh, const Matrix4& model_matrix, const Vector3& color) {
     INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
 
     mesh.bind();

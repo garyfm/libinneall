@@ -34,11 +34,11 @@ class Renderer {
 public:
     Renderer();
     void begin_frame() const;
-    void render(RenderScene const& scene, RenderView const& view);
-    void render(Model const& model);
+    void render(RenderScene& scene, RenderView const& view);
+    void render(Model& model);
     void set_debug_shader(ShaderProgram& shader) { debug_shader = &shader; };
     void set_skybox_shader(ShaderProgram& shader) { skybox_shader = &shader; };
-    void draw_debug_mesh(Mesh const& mesh, const Matrix4& model_matrix, const Vector3& color);
+    void draw_debug_mesh(Mesh& mesh, const Matrix4& model_matrix, const Vector3& color);
     void draw_debug_triangle(const Matrix4& model_matrix, const Vector3& color);
     void draw_debug_quad(const Matrix4& model_matrix, const Vector3& color);
     void draw_debug_cube(const Matrix4& model_matrix, const Vector3& color);

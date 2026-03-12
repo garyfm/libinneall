@@ -144,40 +144,18 @@ int main(int argc, char* argv[]) {
 
         std::optional<ShaderProgram> shader_program_lighting { load_shader(
             assets_path + "/shaders/lighting_phong.vert.glsl", assets_path + "/shaders/lighting_phong.frag.glsl") };
+        INL_ASSERT(shader_program_lighting.has_value(), "Failed to load shader lighting");
 
         std::optional<ShaderProgram> shader_program_debug { load_shader(
             assets_path + "/shaders/debug.vert.glsl", assets_path + "/shaders/debug.frag.glsl") };
+        INL_ASSERT(shader_program_debug.has_value(), "Failed to load shader debug");
 
         std::optional<ShaderProgram> shader_program_skybox { load_shader(
             assets_path + "/shaders/skybox.vert.glsl", assets_path + "/shaders/skybox.frag.glsl") };
+        INL_ASSERT(shader_program_skybox.has_value(), "Failed to load shader skybox");
 
-        if (!shader_program_skybox || !shader_program_lighting || !shader_program_debug) {
-            return -1;
-        }
-
-        // 3D model
-        auto start_load = std::chrono::steady_clock::now();
-        std::string obj_data = read_file(assets_path + obj_file);
-
-        obj::Result<obj::Model> obj_model = obj::load(obj_data);
-        auto end_load = std::chrono::steady_clock::now();
-        if (!obj_model) {
-            log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
-            return -1;
-        }
-
-        log::debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}, time:{}",
-            obj_model->geometric_vertices.size(), obj_model->texture_vertices.size(), obj_model->vertex_normals.size(),
-            obj_model->face_corners.size(),
-            std::chrono::duration_cast<std::chrono::milliseconds>(end_load - start_load));
-
-        auto start_mesh = std::chrono::steady_clock::now();
-        MeshData mesh_data = to_mesh_data(*obj_model);
-        auto end_mesh = std::chrono::steady_clock::now();
-        log::debug("MeshData: vertices:{}, indices:{}, time:{}", mesh_data.vertex_data.size(),
-            mesh_data.index_data.size(), std::chrono::duration_cast<std::chrono::milliseconds>(end_mesh - start_mesh));
-
-        Mesh mesh { mesh_data };
+        std::optional<Mesh> mesh { load_mesh(assets_path + obj_file) };
+        INL_ASSERT(mesh.has_value(), "Failed to load mesh");
 
         std::optional<Texture> texture_albedo { load_texture(assets_path + texture_albedo_file, flip_image) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
@@ -189,7 +167,7 @@ int main(int argc, char* argv[]) {
 
         Matrix4 model_matrix { 1 };
 
-        Model model { &mesh, &material, model_matrix };
+        Model model { &mesh.value(), &material, model_matrix };
 
         // Skybox
         std::array<std::string, 6> cubemap_files { {

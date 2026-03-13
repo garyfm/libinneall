@@ -10,7 +10,7 @@ struct Model {
     Mesh* const mesh {};
     Material* const material {};
 
-    // TODO: Move this out to an entity class
+    // TODO: make this a transform
     Matrix4 model_matrix { 1 };
 };
 

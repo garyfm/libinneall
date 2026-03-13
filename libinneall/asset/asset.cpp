@@ -3,67 +3,77 @@
 #include <libinneall/renderer/shader_stage.hpp>
 #include <libinneall/renderer/texture.hpp>
 
-#include <chrono>
 #include <fstream>
 #include <optional>
 #include <span>
 
 namespace inl {
 
-// TODO: These are quick and dirty implementaitons
-// Some kind of Asset manager should be used
-
-std::string read_file(std::filesystem::path path) {
+std::optional<ByteBuffer> load_file(std::filesystem::path path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-        inl::log::error("Failed to open file: {}", path.c_str());
-        return std::string {};
+        log::error("Failed to open file: {}", path.c_str());
+        return std::nullopt;
     }
 
     std::size_t file_size = std::filesystem::file_size(path);
-    std::string contents(file_size, '\0');
 
-    file.read(contents.data(), file_size);
+    if (file_size == 0) {
+        return ByteBuffer {};
+    }
+
+    ByteBuffer contents(file_size);
+    file.read(reinterpret_cast<char*>(contents.data()), file_size);
 
     return contents;
 }
 
-void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer) {
-    std::ifstream file(path, std::ios::binary);
+std::optional<std::string> load_text_file(std::filesystem::path path) {
 
-    if (!file.is_open()) {
-        inl::log::error("Failed to open file: {}", path.c_str());
+    std::optional<ByteBuffer> byte_buffer = load_file(path);
+    if (!byte_buffer) {
+        return std::nullopt;
     }
 
-    std::size_t file_size = std::filesystem::file_size(path);
-    buffer.resize(file_size);
-    file.read(reinterpret_cast<char*>(buffer.data()), file_size);
+    std::string contents { reinterpret_cast<const char*>(byte_buffer->data()), byte_buffer->size() };
+
+    return contents;
+}
+
+std::optional<ppm::Image> load_image(std::filesystem::path path) {
+    std::optional<ByteBuffer> raw_image_data { load_file(path) };
+    if (!raw_image_data) {
+        return std::nullopt;
+    }
+
+    ppm::Result<ppm::Image> image = ppm::load(*raw_image_data);
+    if (!image) {
+        log::error("Failed to load ppm image error: {}", static_cast<int>(image.error()));
+        return std::nullopt;
+    }
+
+    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int>(image->format), image->width,
+        image->height, image->max_value, image->pixel_data.size());
+
+    return *image;
 }
 
 std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically) {
 
     log::info("Loading texture: {}", path.filename().c_str());
 
-    std::vector<std::uint8_t> raw_image_data {};
-    read_file(path, raw_image_data);
-
-    ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
-    if (!image_or_error) {
-        log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
+    std::optional<ppm::Image> image { load_image(path) };
+    if (!image) {
         return std::nullopt;
     }
 
-    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int>(image_or_error->format),
-        image_or_error->width, image_or_error->height, image_or_error->max_value, image_or_error->pixel_data.size());
-
-    ppm::Image image;
     if (flip_vertically) {
-        image = ppm::flip_vertically(*image_or_error);
+        image = ppm::flip_vertically(*image);
     } else {
-        image = *image_or_error;
+        image = *image;
     }
 
-    Texture texture { image.width, image.height, 3, image.pixel_data.data() };
+    Texture texture { image->width, image->height, 3, image->pixel_data.data() };
 
     glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -78,30 +88,21 @@ std::optional<Cubemap> load_cubemap(std::array<std::string, 6> paths, bool flip_
     std::array<ppm::Image, 6> cubemap_data {};
 
     for (std::size_t i = 0; i < cubemap_data.size(); ++i) {
-        std::vector<std::uint8_t> raw_image_data {};
-        read_file(paths[i], raw_image_data);
 
-        // TODO:: Pul this out into load_image();
         log::info("Loading texture: {}", paths[i]);
 
-        ppm::Result<ppm::Image> image_or_error = ppm::load(raw_image_data);
-        if (!image_or_error) {
-            log::error("Failed to load ppm image error: {}", static_cast<int>(image_or_error.error()));
+        std::optional<ppm::Image> image { load_image(paths[i]) };
+        if (!image) {
             return std::nullopt;
         }
 
-        log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{} ", static_cast<int>(image_or_error->format),
-            image_or_error->width, image_or_error->height, image_or_error->max_value,
-            image_or_error->pixel_data.size());
-
-        ppm::Image image;
         if (flip_vertically) {
-            image = ppm::flip_vertically(*image_or_error);
+            image = ppm::flip_vertically(*image);
         } else {
-            image = *image_or_error;
+            image = *image;
         }
 
-        cubemap_data[i] = image;
+        cubemap_data[i] = *image;
     }
 
     std::array<uint8_t const*, 6> skybox_faces { {
@@ -120,8 +121,6 @@ std::optional<Cubemap> load_cubemap(std::array<std::string, 6> paths, bool flip_
 
 std::optional<inl::ShaderProgram> load_shader(
     std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path) {
-    std::string vertex_source = read_file(vertex_shader_path);
-
     std::string_view sv_path { vertex_shader_path.c_str() };
     std::string_view::size_type name_start_pos = sv_path.find_last_of("/") + 1;
     std::string_view::size_type name_end_pos = sv_path.find(".", name_start_pos);
@@ -129,19 +128,20 @@ std::optional<inl::ShaderProgram> load_shader(
 
     log::info("Loading shader program: {}", shader_name);
 
-    if (vertex_source.empty()) {
+    std::optional<std::string> vertex_source { load_text_file(vertex_shader_path) };
+    if (!vertex_source) {
         log::error("Failed to load shader stage: {}", vertex_shader_path.filename().c_str());
         return std::nullopt;
     }
 
-    std::string fragment_source = read_file(fragment_shader_path);
-    if (fragment_source.empty()) {
+    std::optional<std::string> fragment_source { load_text_file(fragment_shader_path) };
+    if (!fragment_source) {
         log::error("Failed to load shader stage: {}", vertex_shader_path.filename().c_str());
         return std::nullopt;
     }
 
-    ShaderStage vertex_stage { ShaderType::Vertex, vertex_source };
-    ShaderStage fragment_stage { ShaderType::Fragment, fragment_source };
+    ShaderStage vertex_stage { ShaderType::Vertex, *vertex_source };
+    ShaderStage fragment_stage { ShaderType::Fragment, *fragment_source };
 
     ShaderProgram shader_program { std::move(vertex_stage), std::move(fragment_stage) };
 
@@ -152,12 +152,12 @@ std::optional<inl::Mesh> load_mesh(std::filesystem::path path) {
 
     log::info("Loading mesh: {}", path.filename().c_str());
 
-    std::string obj_data = read_file(path);
-    if (obj_data.empty()) {
+    std::optional<std::string> obj_data { load_text_file(path) };
+    if (!obj_data) {
         return std::nullopt;
     }
 
-    obj::Result<obj::Model> obj_model = obj::load(obj_data);
+    obj::Result<obj::Model> obj_model = obj::load(*obj_data);
     if (!obj_model) {
         log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
         return std::nullopt;
@@ -172,4 +172,5 @@ std::optional<inl::Mesh> load_mesh(std::filesystem::path path) {
 
     return mesh;
 }
+
 } // namespace inl

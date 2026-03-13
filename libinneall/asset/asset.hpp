@@ -1,5 +1,6 @@
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/renderer/cubemap.hpp>
+#include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/mesh.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/texture.hpp>
@@ -10,10 +11,12 @@
 
 namespace inl {
 
-// TODO: These are quick and dirty implementaitons
-// Some kind of Asset manager should be used
-std::string read_file(std::filesystem::path path);
-void read_file(std::filesystem::path path, std::vector<std::uint8_t>& buffer);
+// TODO: Some kind of Asset manager should be used
+using ByteBuffer = std::vector<uint8_t>;
+
+std::optional<ByteBuffer> load_file(std::filesystem::path path);
+std::optional<std::string> load_text_file(std::filesystem::path path);
+std::optional<ppm::Image> load_image(std::filesystem::path path);
 std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically);
 std::optional<Cubemap> load_cubemap(std::array<std::string, 6> paths, bool flip_vertically);
 std::optional<inl::ShaderProgram> load_shader(

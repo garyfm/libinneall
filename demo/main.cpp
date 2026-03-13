@@ -116,15 +116,6 @@ void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height)
     g_window.resize(width, height);
 }
 
-//  static const std::string obj_file = "/sword-sting/sting-sword.obj";
-//  static const std::string texture_albedo_file = "/sword-sting/Sting_Base_Color.ppm";
-//  static const std::string texture_specular_file = "/sword-sting/Sting_Metallic.ppm";
-//  bool flip_image = true;
-
-static const std::string obj_file = "/backpack/backpack.obj";
-static const std::string texture_albedo_file = "/backpack/diffuse.ppm";
-static const std::string texture_specular_file = "/backpack/specular.ppm";
-bool flip_image = false;
 }
 
 int main(int argc, char* argv[]) {
@@ -142,25 +133,28 @@ int main(int argc, char* argv[]) {
 
         std::string assets_path = argv[1];
 
+        const std::filesystem::path model_path = assets_path + "/backpack";
+        const std::filesystem::path shader_path = assets_path + "/shaders";
+
         std::optional<ShaderProgram> shader_program_lighting { load_shader(
-            assets_path + "/shaders/lighting_phong.vert.glsl", assets_path + "/shaders/lighting_phong.frag.glsl") };
+            shader_path / "lighting_phong.vert.glsl", shader_path / "lighting_phong.frag.glsl") };
         INL_ASSERT(shader_program_lighting.has_value(), "Failed to load shader lighting");
 
         std::optional<ShaderProgram> shader_program_debug { load_shader(
-            assets_path + "/shaders/debug.vert.glsl", assets_path + "/shaders/debug.frag.glsl") };
+            shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl") };
         INL_ASSERT(shader_program_debug.has_value(), "Failed to load shader debug");
 
         std::optional<ShaderProgram> shader_program_skybox { load_shader(
-            assets_path + "/shaders/skybox.vert.glsl", assets_path + "/shaders/skybox.frag.glsl") };
+            shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl") };
         INL_ASSERT(shader_program_skybox.has_value(), "Failed to load shader skybox");
 
-        std::optional<Mesh> mesh { load_mesh(assets_path + obj_file) };
+        std::optional<Mesh> mesh { load_mesh(model_path / "mesh.obj") };
         INL_ASSERT(mesh.has_value(), "Failed to load mesh");
 
-        std::optional<Texture> texture_albedo { load_texture(assets_path + texture_albedo_file, flip_image) };
+        std::optional<Texture> texture_albedo { load_texture(model_path / "albedo.ppm", false) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        std::optional<Texture> texture_specular { load_texture(assets_path + texture_specular_file, flip_image) };
+        std::optional<Texture> texture_specular { load_texture(model_path / "specular.ppm", false) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
         Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program_lighting.value() };

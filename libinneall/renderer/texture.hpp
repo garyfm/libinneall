@@ -12,7 +12,7 @@ void delete_texture(GLuint handle);
 class Texture {
 public:
     Texture() = default;
-    explicit Texture(std::size_t width, std::size_t height, std::uint8_t n_components, std::uint8_t const* data);
+    explicit Texture(size_t width, size_t height, uint8_t n_components, uint8_t const* data);
 
     Texture(const Texture&) = delete;
     Texture operator=(const Texture&) = delete;

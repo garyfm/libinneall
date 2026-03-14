@@ -27,7 +27,7 @@ public:
 private:
     bool compile(std::string_view source);
 
-    static constexpr std::size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
+    static constexpr size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
 
     UniqueResource<GLuint, decltype(glDeleteShader)> m_handle { 0, glDeleteShader };
     ShaderType m_type {};

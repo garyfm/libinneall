@@ -38,7 +38,7 @@ private:
     void link(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);
     void retrieve_uniforms();
 
-    static constexpr std::size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
+    static constexpr size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
 
     UniqueResource<GLuint, decltype(glDeleteProgram)> m_handle { 0, glDeleteProgram };
 

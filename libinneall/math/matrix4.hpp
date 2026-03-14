@@ -18,7 +18,7 @@ public:
     explicit Matrix4(float diagonal);
     explicit Matrix4(const std::array<float, 16>& elements);
 
-    float operator[](std::size_t i) const {
+    float operator[](size_t i) const {
         INL_ASSERT(i < 16, "Out of bounds array access");
         return m_elements[i];
     }
@@ -56,7 +56,7 @@ public:
     static Matrix4 create_look_at(Vector3 position, Vector3 target, Vector3 up);
 
     std::span<const float> elements() const { return m_elements; };
-    float element(std::size_t row, std::size_t col) const { return m_elements[(col * 4) + row]; };
+    float element(size_t row, size_t col) const { return m_elements[(col * 4) + row]; };
 
     operator Matrix3() const;
 
@@ -64,7 +64,7 @@ private:
     std::array<float, 16> m_elements {};
 };
 
-float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col);
+float cofactor(Matrix4 const& matrix, size_t row, size_t col);
 float determinant(Matrix4 const& matrix);
 Matrix4 transpose(Matrix4 const& matrix);
 Matrix4 inverse(Matrix4 const& matrix);

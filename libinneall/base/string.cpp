@@ -3,7 +3,7 @@
 namespace inl {
 
 std::string_view trim_left(std::string_view sv) {
-    std::size_t cursor { 0 };
+    size_t cursor { 0 };
     for (; cursor < sv.size(); ++cursor) {
         if (!std::isspace(sv[cursor])) {
             break;
@@ -14,7 +14,7 @@ std::string_view trim_left(std::string_view sv) {
 }
 
 std::string_view trim_right(std::string_view sv) {
-    int cursor { static_cast<int>(sv.size() - 1) };
+    int32_t cursor { static_cast<int32_t>(sv.size() - 1) };
     for (; cursor >= 0; --cursor) {
         if (!std::isspace(sv[cursor])) {
             break;
@@ -31,7 +31,7 @@ std::string_view trim(std::string_view sv) {
 
 Cut cut(std::string_view sv, char deliminator) {
 
-    std::size_t cursor { 0 };
+    size_t cursor { 0 };
     Cut result {};
     for (; cursor < sv.size(); ++cursor) {
         if (sv[cursor] == deliminator) {

@@ -17,7 +17,7 @@ Mesh::Mesh(MeshData const& mesh_data)
 
     if (mesh_data.index_data.size() != 0) {
         m_index_buffer = GlBuffer(
-            std::as_bytes(std::span<std::uint32_t const> { mesh_data.index_data.data(), mesh_data.index_data.size() }));
+            std::as_bytes(std::span<uint32_t const> { mesh_data.index_data.data(), mesh_data.index_data.size() }));
         m_vertex_array.bind_element_buffer(m_index_buffer);
     }
 

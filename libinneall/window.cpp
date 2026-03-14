@@ -6,9 +6,9 @@
 namespace inl {
 
 namespace {
-    void error_callback(int error, const char* description) { log::error("GLFW error: {}({})", description, error); }
+    void error_callback(int32_t error, const char* description) { log::error("GLFW error: {}({})", description, error); }
 
-    void APIENTRY opengl_debug_callback(GLenum source, GLenum type, unsigned int id, GLenum severity,
+    void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
         [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
         // ignore non-significant error/warning codes
         if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
@@ -98,7 +98,7 @@ namespace {
     }
 }
 
-Window::Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback,
+Window::Window(uint32_t width, uint32_t height, const std::string& title, InputCallback input_callback,
     MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback)
     : m_width { width }
     , m_height { height }

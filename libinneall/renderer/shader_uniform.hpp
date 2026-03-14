@@ -11,8 +11,8 @@
 
 namespace inl {
 
-void set_uniform(ShaderProgram& shader, std::string_view name, unsigned value);
-void set_uniform(ShaderProgram& shader, std::string_view name, int value);
+void set_uniform(ShaderProgram& shader, std::string_view name, uint32_t value);
+void set_uniform(ShaderProgram& shader, std::string_view name, int32_t value);
 void set_uniform(ShaderProgram& shader, std::string_view name, float value);
 void set_uniform(ShaderProgram& shader, std::string_view name, GLuint value);
 void set_uniform(ShaderProgram& shader, std::string_view name, Color const& color);
@@ -22,7 +22,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Matrix4 const& ma
 void set_uniform(ShaderProgram& shader, std::string_view name, Material const& material);
 void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional const& light);
 void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light);
-void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, std::size_t index);
+void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, size_t index);
 void set_uniform(ShaderProgram& shader, std::string_view name, LightSpot const& light);
 
 }; // namespace inl

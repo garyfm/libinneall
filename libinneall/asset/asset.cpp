@@ -16,7 +16,7 @@ std::optional<ByteBuffer> load_file(std::filesystem::path path) {
         return std::nullopt;
     }
 
-    std::size_t file_size = std::filesystem::file_size(path);
+    size_t file_size = std::filesystem::file_size(path);
 
     if (file_size == 0) {
         return ByteBuffer {};
@@ -48,11 +48,11 @@ std::optional<ppm::Image> load_image(std::filesystem::path path) {
 
     ppm::Result<ppm::Image> image = ppm::load(*raw_image_data);
     if (!image) {
-        log::error("Failed to load ppm image error: {}", static_cast<int>(image.error()));
+        log::error("Failed to load ppm image error: {}", static_cast<int32_t>(image.error()));
         return std::nullopt;
     }
 
-    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int>(image->format), image->width,
+    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int32_t>(image->format), image->width,
         image->height, image->max_value, image->pixel_data.size());
 
     return *image;
@@ -87,7 +87,7 @@ std::optional<Cubemap> load_cubemap(std::array<std::string, 6> paths, bool flip_
 
     std::array<ppm::Image, 6> cubemap_data {};
 
-    for (std::size_t i = 0; i < cubemap_data.size(); ++i) {
+    for (size_t i = 0; i < cubemap_data.size(); ++i) {
 
         log::info("Loading texture: {}", paths[i]);
 
@@ -159,7 +159,7 @@ std::optional<inl::Mesh> load_mesh(std::filesystem::path path) {
 
     obj::Result<obj::Model> obj_model = obj::load(*obj_data);
     if (!obj_model) {
-        log::error("Failed to load obj file error: {}", static_cast<int>(obj_model.error()));
+        log::error("Failed to load obj file error: {}", static_cast<int32_t>(obj_model.error()));
         return std::nullopt;
     }
 

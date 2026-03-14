@@ -114,14 +114,14 @@ Matrix4 operator*(float scalar, Matrix4 const& matrix) { return matrix * scalar;
 Matrix4 operator/(float scalar, Matrix4 const& matrix) { return matrix / scalar; }
 
 Matrix4& Matrix4::operator+=(Matrix4 const& other) {
-    for (std::size_t i = 0; i < m_elements.size(); ++i) {
+    for (size_t i = 0; i < m_elements.size(); ++i) {
         m_elements[i] += other[i];
     }
     return *this;
 }
 
 Matrix4& Matrix4::operator-=(Matrix4 const& other) {
-    for (std::size_t i = 0; i < m_elements.size(); ++i) {
+    for (size_t i = 0; i < m_elements.size(); ++i) {
         m_elements[i] -= other[i];
     }
     return *this;
@@ -131,8 +131,8 @@ Matrix4& Matrix4::operator*=(Matrix4 const& other) {
 
     Matrix4 result {};
 
-    for (std::size_t col = 0; col < 16; col += 4) {
-        for (std::size_t row = 0; row < 4; ++row) {
+    for (size_t col = 0; col < 16; col += 4) {
+        for (size_t row = 0; row < 4; ++row) {
             result.m_elements[row + col] = m_elements[row] * other[col] + m_elements[row + 4] * other[col + 1]
                 + m_elements[row + 8] * other[col + 2] + m_elements[row + 12] * other[col + 3];
             ;
@@ -309,19 +309,19 @@ Matrix4::operator Matrix3() const {
     } };
 }
 
-float cofactor(Matrix4 const& matrix, std::size_t row, std::size_t col) {
+float cofactor(Matrix4 const& matrix, size_t row, size_t col) {
 
     std::array<float, 9> minor { 0 };
 
-    std::size_t index { 0 };
+    size_t index { 0 };
 
     // Construct a minor matrix by removing row and col
-    for (std::size_t matrix_col = 0; matrix_col < 4; ++matrix_col) {
+    for (size_t matrix_col = 0; matrix_col < 4; ++matrix_col) {
         if (matrix_col == col) {
             continue;
         }
 
-        for (std::size_t matrix_row = 0; matrix_row < 4; ++matrix_row) {
+        for (size_t matrix_row = 0; matrix_row < 4; ++matrix_row) {
             if (matrix_row == row) {
                 continue;
             }
@@ -378,8 +378,8 @@ Matrix4 inverse(Matrix4 const& matrix) {
 
     std::array<float, 16> cofactors { 0 };
 
-    for (std::size_t col = 0; col < 4; ++col) {
-        for (std::size_t row = 0; row < 4; ++row) {
+    for (size_t col = 0; col < 4; ++col) {
+        for (size_t row = 0; row < 4; ++row) {
             cofactors[(col * 4) + row] = cofactor(matrix, row, col);
         }
     }
@@ -392,8 +392,8 @@ Matrix4 inverse(Matrix4 const& matrix) {
 
 Vector4 operator*(Matrix4 const& matrix, Vector4 const& vector) {
     Vector4 result {};
-    for (std::size_t row = 0; row < 4; ++row) {
-        for (std::size_t col = 0; col < 4; ++col) {
+    for (size_t row = 0; row < 4; ++row) {
+        for (size_t col = 0; col < 4; ++col) {
             result.elements[row] += matrix.element(row, col) * vector.elements[col];
         }
     }

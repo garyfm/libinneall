@@ -17,6 +17,6 @@ struct VertexData {
     }
 };
 
-std::span<const std::byte> as_bytes(VertexData const* const vertex_data, std::size_t count);
+std::span<const std::byte> as_bytes(VertexData const* const vertex_data, size_t count);
 
 } // namespace inl

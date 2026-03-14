@@ -96,14 +96,14 @@ Matrix3 operator*(float scalar, Matrix3 const& matrix) { return matrix * scalar;
 Matrix3 operator/(float scalar, Matrix3 const& matrix) { return matrix / scalar; }
 
 Matrix3& Matrix3::operator+=(Matrix3 const& other) {
-    for (std::size_t i = 0; i < m_elements.size(); ++i) {
+    for (size_t i = 0; i < m_elements.size(); ++i) {
         m_elements[i] += other[i];
     }
     return *this;
 }
 
 Matrix3& Matrix3::operator-=(Matrix3 const& other) {
-    for (std::size_t i = 0; i < m_elements.size(); ++i) {
+    for (size_t i = 0; i < m_elements.size(); ++i) {
         m_elements[i] -= other[i];
     }
     return *this;
@@ -113,8 +113,8 @@ Matrix3& Matrix3::operator*=(Matrix3 const& other) {
 
     Matrix3 result {};
 
-    for (std::size_t col = 0; col < 9; col += 3) {
-        for (std::size_t row = 0; row < 3; ++row) {
+    for (size_t col = 0; col < 9; col += 3) {
+        for (size_t row = 0; row < 3; ++row) {
             result.m_elements[row + col] = m_elements[row] * other[col] + m_elements[row + 3] * other[col + 1]
                 + m_elements[row + 6] * other[col + 2];
         }

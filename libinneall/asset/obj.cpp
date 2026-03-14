@@ -19,12 +19,12 @@ inl::obj::Result<float> extract_float(std::string_view buffer) {
     return value;
 }
 
-unsigned map_index(inl::obj::Model const& model, float index) {
+uint32_t map_index(inl::obj::Model const& model, float index) {
     if (index < 0) {
         // handle negative index
-        return static_cast<unsigned>(model.geometric_vertices.size() + static_cast<unsigned>(index) + 1);
+        return static_cast<uint32_t>(model.geometric_vertices.size() + static_cast<uint32_t>(index) + 1);
     } else {
-        return static_cast<unsigned>(index);
+        return static_cast<uint32_t>(index);
     }
 }
 

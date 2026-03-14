@@ -42,7 +42,7 @@ void Renderer::render(RenderScene& scene, RenderView const& view) {
             set_uniform(*shader, "u_light_dir", *scene.light_directional);
         }
 
-        set_uniform(*shader, "u_num_light_points", static_cast<int>(scene.light_points.size()));
+        set_uniform(*shader, "u_num_light_points", static_cast<int32_t>(scene.light_points.size()));
         for (size_t i = 0; i < scene.light_points.size(); ++i) {
             set_uniform(*shader, "u_light_points", scene.light_points[i], i);
         }

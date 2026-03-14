@@ -17,8 +17,8 @@ enum class Level : char {
 constexpr std::string_view get_module_name(const std::source_location& location) {
     std::string_view file_name { location.file_name() };
 
-    const std::size_t slash_pos = file_name.find_last_of("/\\");
-    const std::size_t dot_pos = file_name.find_last_of("\\.");
+    const size_t slash_pos = file_name.find_last_of("/\\");
+    const size_t dot_pos = file_name.find_last_of("\\.");
 
     return file_name.substr(slash_pos + 1, dot_pos - slash_pos - 1);
 }

@@ -9,19 +9,19 @@ namespace inl {
 class VertexArray {
 public:
     struct Attribute {
-        std::size_t index;
-        std::size_t binding_index;
-        std::size_t n_components;
-        std::size_t offset_bytes;
+        size_t index;
+        size_t binding_index;
+        size_t n_components;
+        size_t offset_bytes;
         GLenum type;
         bool normalise;
     };
 
     struct BindPoint {
-        std::size_t index;
+        size_t index;
         GlBuffer const& buffer;
-        std::size_t offset_bytes;
-        std::size_t stride_bytes;
+        size_t offset_bytes;
+        size_t stride_bytes;
     };
 
     explicit VertexArray();

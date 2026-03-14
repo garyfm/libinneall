@@ -15,7 +15,7 @@ public:
     explicit Matrix3(float diagonal);
     explicit Matrix3(const std::array<float, 9>& elements);
 
-    float operator[](std::size_t i) const {
+    float operator[](size_t i) const {
         INL_ASSERT(i < 9, "Out of bounds array access");
         return m_elements[i];
     }
@@ -47,7 +47,7 @@ public:
     friend Matrix3 operator*(Matrix3 const& left, Matrix3 const& right);
 
     std::span<const float> elements() const { return m_elements; };
-    float element(std::size_t row, std::size_t col) const { return m_elements[(col * 3) + row]; };
+    float element(size_t row, size_t col) const { return m_elements[(col * 3) + row]; };
 
 private:
     std::array<float, 9> m_elements {};

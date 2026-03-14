@@ -10,7 +10,7 @@
 
 namespace {
 
-inl::ppm::Result<void> skip_whitespace(std::span<std::uint8_t> buffer, std::size_t& cursor) {
+inl::ppm::Result<void> skip_whitespace(std::span<uint8_t> buffer, size_t& cursor) {
 
     unsigned char c {};
     while (cursor < buffer.size()) {
@@ -35,7 +35,7 @@ inl::ppm::Result<void> skip_whitespace(std::span<std::uint8_t> buffer, std::size
     return {};
 }
 
-inl::ppm::Result<int> extract_int(std::span<std::uint8_t> buffer, std::size_t& cursor) {
+inl::ppm::Result<int32_t> extract_int(std::span<uint8_t> buffer, size_t& cursor) {
 
     std::string str;
     while (cursor < buffer.size() && std::isdigit(buffer[cursor])) {
@@ -47,7 +47,7 @@ inl::ppm::Result<int> extract_int(std::span<std::uint8_t> buffer, std::size_t& c
         return std::unexpected(inl::ppm::Error::FailedToExtractInteger);
     }
 
-    int result;
+    int32_t result;
     auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
 
     if (ec != std::errc()) {
@@ -59,9 +59,9 @@ inl::ppm::Result<int> extract_int(std::span<std::uint8_t> buffer, std::size_t& c
 
 namespace inl::ppm {
 
-Result<Image> load(std::span<std::uint8_t> raw_data) {
+Result<Image> load(std::span<uint8_t> raw_data) {
 
-    std::size_t cursor { 0 };
+    size_t cursor { 0 };
     std::string format;
     format.push_back(static_cast<uint8_t>(raw_data[cursor]));
     ++cursor;
@@ -77,22 +77,22 @@ Result<Image> load(std::span<std::uint8_t> raw_data) {
     }
 
     TRY(skip_whitespace(raw_data, cursor));
-    Result<int> width = TRY(extract_int(raw_data, cursor));
+    Result<int32_t> width = TRY(extract_int(raw_data, cursor));
 
     TRY(skip_whitespace(raw_data, cursor));
-    Result<int> height = TRY(extract_int(raw_data, cursor));
+    Result<int32_t> height = TRY(extract_int(raw_data, cursor));
 
     TRY(skip_whitespace(raw_data, cursor));
-    Result<int> max_value = TRY(extract_int(raw_data, cursor));
+    Result<int32_t> max_value = TRY(extract_int(raw_data, cursor));
 
     // Skip the single whitespace prior to the image data
     ++cursor;
 
     const Image image {
         .format { Format::P6 },
-        .width { static_cast<std::size_t>(width.value()) },
-        .height { static_cast<std::size_t>(height.value()) },
-        .max_value { static_cast<std::uint16_t>(max_value.value()) },
+        .width { static_cast<size_t>(width.value()) },
+        .height { static_cast<size_t>(height.value()) },
+        .max_value { static_cast<uint16_t>(max_value.value()) },
         .pixel_data { raw_data.begin() + cursor, raw_data.end() },
     };
 
@@ -112,16 +112,16 @@ Image flip_vertically(Image const& image) {
     log::debug("pixel_data: {}, width: {}, height: {}", image.pixel_data.size(), image.width, image.height);
 
     const uint8_t n_channels { 3 };
-    const std::size_t row_size_bytes { image.width * n_channels };
+    const size_t row_size_bytes { image.width * n_channels };
 
     flipped.pixel_data.resize(image.pixel_data.size());
     log::debug("flipped size: {}", flipped.pixel_data.size());
 
-    for (std::size_t row = 0; row < image.height; ++row) {
+    for (size_t row = 0; row < image.height; ++row) {
 
-        std::size_t row_start { row * row_size_bytes };
-        std::size_t row_end { row_start + row_size_bytes };
-        std::size_t flipped_cursor { (image.height - 1 - row) * row_size_bytes };
+        size_t row_start { row * row_size_bytes };
+        size_t row_end { row_start + row_size_bytes };
+        size_t flipped_cursor { (image.height - 1 - row) * row_size_bytes };
 
         // log::debug("row: {}", row);
         std::copy(image.pixel_data.begin() + row_start, image.pixel_data.begin() + row_end,

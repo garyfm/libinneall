@@ -54,7 +54,7 @@ void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fra
 
         glGetProgramInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_length, info_log.data());
         log::error("Error compiling shader id {}: {}", m_handle.get(),
-            std::string_view { info_log.data(), static_cast<std::size_t>(info_log_length) });
+            std::string_view { info_log.data(), static_cast<size_t>(info_log_length) });
         throw std::runtime_error("Failed to link program");
     }
 }
@@ -63,7 +63,7 @@ void ShaderProgram::retrieve_uniforms() {
     GLint uniform_count {};
     glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &uniform_count);
 
-    log::debug("Shader({}) - Uniform count: {}", static_cast<int>(m_handle), uniform_count);
+    log::debug("Shader({}) - Uniform count: {}", static_cast<int32_t>(m_handle), uniform_count);
 
     if (uniform_count == 0) {
         return;
@@ -71,7 +71,7 @@ void ShaderProgram::retrieve_uniforms() {
 
     GLint max_name_length {};
     glGetProgramiv(m_handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_length);
-    log::debug("Shader({}) - Uniform max name length: {}", static_cast<int>(m_handle), max_name_length);
+    log::debug("Shader({}) - Uniform max name length: {}", static_cast<int32_t>(m_handle), max_name_length);
 
     std::string uniform_name {};
     uniform_name.reserve(max_name_length);
@@ -86,7 +86,7 @@ void ShaderProgram::retrieve_uniforms() {
         UniformInfo info {};
         info.location = glGetUniformLocation(m_handle, uniform_name.c_str());
         info.count = count;
-        log::debug("Shader({}) - Retrived uniform: name {}, location {}, count {}", static_cast<int>(m_handle),
+        log::debug("Shader({}) - Retrived uniform: name {}, location {}, count {}", static_cast<int32_t>(m_handle),
             uniform_name.c_str(), info.location, info.count);
 
         m_uniforms.emplace(std::make_pair(uniform_name.c_str(), info));
@@ -97,11 +97,11 @@ void ShaderProgram::retrieve_uniforms() {
 GLuint ShaderProgram::uniform_location(std::string_view name) const {
 
     if (m_uniforms.find(name.data()) == m_uniforms.end()) {
-        log::error("Shader({}) - Failed to find uniform with name {}", static_cast<int>(m_handle), name.data());
+        log::error("Shader({}) - Failed to find uniform with name {}", static_cast<int32_t>(m_handle), name.data());
         throw std::runtime_error("Failed to find uniform");
     }
 
-    int location = glGetUniformLocation(m_handle, name.data());
+    int32_t location = glGetUniformLocation(m_handle, name.data());
     return location;
 }
 }

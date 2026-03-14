@@ -77,7 +77,7 @@ bool ShaderStage::compile(std::string_view source) {
 
         glGetShaderInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_length, info_log.data());
         log::error("Error compiling shader id {}: {}", m_handle.get(),
-            std::string_view { info_log.data(), static_cast<std::size_t>(info_log_length) });
+            std::string_view { info_log.data(), static_cast<size_t>(info_log_length) });
 
         return false;
     }

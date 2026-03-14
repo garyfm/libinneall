@@ -15,9 +15,9 @@ public:
     using InputCallback = std::function<void(GLFWwindow*)>;
     using MouseCallback = void (*)(GLFWwindow*, double, double);
     using ScrollCallback = void (*)(GLFWwindow*, double, double);
-    using ResizeCallback = void (*)(GLFWwindow*, int, int);
+    using ResizeCallback = void (*)(GLFWwindow*, int32_t, int32_t);
 
-    Window(unsigned width, unsigned height, const std::string& title, InputCallback input_callback,
+    Window(uint32_t width, uint32_t height, const std::string& title, InputCallback input_callback,
         MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback);
 
     Window(const Window&) = delete;
@@ -42,7 +42,7 @@ private:
     uint32_t m_height { 0 };
     std::string m_title {};
 
-    static void framebuffer_resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height);
+    static void framebuffer_resize_callback([[maybe_unused]] GLFWwindow* window, int32_t width, int32_t height);
     std::unique_ptr<GLFWwindow, void (*)(GLFWwindow*)> m_window { nullptr, glfwDestroyWindow };
 
     // TODO: Temporary solution to allow game to handle input

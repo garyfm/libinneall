@@ -10,9 +10,9 @@
 namespace inl::obj {
 
 struct FaceCorner {
-    unsigned vertex_index;
-    unsigned texture_index;
-    unsigned normal_index;
+    uint32_t vertex_index;
+    uint32_t texture_index;
+    uint32_t normal_index;
 };
 
 struct Model {

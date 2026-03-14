@@ -3,12 +3,12 @@
 
 namespace inl {
 
-void set_uniform(ShaderProgram& shader, std::string_view name, unsigned value) {
+void set_uniform(ShaderProgram& shader, std::string_view name, uint32_t value) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform1i(shader.native_handle(), location, value);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, int value) {
+void set_uniform(ShaderProgram& shader, std::string_view name, int32_t value) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform1i(shader.native_handle(), location, value);
 }
@@ -43,8 +43,8 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Material const& m
     // TODO: Replace with static string
     std::string full_name { name };
     // NOTE: samplers must use glProgramUniform1i, explicit cast here to ensure interger is ued
-    set_uniform(shader, "u_material.albedo", static_cast<int>(material.albedo->unit()));
-    set_uniform(shader, "u_material.specular", static_cast<int>(material.specular->unit()));
+    set_uniform(shader, "u_material.albedo", static_cast<int32_t>(material.albedo->unit()));
+    set_uniform(shader, "u_material.specular", static_cast<int32_t>(material.specular->unit()));
     set_uniform(shader, "u_material.shininess", material.shininess);
 }
 
@@ -70,7 +70,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const&
     set_uniform(shader, full_name + ".atten_quadratic", light.atten_quadratic);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, std::size_t index) {
+void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, size_t index) {
     // TODO: Replace with static string
     std::string full_name { name };
     std::string index_str = std::to_string(index);

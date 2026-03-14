@@ -21,11 +21,11 @@ enum class Format {
 
 struct Image {
     Format format;
-    std::size_t width;
-    std::size_t height;
-    std::uint16_t max_value;
+    size_t width;
+    size_t height;
+    uint16_t max_value;
     // TODO: should this own the data ?
-    std::vector<std::uint8_t> pixel_data;
+    std::vector<uint8_t> pixel_data;
 };
 
 enum class Error {
@@ -38,7 +38,7 @@ enum class Error {
 };
 
 template <typename T> using Result = std::expected<T, Error>;
-Result<Image> load(std::span<std::uint8_t> raw_data);
+Result<Image> load(std::span<uint8_t> raw_data);
 
 Image flip_vertically(Image const& image);
 

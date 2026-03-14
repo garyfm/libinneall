@@ -24,12 +24,12 @@ public:
     void unbind();
     bool is_bound() const { return m_is_bound; }
 
-    std::size_t vertext_count() const { return m_vertex_count; };
-    std::size_t index_count() const { return m_index_count; };
+    size_t vertext_count() const { return m_vertex_count; };
+    size_t index_count() const { return m_index_count; };
 
 private:
-    std::size_t m_vertex_count {};
-    std::size_t m_index_count {};
+    size_t m_vertex_count {};
+    size_t m_index_count {};
 
     GlBuffer m_vertex_buffer {};
     GlBuffer m_index_buffer {};

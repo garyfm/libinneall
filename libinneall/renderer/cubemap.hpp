@@ -4,7 +4,8 @@
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <array>
-#include <cstddef>
+#include <stddef.h>
+
 namespace inl {
 
 void delete_texture(GLuint handle);

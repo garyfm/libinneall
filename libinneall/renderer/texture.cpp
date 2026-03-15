@@ -1,7 +1,7 @@
 #include <libinneall/base/assert.hpp>
 #include <libinneall/renderer/texture.hpp>
 
-#include <cstdint>
+#include <stdint.h>
 
 namespace inl {
 

@@ -3,7 +3,7 @@
 #include <libinneall/base/unique_resource.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
-#include <cstdint>
+#include <stdint.h>
 
 namespace inl {
 

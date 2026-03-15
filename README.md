@@ -55,6 +55,11 @@ Stage 4 - Advanced OpenGL
 - [x] GLSL UBO's
 - [x] CubeMaps
 
+Implement when needed:
+- [ ] Instancing
+- [ ] Anti-Aliasing
+- [ ] Normal Maps
+
 Misc:
 - [x] Error handing
 - [x] Logging
@@ -64,3 +69,19 @@ Misc:
 - [ ] Static String
 - [ ] Add platform layer (Remove GLFW)
 - [ ] Remove GLAD
+
+Removing STL:
+- [x] std integral types
+- [x] std::byte
+- [ ] std::array
+- [ ] std::span
+- [ ] std::vector
+- [ ] std::string
+- [ ] std::string_view
+- [ ] std::print
+- [ ] std::optional
+- [ ] std::expected
+- [ ] math
+- [ ] std::unqiue_ptr
+- [ ] file handling
+- [ ] hashmap

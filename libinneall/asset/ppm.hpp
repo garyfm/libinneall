@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
 #include <expected>
 #include <span>
+#include <stddef.h>
+#include <stdint.h>
 #include <vector>
 
 namespace inl::ppm {

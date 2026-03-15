@@ -7,6 +7,7 @@ source_files = files(
   'base/assert.cpp',
   'base/result.cpp',
   'base/string.cpp',
+  'camera.cpp',
   'math/math.cpp',
   'math/matrix3.cpp',
   'math/matrix4.cpp',
@@ -14,6 +15,7 @@ source_files = files(
   'math/vector2.cpp',
   'math/vector3.cpp',
   'math/vector4.cpp',
+  'mesh_data.cpp',
   'renderer/cubemap.cpp',
   'renderer/debug_mesh.cpp',
   'renderer/gl_buffer.cpp',
@@ -24,9 +26,6 @@ source_files = files(
   'renderer/shader_uniform.cpp',
   'renderer/texture.cpp',
   'renderer/vertex_array.cpp',
-  'camera.cpp',
-  'mesh_data.cpp',
-  'vertex_data.cpp',
   'window.cpp',
 )
 

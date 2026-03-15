@@ -1,4 +1,5 @@
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/byte.hpp>
 #include <libinneall/renderer/debug_mesh.hpp>
 #include <libinneall/renderer/renderer.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
@@ -36,7 +37,7 @@ void Renderer::render(RenderScene& scene, RenderView const& view) {
         ShaderProgram* const shader = model.material->shader;
         shader->use();
 
-        ubo_render_view.upload(0, as_bytes(view));
+        ubo_render_view.upload(0, to_bytes(view));
 
         if (scene.light_directional != nullptr) {
             set_uniform(*shader, "u_light_dir", *scene.light_directional);

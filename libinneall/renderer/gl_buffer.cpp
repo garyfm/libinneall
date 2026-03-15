@@ -1,7 +1,5 @@
 #include <libinneall/renderer/gl_buffer.hpp>
 
-#include <span>
-
 namespace inl {
 
 GlBuffer::GlBuffer(size_t size)
@@ -10,13 +8,13 @@ GlBuffer::GlBuffer(size_t size)
     create_buffer(nullptr, size);
 }
 
-GlBuffer::GlBuffer(std::span<std::byte const> data)
+GlBuffer::GlBuffer(std::span<uint8_t const> data)
     : m_size { data.size() } {
 
     create_buffer(data.data(), data.size());
 }
 
-void GlBuffer::allocate(std::span<std::byte const> data) {
+void GlBuffer::allocate(std::span<uint8_t const> data) {
     m_handle.reset();
     m_size = 0;
 
@@ -34,11 +32,11 @@ void GlBuffer::allocate(size_t size) {
     m_size = size;
 }
 
-void GlBuffer::upload(size_t offset, std::span<std::byte const> data) {
+void GlBuffer::upload(size_t offset, std::span<uint8_t const> data) {
     glNamedBufferSubData(m_handle, offset, data.size(), data.data());
 }
 
-void GlBuffer::create_buffer(std::byte const* data, size_t size) {
+void GlBuffer::create_buffer(uint8_t const* data, size_t size) {
     glCreateBuffers(1, &m_handle);
     glNamedBufferStorage(m_handle, size, data, GL_DYNAMIC_STORAGE_BIT);
 }

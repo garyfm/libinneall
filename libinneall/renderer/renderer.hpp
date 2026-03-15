@@ -19,10 +19,6 @@ struct RenderView {
     Vector3 pos;
 };
 
-inline std::span<std::byte const> as_bytes(RenderView const& render_view) {
-    return std::as_bytes(std::span<RenderView const>(&render_view, 1));
-}
-
 struct RenderScene {
     std::span<Model> models;
     LightDirectional* light_directional;

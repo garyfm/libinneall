@@ -1,6 +1,7 @@
 #include <libinneall/asset/asset.hpp>
 #include <libinneall/asset/obj.hpp>
 #include <libinneall/asset/ppm.hpp>
+#include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/result.hpp>
@@ -27,7 +28,6 @@
 #include <optional>
 #include <subprojects/glad/include/glad/glad.h>
 
-#include <array>
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -133,6 +133,8 @@ int main(int argc, char* argv[]) {
 
         std::string assets_path = argv[1];
 
+        Array<int, 10> array;
+
         const std::filesystem::path model_path = assets_path + "/backpack";
         const std::filesystem::path shader_path = assets_path + "/shaders";
 
@@ -164,7 +166,7 @@ int main(int argc, char* argv[]) {
         Model model { &mesh.value(), &material, model_matrix };
 
         // Skybox
-        std::array<std::string, 6> cubemap_files { {
+        Array<std::string, 6> cubemap_files { {
             { assets_path + "/skybox/right.ppm" },
             { assets_path + "/skybox/left.ppm" },
             { assets_path + "/skybox/top.ppm" },

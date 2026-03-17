@@ -1,11 +1,11 @@
 #pragma once
 
+#include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
 #include <libinneall/math/matrix3.hpp>
 #include <libinneall/math/vector3.hpp>
 #include <libinneall/math/vector4.hpp>
 
-#include <array>
 #include <format>
 #include <span>
 
@@ -16,7 +16,7 @@ class Matrix4 {
 public:
     Matrix4() = default;
     explicit Matrix4(float diagonal);
-    explicit Matrix4(const std::array<float, 16>& elements);
+    explicit Matrix4(const Array<float, 16>& elements);
 
     float operator[](size_t i) const {
         INL_ASSERT(i < 16, "Out of bounds array access");
@@ -55,13 +55,13 @@ public:
     static Matrix4 create_perspective(float fov_y, float aspect, float z_near, float z_far);
     static Matrix4 create_look_at(Vector3 position, Vector3 target, Vector3 up);
 
-    std::span<const float> elements() const { return m_elements; };
+    std::span<const float> elements() const { return { m_elements.data(), m_elements.size() }; };
     float element(size_t row, size_t col) const { return m_elements[(col * 4) + row]; };
 
     operator Matrix3() const;
 
 private:
-    std::array<float, 16> m_elements {};
+    Array<float, 16> m_elements {};
 };
 
 float cofactor(Matrix4 const& matrix, size_t row, size_t col);

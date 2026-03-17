@@ -1,11 +1,10 @@
+#include <libinneall/base/array.hpp>
 #include <libinneall/renderer/debug_mesh.hpp>
-
-#include <array>
 
 namespace inl {
 
 Mesh* debug_mesh_triangle() {
-    static std::array<VertexData, 36> debug_triangle_vertices { {
+    static Array<VertexData, 36> debug_triangle_vertices { {
         { { -0.5f, -0.5f, 0.0f }, {}, {} },
         { { 0.5f, -0.5f, 0.0f }, {}, {} },
         { { 0.5f, 0.5f, 0.0f }, {}, {} },
@@ -19,7 +18,7 @@ Mesh* debug_mesh_triangle() {
 }
 
 Mesh* debug_mesh_quad() {
-    static std::array<VertexData, 36> debug_quad_vertices { {
+    static Array<VertexData, 36> debug_quad_vertices { {
         // triangle 1
         { { -0.5f, -0.5f, 0.0f }, {}, {} },
         { { 0.5f, -0.5f, 0.0f }, {}, {} },
@@ -38,7 +37,7 @@ Mesh* debug_mesh_quad() {
 }
 
 Mesh* debug_mesh_cube() {
-    static std::array<VertexData, 36> debug_cube_vertices { {
+    static Array<VertexData, 36> debug_cube_vertices { {
         { { -0.5f, -0.5f, -0.5f }, {}, {} },
         { { 0.5f, -0.5f, -0.5f }, {}, {} },
         { { 0.5f, 0.5f, -0.5f }, {}, {} },
@@ -90,7 +89,7 @@ Mesh* debug_mesh_cube() {
 }
 
 Mesh* mesh_cubemap() {
-    static std::array<VertexData, 36> cubemap_vertices { {
+    static Array<VertexData, 36> cubemap_vertices { {
         { { -1.0f, -1.0f, -1.0f }, {}, {} },
         { { 1.0f, -1.0f, -1.0f }, {}, {} },
         { { 1.0f, 1.0f, -1.0f }, {}, {} },

@@ -83,9 +83,9 @@ std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_v
     return texture;
 }
 
-std::optional<Cubemap> load_cubemap(std::array<std::string, 6> paths, bool flip_vertically) {
+std::optional<Cubemap> load_cubemap(Array<std::string, 6> paths, bool flip_vertically) {
 
-    std::array<ppm::Image, 6> cubemap_data {};
+    Array<ppm::Image, 6> cubemap_data {};
 
     for (size_t i = 0; i < cubemap_data.size(); ++i) {
 
@@ -105,7 +105,7 @@ std::optional<Cubemap> load_cubemap(std::array<std::string, 6> paths, bool flip_
         cubemap_data[i] = *image;
     }
 
-    std::array<uint8_t const*, 6> skybox_faces { {
+    Array<uint8_t const*, 6> skybox_faces { {
         cubemap_data[0].pixel_data.data(),
         cubemap_data[1].pixel_data.data(),
         cubemap_data[2].pixel_data.data(),

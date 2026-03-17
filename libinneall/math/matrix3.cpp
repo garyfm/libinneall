@@ -15,7 +15,7 @@ Matrix3::Matrix3(float diagonal)
         diagonal,
     } { }
 
-Matrix3::Matrix3(const std::array<float, 9>& elements)
+Matrix3::Matrix3(const Array<float, 9>& elements)
     : m_elements { elements } { }
 
 Matrix3 Matrix3::operator-() const {

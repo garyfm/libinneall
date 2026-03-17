@@ -1,9 +1,9 @@
 #pragma once
 
+#include <libinneall/base/array.hpp>
 #include <libinneall/base/unique_resource.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
-#include <array>
 #include <stddef.h>
 
 namespace inl {
@@ -12,7 +12,7 @@ void delete_texture(GLuint handle);
 
 class Cubemap {
 public:
-    explicit Cubemap(size_t width, size_t height, size_t n_components, std::array<uint8_t const*, 6> faces);
+    explicit Cubemap(size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces);
 
     Cubemap(const Cubemap&) = delete;
     Cubemap operator=(const Cubemap&) = delete;

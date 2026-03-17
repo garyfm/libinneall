@@ -1,3 +1,4 @@
+#include <libinneall/base/array.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/renderer/shader_program.hpp>
@@ -49,7 +50,8 @@ void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fra
     glGetProgramiv(m_handle, GL_LINK_STATUS, &success);
 
     if (success != GL_TRUE) {
-        std::array<GLchar, MAX_OPENGL_INFO_LOG_SIZE> info_log { 0 };
+        // TODO: Use static string
+        Array<GLchar, MAX_OPENGL_INFO_LOG_SIZE> info_log { 0 };
         GLsizei info_log_length { 0 };
 
         glGetProgramInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_length, info_log.data());

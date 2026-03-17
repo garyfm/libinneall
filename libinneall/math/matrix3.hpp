@@ -1,8 +1,8 @@
 #pragma once
 
+#include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
 
-#include <array>
 #include <format>
 #include <span>
 
@@ -13,7 +13,7 @@ class Matrix3 {
 public:
     Matrix3() = default;
     explicit Matrix3(float diagonal);
-    explicit Matrix3(const std::array<float, 9>& elements);
+    explicit Matrix3(const Array<float, 9>& elements);
 
     float operator[](size_t i) const {
         INL_ASSERT(i < 9, "Out of bounds array access");
@@ -46,11 +46,11 @@ public:
     friend Matrix3 operator-(Matrix3 const& left, Matrix3 const& right);
     friend Matrix3 operator*(Matrix3 const& left, Matrix3 const& right);
 
-    std::span<const float> elements() const { return m_elements; };
+    std::span<const float> elements() const { return { m_elements.data(), m_elements.size() }; };
     float element(size_t row, size_t col) const { return m_elements[(col * 3) + row]; };
 
 private:
-    std::array<float, 9> m_elements {};
+    Array<float, 9> m_elements {};
 };
 
 float determinant(Matrix3 const& matrix);

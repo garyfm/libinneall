@@ -1,8 +1,7 @@
+#include <libinneall/base/array.hpp>
+#include <libinneall/base/log.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
 
-#include <libinneall/base/log.hpp>
-
-#include <exception>
 #include <string_view>
 
 namespace {
@@ -72,7 +71,8 @@ bool ShaderStage::compile(std::string_view source) {
     glGetShaderiv(m_handle, GL_COMPILE_STATUS, &success);
 
     if (success != GL_TRUE) {
-        std::array<GLchar, MAX_OPENGL_INFO_LOG_SIZE> info_log { 0 };
+        // TODO: Use static string
+        Array<GLchar, MAX_OPENGL_INFO_LOG_SIZE> info_log { 0 };
         GLsizei info_log_length { 0 };
 
         glGetShaderInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_length, info_log.data());

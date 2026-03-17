@@ -2,8 +2,6 @@
 #include <libinneall/math/matrix3.hpp>
 #include <libinneall/math/matrix4.hpp>
 
-#include <array>
-
 namespace inl {
 
 Matrix4::Matrix4(float identity)
@@ -26,7 +24,7 @@ Matrix4::Matrix4(float identity)
         identity,
     } { }
 
-Matrix4::Matrix4(const std::array<float, 16>& elements)
+Matrix4::Matrix4(const Array<float, 16>& elements)
     : m_elements { elements } { }
 
 Matrix4 Matrix4::operator-() const {
@@ -311,7 +309,7 @@ Matrix4::operator Matrix3() const {
 
 float cofactor(Matrix4 const& matrix, size_t row, size_t col) {
 
-    std::array<float, 9> minor { 0 };
+    Array<float, 9> minor { 0 };
 
     size_t index { 0 };
 
@@ -376,7 +374,7 @@ Matrix4 inverse(Matrix4 const& matrix) {
     //    return {};
     //}
 
-    std::array<float, 16> cofactors { 0 };
+    Array<float, 16> cofactors { 0 };
 
     for (size_t col = 0; col < 4; ++col) {
         for (size_t row = 0; row < 4; ++row) {

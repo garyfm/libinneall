@@ -1,7 +1,8 @@
 #pragma once
 
+#include <libinneall/base/span.hpp>
+
 #include <expected>
-#include <span>
 #include <stddef.h>
 #include <stdint.h>
 #include <vector>
@@ -38,7 +39,7 @@ enum class Error {
 };
 
 template <typename T> using Result = std::expected<T, Error>;
-Result<Image> load(std::span<uint8_t> raw_data);
+Result<Image> load(Span<uint8_t> raw_data);
 
 Image flip_vertically(Image const& image);
 

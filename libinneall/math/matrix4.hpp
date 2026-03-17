@@ -2,12 +2,12 @@
 
 #include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/span.hpp>
 #include <libinneall/math/matrix3.hpp>
 #include <libinneall/math/vector3.hpp>
 #include <libinneall/math/vector4.hpp>
 
 #include <format>
-#include <span>
 
 namespace inl {
 
@@ -55,7 +55,7 @@ public:
     static Matrix4 create_perspective(float fov_y, float aspect, float z_near, float z_far);
     static Matrix4 create_look_at(Vector3 position, Vector3 target, Vector3 up);
 
-    std::span<const float> elements() const { return { m_elements.data(), m_elements.size() }; };
+    Span<float const> elements() const { return { m_elements.data(), m_elements.size() }; };
     float element(size_t row, size_t col) const { return m_elements[(col * 4) + row]; };
 
     operator Matrix3() const;

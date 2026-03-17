@@ -4,8 +4,6 @@
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/vertex_array.hpp>
 
-#include <vector>
-
 namespace inl {
 
 class Mesh {

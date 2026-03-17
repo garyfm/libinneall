@@ -1,9 +1,9 @@
 #pragma once
 
+#include <libinneall/base/span.hpp>
 #include <libinneall/base/unique_resource.hpp>
-#include <subprojects/glad/include/glad/glad.h>
 
-#include <span>
+#include <subprojects/glad/include/glad/glad.h>
 
 namespace inl {
 
@@ -11,11 +11,11 @@ class GlBuffer {
 public:
     GlBuffer() = default;
     explicit GlBuffer(size_t size);
-    explicit GlBuffer(std::span<uint8_t const> data);
+    explicit GlBuffer(Span<uint8_t const> data);
 
     void allocate(size_t size);
-    void allocate(std::span<uint8_t const> data);
-    void upload(size_t offset, std::span<uint8_t const> data);
+    void allocate(Span<uint8_t const> data);
+    void upload(size_t offset, Span<uint8_t const> data);
 
     GLuint native_handle() const { return m_handle; }
     size_t size() const { return m_size; };

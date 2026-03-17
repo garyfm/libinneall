@@ -2,9 +2,9 @@
 
 #include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/span.hpp>
 
 #include <format>
-#include <span>
 
 namespace inl {
 
@@ -46,7 +46,7 @@ public:
     friend Matrix3 operator-(Matrix3 const& left, Matrix3 const& right);
     friend Matrix3 operator*(Matrix3 const& left, Matrix3 const& right);
 
-    std::span<const float> elements() const { return { m_elements.data(), m_elements.size() }; };
+    Span<float const> elements() const { return { m_elements.data(), m_elements.size() }; };
     float element(size_t row, size_t col) const { return m_elements[(col * 3) + row]; };
 
 private:

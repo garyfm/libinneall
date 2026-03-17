@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libinneall/base/span.hpp>
 #include <libinneall/light.hpp>
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/math/vector3.hpp>
@@ -8,8 +9,6 @@
 #include <libinneall/renderer/shader_program.hpp>
 
 #include <subprojects/glad/include/glad/glad.h>
-
-#include <span>
 
 namespace inl {
 
@@ -20,9 +19,9 @@ struct RenderView {
 };
 
 struct RenderScene {
-    std::span<Model> models;
+    Span<Model> models;
     LightDirectional* light_directional;
-    std::span<LightPoint> light_points;
+    Span<LightPoint> light_points;
     LightSpot* light_spot;
 };
 

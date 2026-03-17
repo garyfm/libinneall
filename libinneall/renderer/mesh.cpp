@@ -1,4 +1,5 @@
 #include <libinneall/base/byte.hpp>
+#include <libinneall/base/span.hpp>
 #include <libinneall/renderer/mesh.hpp>
 
 namespace inl {
@@ -6,8 +7,7 @@ namespace inl {
 Mesh::Mesh(MeshData const& mesh_data)
     : m_vertex_count { mesh_data.vertex_data.size() }
     , m_index_count { mesh_data.index_data.size() }
-    , m_vertex_buffer { to_bytes(*mesh_data.vertex_data.data(), mesh_data.vertex_data.size()) } {
-
+    , m_vertex_buffer { to_bytes(Span { mesh_data.vertex_data.data(), mesh_data.vertex_data.size() }) } {
     m_vertex_array.bind_vertex_buffer({
         .index = 0,
         .buffer = m_vertex_buffer,
@@ -16,7 +16,7 @@ Mesh::Mesh(MeshData const& mesh_data)
     });
 
     if (mesh_data.index_data.size() != 0) {
-        m_index_buffer = GlBuffer(to_bytes(*mesh_data.index_data.data(), mesh_data.index_data.size()));
+        m_index_buffer = GlBuffer(to_bytes(Span { mesh_data.index_data.data(), mesh_data.index_data.size() }));
         m_vertex_array.bind_element_buffer(m_index_buffer);
     }
 
@@ -59,7 +59,6 @@ Mesh::Mesh(Mesh&& other) noexcept
 }
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
-
     if (this != std::addressof(other)) {
         if (is_bound()) {
             unbind();

@@ -12,8 +12,7 @@ struct HasherVertexData {
     size_t operator()(const VertexData& key) const {
         using std::hash;
 
-        size_t hash_pos
-            = hash<float>()(key.pos.x) ^ (hash<float>()(key.pos.y) << 1) ^ (hash<float>()(key.pos.z) << 2);
+        size_t hash_pos = hash<float>()(key.pos.x) ^ (hash<float>()(key.pos.y) << 1) ^ (hash<float>()(key.pos.z) << 2);
 
         size_t hash_uv = hash<float>()(key.uv.x) ^ (hash<float>()(key.uv.y) << 1);
         size_t hash_normal

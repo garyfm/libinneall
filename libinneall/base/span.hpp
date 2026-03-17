@@ -30,6 +30,11 @@ public:
         return m_data[index];
     }
 
+    Span<T> subspan(size_t offset, size_t size) {
+        INL_ASSERT(offset + size < m_size, "Inavlid offset + size");
+        return { m_data + offset, size };
+    }
+
     T* data() { return m_data; };
     T const* data() const { return m_data; };
 
@@ -40,6 +45,7 @@ public:
     T const* end() const { return m_data + m_size; };
 
     constexpr size_t size() const { return m_size; };
+    constexpr size_t size_bytes() const { return m_size * sizeof(T); };
 
 private:
     T* m_data {};

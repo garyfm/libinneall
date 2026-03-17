@@ -5,7 +5,6 @@
 
 #include <fstream>
 #include <optional>
-#include <span>
 
 namespace inl {
 
@@ -46,7 +45,7 @@ std::optional<ppm::Image> load_image(std::filesystem::path path) {
         return std::nullopt;
     }
 
-    ppm::Result<ppm::Image> image = ppm::load(*raw_image_data);
+    ppm::Result<ppm::Image> image = ppm::load({ raw_image_data->data(), raw_image_data->size() });
     if (!image) {
         log::error("Failed to load ppm image error: {}", static_cast<int32_t>(image.error()));
         return std::nullopt;

@@ -30,8 +30,6 @@
 
 #include <chrono>
 #include <cmath>
-#include <fstream>
-#include <span>
 
 namespace {
 

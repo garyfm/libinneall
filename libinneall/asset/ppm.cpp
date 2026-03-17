@@ -10,7 +10,7 @@
 
 namespace {
 
-inl::ppm::Result<void> skip_whitespace(std::span<uint8_t> buffer, size_t& cursor) {
+inl::ppm::Result<void> skip_whitespace(inl::Span<uint8_t> buffer, size_t& cursor) {
 
     unsigned char c {};
     while (cursor < buffer.size()) {
@@ -35,7 +35,7 @@ inl::ppm::Result<void> skip_whitespace(std::span<uint8_t> buffer, size_t& cursor
     return {};
 }
 
-inl::ppm::Result<int32_t> extract_int(std::span<uint8_t> buffer, size_t& cursor) {
+inl::ppm::Result<int32_t> extract_int(inl::Span<uint8_t> buffer, size_t& cursor) {
 
     std::string str;
     while (cursor < buffer.size() && std::isdigit(buffer[cursor])) {
@@ -59,7 +59,7 @@ inl::ppm::Result<int32_t> extract_int(std::span<uint8_t> buffer, size_t& cursor)
 
 namespace inl::ppm {
 
-Result<Image> load(std::span<uint8_t> raw_data) {
+Result<Image> load(Span<uint8_t> raw_data) {
 
     size_t cursor { 0 };
     std::string format;

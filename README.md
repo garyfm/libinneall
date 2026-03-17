@@ -71,13 +71,14 @@ Misc:
 - [ ] Remove GLAD
 
 Removing STL:
+Size: 5116096
 - [x] std integral types
 - [x] std::byte
-- [ ] std::array
-- [ ] std::span
-- [ ] std::vector
+- [x] std::array
+- [x] std::span
 - [ ] std::string
 - [ ] std::string_view
+- [ ] std::vector
 - [ ] std::print
 - [ ] std::optional
 - [ ] std::expected

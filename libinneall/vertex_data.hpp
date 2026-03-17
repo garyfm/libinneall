@@ -3,8 +3,6 @@
 #include <libinneall/math/vector2.hpp>
 #include <libinneall/math/vector3.hpp>
 
-#include <span>
-
 namespace inl {
 
 struct VertexData {

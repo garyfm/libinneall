@@ -2,6 +2,64 @@
 
 #include <libinneall/base/string.hpp>
 
+TEST_CASE("String: Test strlen") {
+    {
+        char str[] = "Hello, World!";
+
+        CHECK(inl::strlen(str) == 13);
+    }
+
+    {
+        char str[] = "Hello\0,World!";
+
+        CHECK(inl::strlen(str) == 5);
+    }
+
+    { CHECK(inl::strlen("Hello, World!") == 13); }
+}
+
+TEST_CASE("String: Test memcmp") {
+
+    {
+        char str1[] = "Hello, World!";
+        char str2[] = "Hello, World!";
+
+        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == 0);
+    }
+
+    {
+        char str1[] = "Hello, World!";
+        char str2[] = "Hfllo, World!";
+
+        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == -1);
+    }
+
+    {
+        char str1[] = "Hello, World!";
+        char str2[] = "Aello, World!";
+
+        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == 1);
+    }
+
+    {
+        char str1[] = "Hello, World!";
+        char str2[] = "Hello, Worlda";
+
+        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == -1);
+    }
+}
+
+TEST_CASE("String: Test isspace") {
+    {
+        char c = ' ';
+        CHECK(inl::isspace(c));
+        c = '\n';
+        CHECK(inl::isspace(c));
+        c = '\t';
+        CHECK(inl::isspace(c));
+    }
+}
+
 TEST_CASE("string: trim") {
     const std::string expected { "hello, world!" };
     std::string s_left { "    hello, world!" };

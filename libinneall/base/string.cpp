@@ -1,11 +1,28 @@
 #include <libinneall/base/string.hpp>
+#include <stdint.h>
 
 namespace inl {
+
+int memcmp(void const* lhs, void const* rhs, size_t size) {
+    INL_ASSERT(lhs != nullptr, "Invalid pointer");
+    INL_ASSERT(rhs != nullptr, "Invalid pointer");
+
+    auto lhs_bytes = reinterpret_cast<uint8_t const*>(lhs);
+    auto rhs_bytes = reinterpret_cast<uint8_t const*>(rhs);
+
+    for (size_t i = 0; i < size; ++i) {
+        if (lhs_bytes[i] != rhs_bytes[i]) {
+            return (lhs_bytes[i] < rhs_bytes[i]) ? -1 : 1;
+        }
+    }
+
+    return 0;
+}
 
 std::string_view trim_left(std::string_view sv) {
     size_t cursor { 0 };
     for (; cursor < sv.size(); ++cursor) {
-        if (!std::isspace(sv[cursor])) {
+        if (!inl::isspace(sv[cursor])) {
             break;
         }
     }
@@ -16,7 +33,7 @@ std::string_view trim_left(std::string_view sv) {
 std::string_view trim_right(std::string_view sv) {
     int32_t cursor { static_cast<int32_t>(sv.size() - 1) };
     for (; cursor >= 0; --cursor) {
-        if (!std::isspace(sv[cursor])) {
+        if (!inl::isspace(sv[cursor])) {
             break;
         }
     }

@@ -1,7 +1,9 @@
-#include <doctest.h>
-#include <stdint.h>
 
 #include <libinneall/base/string.hpp>
+#include <libinneall/math/math.hpp>
+
+#include <doctest.h>
+#include <stdint.h>
 
 TEST_CASE("String: Test strlen") {
     {
@@ -237,7 +239,7 @@ TEST_CASE("String: Test String mutating") {
     }
 }
 
-TEST_CASE("string: trim") {
+TEST_CASE("String: trim") {
     const inl::String expected { "hello, world!" };
     inl::String s_left { "    hello, world!" };
     inl::String s_right { "hello, world!    " };
@@ -250,7 +252,7 @@ TEST_CASE("string: trim") {
     CHECK(inl::trim(s_escape) == expected);
 }
 
-TEST_CASE("string: cut") {
+TEST_CASE("String: cut") {
     {
         inl::String input { "hello, world!" };
         const inl::String expected_left { "hello" };
@@ -285,5 +287,87 @@ TEST_CASE("string: cut") {
         CHECK(result.success == false);
         CHECK(result.left == expected_left);
         // CHECK(result.right == expected_right);
+    }
+}
+
+TEST_CASE("String: to_string") {
+    {
+
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(1);
+        CHECK(str[0] == '1');
+        CHECK(str.size() == 1);
+    }
+
+    {
+
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(0);
+        CHECK(str[0] == '0');
+        CHECK(str.size() == 1);
+    }
+
+    {
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(-1);
+        CHECK(str[0] == '-');
+        CHECK(str[1] == '1');
+        CHECK(str.size() == 2);
+    }
+
+    {
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(15);
+        CHECK(str[0] == '1');
+        CHECK(str[1] == '5');
+        CHECK(str.size() == 2);
+    }
+    {
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(-15);
+        CHECK(str[0] == '-');
+        CHECK(str[1] == '1');
+        CHECK(str[2] == '5');
+        CHECK(str.size() == 3);
+    }
+
+    {
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(inl::MAX_INT32);
+        CHECK(str[0] == '2');
+        CHECK(str[1] == '1');
+        CHECK(str[2] == '4');
+        CHECK(str[3] == '7');
+        CHECK(str[4] == '4');
+        CHECK(str[5] == '8');
+        CHECK(str[6] == '3');
+        CHECK(str[7] == '6');
+        CHECK(str[8] == '4');
+        CHECK(str[9] == '7');
+        CHECK(str.size() == 10);
+    }
+
+    {
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(inl::MIN_INT32);
+        CHECK(str[0] == '-');
+        CHECK(str[1] == '2');
+        CHECK(str[2] == '1');
+        CHECK(str[3] == '4');
+        CHECK(str[4] == '7');
+        CHECK(str[5] == '4');
+        CHECK(str[6] == '8');
+        CHECK(str[7] == '3');
+        CHECK(str[8] == '6');
+        CHECK(str[9] == '4');
+        CHECK(str[10] == '8');
+        CHECK(str.size() == 11);
+    }
+    {
+        inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str = inl::to_string(inl::MAX_UINT32);
+        CHECK(str[0] == '4');
+        CHECK(str[1] == '2');
+        CHECK(str[2] == '9');
+        CHECK(str[3] == '4');
+        CHECK(str[4] == '9');
+        CHECK(str[5] == '6');
+        CHECK(str[6] == '7');
+        CHECK(str[7] == '2');
+        CHECK(str[8] == '9');
+        CHECK(str[9] == '5');
+        CHECK(str.size() == 10);
     }
 }

@@ -12,4 +12,20 @@ float clamp(float value, float min, float max) {
     return value;
 }
 
+float abs(float value) {
+    if (value < 0) {
+        return -value;
+    }
+
+    return value;
+}
+
+int abs(int value) {
+    if (value < 0) {
+        return -value;
+    }
+
+    return value;
+}
+
 } // namespace inl

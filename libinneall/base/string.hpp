@@ -2,6 +2,7 @@
 
 #include <libinneall/base/assert.hpp>
 
+#include <stdint.h>
 #include <string_view>
 
 namespace inl {
@@ -136,6 +137,13 @@ public:
         return *this;
     }
 
+    String& append(char c) {
+
+        append({ &c, 1 });
+
+        return *this;
+    }
+
     String& replace(std::string_view sv, size_t pos = 0) {
         INL_ASSERT(sv.size() + pos <= m_size, "replace string overflows the capactiy");
 
@@ -191,5 +199,12 @@ std::string_view trim_right(std::string_view sv);
 std::string_view trim(std::string_view sv);
 
 Cut cut(std::string_view sv, char deliminator);
+
+uint8_t digit_count(uint32_t number);
+
+constexpr size_t MAX_STRING_SIZE_OF_NUMBER = 11;
+
+String<MAX_STRING_SIZE_OF_NUMBER> to_string(int32_t number);
+String<MAX_STRING_SIZE_OF_NUMBER> to_string(uint32_t number);
 
 } // namespace

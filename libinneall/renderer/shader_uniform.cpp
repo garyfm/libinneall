@@ -1,4 +1,5 @@
-#include "light.hpp"
+#include <libinneall/base/string.hpp>
+#include <libinneall/light.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
 
 namespace inl {
@@ -40,60 +41,63 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Matrix4 const& ma
 }
 
 void set_uniform(ShaderProgram& shader, std::string_view name, Material const& material) {
-    // TODO: Replace with static string
-    std::string full_name { name };
-    // NOTE: samplers must use glProgramUniform1i, explicit cast here to ensure interger is ued
-    set_uniform(shader, "u_material.albedo", static_cast<int32_t>(material.albedo->unit()));
-    set_uniform(shader, "u_material.specular", static_cast<int32_t>(material.specular->unit()));
-    set_uniform(shader, "u_material.shininess", material.shininess);
+    String<MAX_SHADER_UNIFORM_NAME> buffer { name };
+
+    // NOTE: samplers must use glProgramUniform1i, explicit cast here to ensure interger is used
+    set_uniform(shader, buffer.append(".albedo"), static_cast<int32_t>(material.albedo->unit()));
+    set_uniform(shader, buffer.overwrite(".specular", name.size()), static_cast<int32_t>(material.specular->unit()));
+    set_uniform(shader, buffer.overwrite(".shininess", name.size()), material.shininess);
 }
 
 void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional const& light) {
-    // TODO: Replace with static string
-    std::string full_name { name };
-    set_uniform(shader, full_name + ".dir", light.dir);
-    set_uniform(shader, full_name + ".ambient", light.ambient);
-    set_uniform(shader, full_name + ".diffuse", light.diffuse);
-    set_uniform(shader, full_name + ".specular", light.specular);
+    String<MAX_SHADER_UNIFORM_NAME> buffer { name };
+
+    set_uniform(shader, buffer.append(".dir"), light.dir);
+    set_uniform(shader, buffer.overwrite(".ambient", name.size()), light.ambient);
+    set_uniform(shader, buffer.overwrite(".diffuse", name.size()), light.diffuse);
+    set_uniform(shader, buffer.overwrite(".specular", name.size()), light.specular);
 }
 
 void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light) {
-    // TODO: Replace with static string
-    std::string full_name { name };
-    set_uniform(shader, full_name + ".pos", light.pos);
-    set_uniform(shader, full_name + ".ambient", light.ambient);
-    set_uniform(shader, full_name + ".diffuse", light.diffuse);
-    set_uniform(shader, full_name + ".specular", light.specular);
+    String<MAX_SHADER_UNIFORM_NAME> buffer { name };
 
-    set_uniform(shader, full_name + ".atten_constant", light.atten_constant);
-    set_uniform(shader, full_name + ".atten_linear", light.atten_linear);
-    set_uniform(shader, full_name + ".atten_quadratic", light.atten_quadratic);
+    set_uniform(shader, buffer.append(".pos"), light.pos);
+    set_uniform(shader, buffer.overwrite(".ambient", name.size()), light.ambient);
+    set_uniform(shader, buffer.overwrite(".diffuse", name.size()), light.diffuse);
+    set_uniform(shader, buffer.overwrite(".specular", name.size()), light.specular);
+
+    set_uniform(shader, buffer.overwrite(".atten_constant", name.size()), light.atten_constant);
+    set_uniform(shader, buffer.overwrite(".atten_linear", name.size()), light.atten_linear);
+    set_uniform(shader, buffer.overwrite(".atten_quadratic", name.size()), light.atten_quadratic);
 }
 
 void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, size_t index) {
-    // TODO: Replace with static string
-    std::string full_name { name };
-    std::string index_str = std::to_string(index);
-    set_uniform(shader, full_name + "[" + index_str + "].pos", light.pos);
-    set_uniform(shader, full_name + "[" + index_str + "].ambient", light.ambient);
-    set_uniform(shader, full_name + "[" + index_str + "].diffuse", light.diffuse);
-    set_uniform(shader, full_name + "[" + index_str + "].specular", light.specular);
+    String<MAX_STRING_SIZE_OF_NUMBER> index_str = to_string(static_cast<uint32_t>(index));
+    String<MAX_SHADER_UNIFORM_NAME> buffer { name };
+    buffer.append("[");
+    buffer.append(index_str);
+    buffer.append("]");
+    size_t member_pos = buffer.size();
 
-    set_uniform(shader, full_name + "[" + index_str + "].atten_constant", light.atten_constant);
-    set_uniform(shader, full_name + "[" + index_str + "].atten_linear", light.atten_linear);
-    set_uniform(shader, full_name + "[" + index_str + "].atten_quadratic", light.atten_quadratic);
+    set_uniform(shader, buffer.append(".pos"), light.pos);
+    set_uniform(shader, buffer.overwrite(".ambient", member_pos), light.ambient);
+    set_uniform(shader, buffer.overwrite(".diffuse", member_pos), light.diffuse);
+    set_uniform(shader, buffer.overwrite(".specular", member_pos), light.specular);
+
+    set_uniform(shader, buffer.overwrite(".atten_constant", member_pos), light.atten_constant);
+    set_uniform(shader, buffer.overwrite(".atten_linear", member_pos), light.atten_linear);
+    set_uniform(shader, buffer.overwrite(".atten_quadratic", member_pos), light.atten_quadratic);
 }
 
 void set_uniform(ShaderProgram& shader, std::string_view name, LightSpot const& light) {
-    // TODO: Replace with static string
-    std::string full_name { name };
-    set_uniform(shader, full_name + ".pos", light.pos);
-    set_uniform(shader, full_name + ".dir", light.dir);
-    set_uniform(shader, full_name + ".ambient", light.ambient);
-    set_uniform(shader, full_name + ".diffuse", light.diffuse);
-    set_uniform(shader, full_name + ".specular", light.specular);
-    set_uniform(shader, full_name + ".inner_cutoff_cosine", light.inner_cutoff_cosine);
-    set_uniform(shader, full_name + ".outer_cutoff_cosine", light.outer_cutoff_cosine);
+    String<MAX_SHADER_UNIFORM_NAME> buffer { name };
+    set_uniform(shader, buffer.append(".pos"), light.pos);
+    set_uniform(shader, buffer.overwrite(".dir", name.size()), light.dir);
+    set_uniform(shader, buffer.overwrite(".ambient", name.size()), light.ambient);
+    set_uniform(shader, buffer.overwrite(".diffuse", name.size()), light.diffuse);
+    set_uniform(shader, buffer.overwrite(".specular", name.size()), light.specular);
+    set_uniform(shader, buffer.overwrite(".inner_cutoff_cosine", name.size()), light.inner_cutoff_cosine);
+    set_uniform(shader, buffer.overwrite(".outer_cutoff_cosine", name.size()), light.outer_cutoff_cosine);
 }
 
 }; // namespace inl

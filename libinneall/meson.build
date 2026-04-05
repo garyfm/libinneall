@@ -5,6 +5,7 @@ source_files = files(
   'asset/obj.cpp',
   'asset/ppm.cpp',
   'base/assert.cpp',
+  'base/hash.cpp',
   'base/result.cpp',
   'base/string.cpp',
   'camera.cpp',
@@ -32,6 +33,7 @@ source_files = files(
 test_files = files(
     'doctest.cpp',
     'base/array.test.cpp',
+    'base/hash.test.cpp',
     'base/string.test.cpp',
     'math/matrix3.test.cpp',
     'math/matrix4.test.cpp',

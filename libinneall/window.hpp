@@ -1,12 +1,13 @@
 #pragma once
 
+#include <libinneall/base/string.hpp>
+
 #define GLFW_INCLUDE_NONE
 #include <subprojects/glad/include/glad/glad.h>
 #include <subprojects/glfw-3.4/include/GLFW/glfw3.h>
 
 #include <functional>
 #include <memory>
-#include <string>
 
 namespace inl {
 
@@ -17,7 +18,7 @@ public:
     using ScrollCallback = void (*)(GLFWwindow*, double, double);
     using ResizeCallback = void (*)(GLFWwindow*, int32_t, int32_t);
 
-    Window(uint32_t width, uint32_t height, const std::string& title, InputCallback input_callback,
+    Window(uint32_t width, uint32_t height, std::string_view title, InputCallback input_callback,
         MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback);
 
     Window(const Window&) = delete;
@@ -38,9 +39,10 @@ public:
     void resize(uint32_t width, uint32_t height);
 
 private:
+    static constexpr size_t MAX_TITLE_SIZE { 128 };
     uint32_t m_width { 0 };
     uint32_t m_height { 0 };
-    std::string m_title {};
+    String<MAX_TITLE_SIZE> m_title {};
 
     static void framebuffer_resize_callback([[maybe_unused]] GLFWwindow* window, int32_t width, int32_t height);
     std::unique_ptr<GLFWwindow, void (*)(GLFWwindow*)> m_window { nullptr, glfwDestroyWindow };

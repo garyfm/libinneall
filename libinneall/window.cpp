@@ -3,110 +3,111 @@
 
 #include <memory>
 
-namespace inl {
-
 namespace {
-    void error_callback(int32_t error, const char* description) {
-        log::error("GLFW error: {}({})", description, error);
+void error_callback(int32_t error, const char* description) {
+    inl::log::error("GLFW error: {}({})", description, error);
+}
+
+void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
+    [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
+    // ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
+        return;
+
+    std::string_view source_str {};
+    switch (source) {
+    case GL_DEBUG_SOURCE_API:
+        source_str = "api";
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+        source_str = "window system";
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+        source_str = "shader compiler";
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+        source_str = "third party";
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+        source_str = "application";
+        break;
+    case GL_DEBUG_SOURCE_OTHER:
+        source_str = "other";
+        break;
+    default:
+        source_str = "unknown";
     }
 
-    void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
-        [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
-        // ignore non-significant error/warning codes
-        if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
-            return;
+    std::string_view type_str {};
+    switch (type) {
+    case GL_DEBUG_TYPE_ERROR:
+        type_str = "error";
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        type_str = "deprecated behaviour";
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        type_str = "undefined behaviour";
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        type_str = "portability";
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        type_str = "performance";
+        break;
+    case GL_DEBUG_TYPE_MARKER:
+        type_str = "marker";
+        break;
+    case GL_DEBUG_TYPE_PUSH_GROUP:
+        type_str = "push group";
+        break;
+    case GL_DEBUG_TYPE_POP_GROUP:
+        type_str = "pop group";
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        type_str = "other";
+        break;
+    default:
+        type_str = "unknown";
+    }
 
-        std::string_view source_str {};
-        switch (source) {
-        case GL_DEBUG_SOURCE_API:
-            source_str = "api";
-            break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-            source_str = "window system";
-            break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER:
-            source_str = "shader compiler";
-            break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:
-            source_str = "third party";
-            break;
-        case GL_DEBUG_SOURCE_APPLICATION:
-            source_str = "application";
-            break;
-        case GL_DEBUG_SOURCE_OTHER:
-            source_str = "other";
-            break;
-        default:
-            source_str = "unknown";
-        }
+    std::string_view severity_str {};
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_HIGH:
+        severity_str = "high";
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        severity_str = "medium";
+        break;
+    case GL_DEBUG_SEVERITY_LOW:
+        severity_str = "low";
+        break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        severity_str = "notification";
+        break;
+    default:
+        severity_str = "unknown";
+    }
 
-        std::string_view type_str {};
-        switch (type) {
-        case GL_DEBUG_TYPE_ERROR:
-            type_str = "error";
-            break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            type_str = "deprecated behaviour";
-            break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            type_str = "undefined behaviour";
-            break;
-        case GL_DEBUG_TYPE_PORTABILITY:
-            type_str = "portability";
-            break;
-        case GL_DEBUG_TYPE_PERFORMANCE:
-            type_str = "performance";
-            break;
-        case GL_DEBUG_TYPE_MARKER:
-            type_str = "marker";
-            break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:
-            type_str = "push group";
-            break;
-        case GL_DEBUG_TYPE_POP_GROUP:
-            type_str = "pop group";
-            break;
-        case GL_DEBUG_TYPE_OTHER:
-            type_str = "other";
-            break;
-        default:
-            type_str = "unknown";
-        }
+    inl::log::info("OpenGL debug callback - servierty: {} source: {} type: {} msg: {} ", severity_str, source_str,
+        type_str, message);
 
-        std::string_view severity_str {};
-        switch (severity) {
-        case GL_DEBUG_SEVERITY_HIGH:
-            severity_str = "high";
-            break;
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            severity_str = "medium";
-            break;
-        case GL_DEBUG_SEVERITY_LOW:
-            severity_str = "low";
-            break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            severity_str = "notification";
-            break;
-        default:
-            severity_str = "unknown";
-        }
-
-        log::info("OpenGL debug callback - servierty: {} source: {} type: {} msg: {} ", severity_str, source_str,
-            type_str, message);
-
-        if (type == GL_DEBUG_TYPE_ERROR) {
-            throw std::runtime_error("OpenGL debug error");
-        }
+    if (type == GL_DEBUG_TYPE_ERROR) {
+        throw std::runtime_error("OpenGL debug error");
     }
 }
 
-Window::Window(uint32_t width, uint32_t height, const std::string& title, InputCallback input_callback,
+} // namespace
+
+namespace inl {
+
+Window::Window(uint32_t width, uint32_t height, std::string_view title, InputCallback input_callback,
     MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback)
     : m_width { width }
     , m_height { height }
     , m_title { title }
     , m_input_callback { input_callback } {
-    log::debug("Creating window: {} {}x{}", m_title, m_width, m_height);
+    log::debug("Creating window: {} {}x{}", m_title.data(), m_width, m_height);
 
     glfwSetErrorCallback(error_callback);
 
@@ -118,7 +119,7 @@ Window::Window(uint32_t width, uint32_t height, const std::string& title, InputC
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_window.reset(glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr));
+    m_window.reset(glfwCreateWindow(m_width, m_height, m_title.data(), nullptr, nullptr));
 
     if (!m_window) {
         glfwTerminate();

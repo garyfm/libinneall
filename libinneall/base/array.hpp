@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/span.hpp>
 
 #include <stddef.h>
 
@@ -21,6 +22,8 @@ template <typename T, size_t N> struct Array {
         INL_ASSERT(index < N, "Out of bounds access");
         return _m_elements[index];
     }
+
+    operator Span<T>() { return { _m_elements, N }; }
 
     T* data() { return _m_elements; };
     T const* data() const { return _m_elements; };

@@ -1,17 +1,19 @@
 #pragma once
 
+#include <libinneall/base/string.hpp>
 #include <libinneall/base/unique_resource.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
 
 #include <subprojects/glad/include/glad/glad.h>
 
-#include <string>
 #include <string_view>
 #include <unordered_map>
 
 namespace inl {
 
 class ShaderStage;
+
+static constexpr size_t MAX_SHADER_UNIFORM_NAME = 128;
 
 class ShaderProgram {
 public:
@@ -45,7 +47,7 @@ private:
     ShaderStage m_vertex {};
     ShaderStage m_fragment {};
 
-    std::unordered_map<std::string, UniformInfo> m_uniforms;
+    std::unordered_map<String<MAX_SHADER_UNIFORM_NAME>, UniformInfo, StringHash> m_uniforms;
 };
 
 } // namespace inl

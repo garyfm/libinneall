@@ -27,16 +27,16 @@ std::optional<ByteBuffer> load_file(std::filesystem::path path) {
     return contents;
 }
 
-std::optional<std::string> load_text_file(std::filesystem::path path) {
+std::optional<std::string_view> load_text_file(std::filesystem::path path, Span<uint8_t> buffer) {
 
+    // TODO: This should take the buffer in
     std::optional<ByteBuffer> byte_buffer = load_file(path);
     if (!byte_buffer) {
         return std::nullopt;
     }
-
-    std::string contents { reinterpret_cast<const char*>(byte_buffer->data()), byte_buffer->size() };
-
-    return contents;
+    // TODO: Read directly into buffer rather than copy
+    memcpy(buffer.data(), byte_buffer->data(), byte_buffer->size());
+    return std::string_view { reinterpret_cast<char const*>(buffer.data()), byte_buffer->size() };
 }
 
 std::optional<ppm::Image> load_image(std::filesystem::path path) {
@@ -82,15 +82,31 @@ std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_v
     return texture;
 }
 
-std::optional<Cubemap> load_cubemap(Array<std::string, 6> paths, bool flip_vertically) {
+std::optional<Cubemap> load_cubemap(std::string_view path, bool flip_vertically) {
 
     Array<ppm::Image, 6> cubemap_data {};
+    const Array<std::string_view, 6> cubemap_files { {
+        { "/right.ppm" },
+        { "/left.ppm" },
+        { "/top.ppm" },
+        { "/bottom.ppm" },
+        { "/front.ppm" },
+        { "/back.ppm" },
+    } };
+
+    String<MAX_ASSET_PATH_SIZE> image_path { path };
 
     for (size_t i = 0; i < cubemap_data.size(); ++i) {
 
-        log::info("Loading texture: {}", paths[i]);
+        log::info("Loading texture: {}", path[i]);
 
-        std::optional<ppm::Image> image { load_image(paths[i]) };
+        if (i == 0) {
+            image_path.append(cubemap_files[i]);
+        } else {
+            image_path.overwrite(cubemap_files[i], path.size());
+        }
+
+        std::optional<ppm::Image> image { load_image(image_path.data()) };
         if (!image) {
             return std::nullopt;
         }
@@ -119,7 +135,7 @@ std::optional<Cubemap> load_cubemap(Array<std::string, 6> paths, bool flip_verti
 }
 
 std::optional<inl::ShaderProgram> load_shader(
-    std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path) {
+    std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path, Span<uint8_t> buffer) {
     std::string_view sv_path { vertex_shader_path.c_str() };
     std::string_view::size_type name_start_pos = sv_path.find_last_of("/") + 1;
     std::string_view::size_type name_end_pos = sv_path.find(".", name_start_pos);
@@ -127,31 +143,31 @@ std::optional<inl::ShaderProgram> load_shader(
 
     log::info("Loading shader program: {}", shader_name);
 
-    std::optional<std::string> vertex_source { load_text_file(vertex_shader_path) };
-    if (!vertex_source) {
+    std::optional<std::string_view> vertex_shader_source = load_text_file(vertex_shader_path, buffer);
+    if (!vertex_shader_source) {
         log::error("Failed to load shader stage: {}", vertex_shader_path.filename().c_str());
         return std::nullopt;
     }
 
-    std::optional<std::string> fragment_source { load_text_file(fragment_shader_path) };
-    if (!fragment_source) {
-        log::error("Failed to load shader stage: {}", vertex_shader_path.filename().c_str());
+    ShaderStage vertex_stage { ShaderType::Vertex, *vertex_shader_source };
+    std::optional<std::string_view> fragment_shader_source = load_text_file(fragment_shader_path, buffer);
+    if (!fragment_shader_source) {
+        log::error("Failed to load shader stage: {}", fragment_shader_path.filename().c_str());
         return std::nullopt;
     }
 
-    ShaderStage vertex_stage { ShaderType::Vertex, *vertex_source };
-    ShaderStage fragment_stage { ShaderType::Fragment, *fragment_source };
+    ShaderStage fragment_stage { ShaderType::Fragment, *fragment_shader_source };
 
     ShaderProgram shader_program { std::move(vertex_stage), std::move(fragment_stage) };
 
     return shader_program;
 }
 
-std::optional<inl::Mesh> load_mesh(std::filesystem::path path) {
+std::optional<inl::Mesh> load_mesh(std::filesystem::path path, Span<uint8_t> buffer) {
 
     log::info("Loading mesh: {}", path.filename().c_str());
 
-    std::optional<std::string> obj_data { load_text_file(path) };
+    std::optional<std::string_view> obj_data { load_text_file(path, buffer) };
     if (!obj_data) {
         return std::nullopt;
     }

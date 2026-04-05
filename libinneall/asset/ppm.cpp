@@ -5,7 +5,6 @@
 #include <libinneall/base/string.hpp>
 
 #include <algorithm>
-#include <cctype>
 #include <charconv>
 
 namespace {
@@ -16,7 +15,7 @@ inl::ppm::Result<void> skip_whitespace(inl::Span<uint8_t> buffer, size_t& cursor
     while (cursor < buffer.size()) {
         c = buffer[cursor];
 
-        if (std::isspace(c)) {
+        if (inl::isspace(c)) {
             ++cursor;
             continue;
         }
@@ -37,9 +36,9 @@ inl::ppm::Result<void> skip_whitespace(inl::Span<uint8_t> buffer, size_t& cursor
 
 inl::ppm::Result<int32_t> extract_int(inl::Span<uint8_t> buffer, size_t& cursor) {
 
-    std::string str;
-    while (cursor < buffer.size() && std::isdigit(buffer[cursor])) {
-        str.push_back(buffer[cursor]);
+    inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str {};
+    while (cursor < buffer.size() && inl::isdigit(buffer[cursor])) {
+        str.append(buffer[cursor]);
         ++cursor;
     }
 
@@ -55,17 +54,18 @@ inl::ppm::Result<int32_t> extract_int(inl::Span<uint8_t> buffer, size_t& cursor)
     }
     return result;
 }
-}
+} // namespace
 
 namespace inl::ppm {
 
 Result<Image> load(Span<uint8_t> raw_data) {
 
     size_t cursor { 0 };
-    std::string format;
-    format.push_back(static_cast<uint8_t>(raw_data[cursor]));
+    static constexpr uint8_t FORMAT_SIZE { 2 };
+    String<FORMAT_SIZE> format;
+    format.append(static_cast<uint8_t>(raw_data[cursor]));
     ++cursor;
-    format.push_back(static_cast<uint8_t>(raw_data[cursor]));
+    format.append(static_cast<uint8_t>(raw_data[cursor]));
     ++cursor;
 
     if (format[0] != 'P') {
@@ -123,11 +123,10 @@ Image flip_vertically(Image const& image) {
         size_t row_end { row_start + row_size_bytes };
         size_t flipped_cursor { (image.height - 1 - row) * row_size_bytes };
 
-        // log::debug("row: {}", row);
         std::copy(image.pixel_data.begin() + row_start, image.pixel_data.begin() + row_end,
             flipped.pixel_data.begin() + flipped_cursor);
     }
 
     return flipped;
 }
-} // namespace inl
+} // namespace inl::ppm

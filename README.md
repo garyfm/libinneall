@@ -76,7 +76,7 @@ Size: 5116096
 - [x] std::byte
 - [x] std::array
 - [x] std::span
-- [ ] std::string
+- [x] std::string
 - [ ] std::string_view
 - [ ] std::vector
 - [ ] std::print
@@ -86,3 +86,4 @@ Size: 5116096
 - [ ] std::unqiue_ptr
 - [ ] file handling
 - [ ] hashmap
+- [ ] remove execptions

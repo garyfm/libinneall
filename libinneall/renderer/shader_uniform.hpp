@@ -9,6 +9,8 @@
 #include <libinneall/renderer/shader_program.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
+#include <string_view>
+
 namespace inl {
 
 void set_uniform(ShaderProgram& shader, std::string_view name, uint32_t value);

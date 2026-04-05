@@ -1,5 +1,5 @@
-#include <libinneall/base/array.hpp>
 #include <libinneall/base/log.hpp>
+#include <libinneall/base/string.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
 
 #include <string_view>
@@ -71,13 +71,13 @@ bool ShaderStage::compile(std::string_view source) {
     glGetShaderiv(m_handle, GL_COMPILE_STATUS, &success);
 
     if (success != GL_TRUE) {
-        // TODO: Use static string
-        Array<GLchar, MAX_OPENGL_INFO_LOG_SIZE> info_log { 0 };
-        GLsizei info_log_length { 0 };
+        String<MAX_OPENGL_INFO_LOG_SIZE> info_log { MAX_OPENGL_INFO_LOG_SIZE };
+        GLsizei info_log_size { 0 };
 
-        glGetShaderInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_length, info_log.data());
-        log::error("Error compiling shader id {}: {}", m_handle.get(),
-            std::string_view { info_log.data(), static_cast<size_t>(info_log_length) });
+        glGetShaderInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
+        info_log.resize(info_log_size);
+        log::error(
+            "Error compiling shader id {}: {}", m_handle.get(), std::string_view { info_log.data(), info_log.size() });
 
         return false;
     }

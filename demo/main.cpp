@@ -33,6 +33,10 @@
 
 namespace {
 
+static constexpr size_t KB = 1024;
+static constexpr size_t MB = KB * 1000;
+static constexpr size_t GB = MB * 1000;
+
 static constexpr unsigned DEFAULT_SCREEN_WIDTH = 800;
 static constexpr unsigned DEFAULT_SCREEN_HEIGHT = 600;
 
@@ -114,7 +118,10 @@ void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height)
     g_window.resize(width, height);
 }
 
-}
+} // namespace
+
+// TODO: This should be an arena of some kind
+static inl::Array<uint8_t, MB * 100> scratch_buffer {};
 
 int main(int argc, char* argv[]) {
     using namespace inl;
@@ -129,26 +136,26 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
-        std::string assets_path = argv[1];
+        String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
+        log::info("Asset path: {}", assets_path.data());
+        size_t assets_path_root_pos { assets_path.size() };
 
-        Array<int, 10> array;
-
-        const std::filesystem::path model_path = assets_path + "/backpack";
-        const std::filesystem::path shader_path = assets_path + "/shaders";
+        const std::filesystem::path model_path { assets_path.append("/backpack").data() };
+        const std::filesystem::path shader_path { assets_path.overwrite("/shaders", assets_path_root_pos).data() };
 
         std::optional<ShaderProgram> shader_program_lighting { load_shader(
-            shader_path / "lighting_phong.vert.glsl", shader_path / "lighting_phong.frag.glsl") };
+            shader_path / "lighting_phong.vert.glsl", shader_path / "lighting_phong.frag.glsl", scratch_buffer) };
         INL_ASSERT(shader_program_lighting.has_value(), "Failed to load shader lighting");
 
         std::optional<ShaderProgram> shader_program_debug { load_shader(
-            shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl") };
+            shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl", scratch_buffer) };
         INL_ASSERT(shader_program_debug.has_value(), "Failed to load shader debug");
 
         std::optional<ShaderProgram> shader_program_skybox { load_shader(
-            shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl") };
+            shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl", scratch_buffer) };
         INL_ASSERT(shader_program_skybox.has_value(), "Failed to load shader skybox");
 
-        std::optional<Mesh> mesh { load_mesh(model_path / "mesh.obj") };
+        std::optional<Mesh> mesh { load_mesh(model_path / "mesh.obj", scratch_buffer) };
         INL_ASSERT(mesh.has_value(), "Failed to load mesh");
 
         std::optional<Texture> texture_albedo { load_texture(model_path / "albedo.ppm", false) };
@@ -164,16 +171,9 @@ int main(int argc, char* argv[]) {
         Model model { &mesh.value(), &material, model_matrix };
 
         // Skybox
-        Array<std::string, 6> cubemap_files { {
-            { assets_path + "/skybox/right.ppm" },
-            { assets_path + "/skybox/left.ppm" },
-            { assets_path + "/skybox/top.ppm" },
-            { assets_path + "/skybox/bottom.ppm" },
-            { assets_path + "/skybox/front.ppm" },
-            { assets_path + "/skybox/back.ppm" },
-        } };
+        assets_path.overwrite("/skybox", assets_path_root_pos);
 
-        std::optional<Cubemap> skybox = load_cubemap(cubemap_files, false);
+        std::optional<Cubemap> skybox = load_cubemap(assets_path, false);
         if (!skybox) {
             log::error("Failed to load skybox");
             return -1;

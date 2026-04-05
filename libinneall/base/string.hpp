@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/hash.hpp>
 
 #include <stdint.h>
 #include <string_view>
@@ -35,6 +36,8 @@ inline constexpr bool isspace(char c) {
     return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
 }
 
+inline constexpr bool isdigit(char c) { return (c >= '0' && c <= '9'); }
+
 template <size_t N> class String {
 public:
     static_assert(N > 0, "String size must be greater than zero");
@@ -67,6 +70,12 @@ public:
 
         m_size = sv.size();
         m_buffer[m_size] = '\0';
+    }
+
+    String(size_t size) {
+        INL_ASSERT(size <= N, "Size is greater than capacity");
+
+        m_size = size;
     }
 
     template <size_t Len> String& operator=(String<Len> const& other) {
@@ -144,6 +153,11 @@ public:
         return *this;
     }
 
+    void clear() {
+        m_size = 0;
+        m_buffer[m_size] = '\0';
+    }
+
     String& replace(std::string_view sv, size_t pos = 0) {
         INL_ASSERT(sv.size() + pos <= m_size, "replace string overflows the capactiy");
 
@@ -166,6 +180,9 @@ public:
         return *this;
     }
 
+    bool empty() { return m_size == 0; }
+
+    char* data() { return m_buffer; }
     char const* data() const { return m_buffer; }
 
     char* begin() { return m_buffer; };
@@ -188,6 +205,12 @@ private:
 // the size of the literal by 1
 template <size_t Len> String(const char (&str)[Len]) -> String<Len - 1>;
 
+struct StringHash {
+    template <size_t N> size_t operator()(inl::String<N> const& str) const { return hash_fnv1a(str); }
+
+    size_t operator()(std::string_view sv) const { return hash_fnv1a(sv); }
+};
+
 struct Cut {
     std::string_view left;
     std::string_view right;
@@ -207,4 +230,4 @@ constexpr size_t MAX_STRING_SIZE_OF_NUMBER = 11;
 String<MAX_STRING_SIZE_OF_NUMBER> to_string(int32_t number);
 String<MAX_STRING_SIZE_OF_NUMBER> to_string(uint32_t number);
 
-} // namespace
+} // namespace inl

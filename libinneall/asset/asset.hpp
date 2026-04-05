@@ -1,5 +1,6 @@
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/array.hpp>
+#include <libinneall/base/span.hpp>
 #include <libinneall/renderer/cubemap.hpp>
 #include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/mesh.hpp>
@@ -12,16 +13,18 @@
 
 namespace inl {
 
+constexpr size_t MAX_ASSET_PATH_SIZE { 128 };
+
 // TODO: Some kind of Asset manager should be used
 using ByteBuffer = std::vector<uint8_t>;
 
 std::optional<ByteBuffer> load_file(std::filesystem::path path);
-std::optional<std::string> load_text_file(std::filesystem::path path);
+std::optional<std::string_view> load_text_file(std::filesystem::path path, Span<uint8_t> buffer);
 std::optional<ppm::Image> load_image(std::filesystem::path path);
 std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically);
-std::optional<Cubemap> load_cubemap(Array<std::string, 6> paths, bool flip_vertically);
+std::optional<Cubemap> load_cubemap(std::string_view path, bool flip_vertically);
 std::optional<inl::ShaderProgram> load_shader(
-    std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path);
-std::optional<inl::Mesh> load_mesh(std::filesystem::path path);
+    std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path, Span<uint8_t> buffer);
+std::optional<inl::Mesh> load_mesh(std::filesystem::path path, Span<uint8_t> buffer);
 
 } // namespace inl

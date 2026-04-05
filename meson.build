@@ -1,4 +1,6 @@
-project('libinneall', 'c', 'cpp', default_options: ['cpp_std=c++23'])
+project('libinneall', 'c', 'cpp', 
+  default_options: ['cpp_std=c++23']
+)
 
 add_project_arguments(
   '-Werror',
@@ -13,7 +15,6 @@ add_project_arguments(
   '-Wfloat-equal',
   language: ['c', 'cpp']
 )
-
 
 subdir('libinneall')
 subdir('demo')

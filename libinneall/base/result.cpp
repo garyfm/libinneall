@@ -2,7 +2,7 @@
 
 namespace inl {
 
-std::string_view to_string(inl::Error e) {
+StringView to_string(inl::Error e) {
     switch (e) {
     case inl::Error::OK:
         return "OK";

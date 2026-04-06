@@ -1,4 +1,5 @@
 #include <libinneall/base/string.hpp>
+#include <libinneall/base/string_view.hpp>
 #include <libinneall/math/math.hpp>
 
 #include <doctest.h>
@@ -38,7 +39,7 @@ TEST_CASE("String: Test String construction") {
     }
 
     {
-        std::string_view sv { "hello" };
+        inl::StringView sv { "hello" };
         inl::String<5> str { sv };
         CHECK(str == sv);
         CHECK(sv == str);
@@ -47,7 +48,7 @@ TEST_CASE("String: Test String construction") {
     }
 
     {
-        std::string_view sv { "hello" };
+        inl::StringView sv { "hello" };
         inl::String<100> str { sv };
         CHECK(str == sv);
         CHECK(sv == str);

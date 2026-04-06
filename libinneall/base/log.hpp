@@ -1,9 +1,9 @@
 #pragma once
 
 #include <format>
+#include <libinneall/base/string_view.hpp>
 #include <print>
 #include <source_location>
-#include <string_view>
 
 namespace inl::log {
 
@@ -14,13 +14,17 @@ enum class Level : char {
     Error = 'e',
 };
 
-constexpr std::string_view get_module_name(const std::source_location& location) {
-    std::string_view file_name { location.file_name() };
+constexpr StringView get_module_name(const std::source_location& location) {
+    StringView file_name { location.file_name() };
 
-    const size_t slash_pos = file_name.find_last_of("/\\");
-    const size_t dot_pos = file_name.find_last_of("\\.");
+    const std::optional<size_t> slash_pos = file_name.rfind("/");
+    const std::optional<size_t> dot_pos = file_name.rfind(".");
 
-    return file_name.substr(slash_pos + 1, dot_pos - slash_pos - 1);
+    if (!slash_pos || !dot_pos) {
+        return "";
+    }
+
+    return file_name.substr(*slash_pos + 1, *dot_pos - *slash_pos - 1);
 }
 
 // Use template deduction guide to get arround variadic args and defaulted args
@@ -39,12 +43,13 @@ template <Level L, typename... Args> struct Log {
             level = 'E';
         }
 
-        std::println("[{}][{}:{}] {}", level, get_module_name(location), location.line(),
+        StringView module = get_module_name(location);
+        std::println("[{}][{:.{}}:{}] {}", level, module.data(), module.size(), location.line(),
             std::format(fmt, std::forward<Args>(args)...));
     }
 };
 
-template <Level L = {}, typename... Args> Log(std::string_view fmt, Args&&...) -> Log<L, Args...>;
+template <Level L = {}, typename... Args> Log(StringView fmt, Args&&...) -> Log<L, Args...>;
 
 template <typename... Args> using debug = Log<Level::Debug, Args...>;
 template <typename... Args> using info = Log<Level::Info, Args...>;

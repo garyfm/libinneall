@@ -5,6 +5,54 @@
 
 namespace inl {
 
+std::optional<size_t> StringView::find(StringView needle, size_t start_pos) {
+    if (m_size < needle.size() || start_pos > m_size) {
+        return std::nullopt;
+    }
+
+    for (size_t i = start_pos; i < m_size; ++i) {
+
+        if (m_data[i] != needle[0]) {
+            continue;
+        }
+
+        if (m_size - i < needle.size()) {
+            return std::nullopt;
+        }
+
+        if (memcmp(m_data + i, needle.data(), needle.size()) == 0) {
+            return i;
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<size_t> StringView::rfind(StringView needle, size_t start_pos) {
+    if (m_size < needle.size() || start_pos > m_size) {
+        return std::nullopt;
+    }
+
+    size_t pos = (start_pos != 0) ? start_pos : m_size;
+
+    for (int32_t i = static_cast<int32_t>(pos); i >= 0; --i) {
+
+        if (m_data[i] != needle[0]) {
+            continue;
+        }
+
+        if (m_size - i < needle.size()) {
+            return std::nullopt;
+        }
+
+        if (memcmp(m_data + i, needle.data(), needle.size()) == 0) {
+            return i;
+        }
+    }
+
+    return std::nullopt;
+}
+
 StringView trim_left(StringView sv) {
     size_t cursor { 0 };
     for (; cursor < sv.size(); ++cursor) {

@@ -1,4 +1,5 @@
 #include <libinneall/base/hash.hpp>
+#include <libinneall/base/string_view.hpp>
 
 #include <doctest.h>
 #include <stdint.h>
@@ -12,7 +13,7 @@ TEST_CASE("hash: fnv1a") {
     }
 
     {
-        std::string_view str { "test fnv1a" };
+        inl::StringView str { "test fnv1a" };
 
         uint64_t hash = 0x9849e0655d1498ad;
         CHECK(inl::hash_fnv1a(str) == hash);

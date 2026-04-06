@@ -13,7 +13,7 @@ uint64_t hash_fnv1a(Span<uint8_t const> data) {
     }
     return hash;
 }
-uint64_t hash_fnv1a(std::string_view data) {
+uint64_t hash_fnv1a(StringView data) {
     return hash_fnv1a({ reinterpret_cast<uint8_t const*>(data.data()), data.size() });
 }
 }

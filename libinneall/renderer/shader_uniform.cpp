@@ -4,43 +4,43 @@
 
 namespace inl {
 
-void set_uniform(ShaderProgram& shader, std::string_view name, uint32_t value) {
+void set_uniform(ShaderProgram& shader, StringView name, uint32_t value) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform1i(shader.native_handle(), location, value);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, int32_t value) {
+void set_uniform(ShaderProgram& shader, StringView name, int32_t value) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform1i(shader.native_handle(), location, value);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, float value) {
+void set_uniform(ShaderProgram& shader, StringView name, float value) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform1f(shader.native_handle(), location, value);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, Color color) {
+void set_uniform(ShaderProgram& shader, StringView name, Color color) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform3f(shader.native_handle(), location, color.r, color.g, color.b);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, Vector3 const& vector) {
+void set_uniform(ShaderProgram& shader, StringView name, Vector3 const& vector) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniform3f(shader.native_handle(), location, vector.x, vector.y, vector.z);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, Matrix3 const& matrix) {
+void set_uniform(ShaderProgram& shader, StringView name, Matrix3 const& matrix) {
     const GLuint location = shader.uniform_location(name);
     glProgramUniformMatrix3fv(shader.native_handle(), location, 1, GL_FALSE, matrix.elements().data());
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, Matrix4 const& matrix) {
+void set_uniform(ShaderProgram& shader, StringView name, Matrix4 const& matrix) {
 
     const GLuint location = shader.uniform_location(name);
     glProgramUniformMatrix4fv(shader.native_handle(), location, 1, GL_FALSE, matrix.elements().data());
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, Material const& material) {
+void set_uniform(ShaderProgram& shader, StringView name, Material const& material) {
     String<MAX_SHADER_UNIFORM_NAME> buffer { name };
 
     // NOTE: samplers must use glProgramUniform1i, explicit cast here to ensure interger is used
@@ -49,7 +49,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, Material const& m
     set_uniform(shader, buffer.overwrite(".shininess", name.size()), material.shininess);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional const& light) {
+void set_uniform(ShaderProgram& shader, StringView name, LightDirectional const& light) {
     String<MAX_SHADER_UNIFORM_NAME> buffer { name };
 
     set_uniform(shader, buffer.append(".dir"), light.dir);
@@ -58,7 +58,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, LightDirectional 
     set_uniform(shader, buffer.overwrite(".specular", name.size()), light.specular);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light) {
+void set_uniform(ShaderProgram& shader, StringView name, LightPoint const& light) {
     String<MAX_SHADER_UNIFORM_NAME> buffer { name };
 
     set_uniform(shader, buffer.append(".pos"), light.pos);
@@ -71,7 +71,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const&
     set_uniform(shader, buffer.overwrite(".atten_quadratic", name.size()), light.atten_quadratic);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const& light, size_t index) {
+void set_uniform(ShaderProgram& shader, StringView name, LightPoint const& light, size_t index) {
     String<MAX_STRING_SIZE_OF_NUMBER> index_str = to_string(static_cast<uint32_t>(index));
     String<MAX_SHADER_UNIFORM_NAME> buffer { name };
     buffer.append("[");
@@ -89,7 +89,7 @@ void set_uniform(ShaderProgram& shader, std::string_view name, LightPoint const&
     set_uniform(shader, buffer.overwrite(".atten_quadratic", member_pos), light.atten_quadratic);
 }
 
-void set_uniform(ShaderProgram& shader, std::string_view name, LightSpot const& light) {
+void set_uniform(ShaderProgram& shader, StringView name, LightSpot const& light) {
     String<MAX_SHADER_UNIFORM_NAME> buffer { name };
     set_uniform(shader, buffer.append(".pos"), light.pos);
     set_uniform(shader, buffer.overwrite(".dir", name.size()), light.dir);

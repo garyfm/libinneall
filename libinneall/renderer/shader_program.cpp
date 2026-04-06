@@ -56,7 +56,7 @@ void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fra
         glGetProgramInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
         info_log.resize(info_log_size);
         log::error(
-            "Error compiling shader id {}: {}", m_handle.get(), std::string_view { info_log.data(), info_log.size() });
+            "Error compiling shader id {}: {}", m_handle.get(), StringView { info_log.data(), info_log.size() });
         throw std::runtime_error("Failed to link program");
     }
 }
@@ -96,7 +96,7 @@ void ShaderProgram::retrieve_uniforms() {
     }
 }
 
-GLuint ShaderProgram::uniform_location(std::string_view name) const {
+GLuint ShaderProgram::uniform_location(StringView name) const {
 
     if (m_uniforms.find(name) == m_uniforms.end()) {
         log::error("Shader({}) - Failed to find uniform with name {}", static_cast<int32_t>(m_handle), name.data());

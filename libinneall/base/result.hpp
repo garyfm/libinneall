@@ -2,7 +2,7 @@
 
 #include <expected>
 #include <format>
-#include <string_view>
+#include <libinneall/base/string_view.hpp>
 
 #define TRY(result)                                                                                                    \
     ({                                                                                                                 \
@@ -23,7 +23,7 @@ enum class Error {
 
 template <typename T> using Result = std::expected<T, Error>;
 
-std::string_view to_string(inl::Error e);
+StringView to_string(inl::Error e);
 
 } // namespace inl
 

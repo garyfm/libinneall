@@ -103,8 +103,7 @@ Result<Model> load(StringView buffer) {
                     FaceCorner corner {};
                     Result<float> vertex_index = TRY(extract_float(cut_index.left));
                     corner.vertex_index = map_index(model, *vertex_index);
-                    INL_ASSERT(corner.vertex_index - 1 < model.geometric_vertices.size(),
-                        std::format("Invalid obj vertex index: {}", corner.vertex_index));
+                    INL_ASSERT(corner.vertex_index - 1 < model.geometric_vertices.size(), "Invalid obj vertex index");
 
                     // Cut successful, process next index
                     if (cut_index.success) {
@@ -112,15 +111,15 @@ Result<Model> load(StringView buffer) {
 
                         Result<float> texture_index = TRY(extract_float(cut_index.left));
                         corner.texture_index = map_index(model, *texture_index);
-                        INL_ASSERT(corner.texture_index - 1 < model.texture_vertices.size(),
-                            std::format("Invalid obj texture index: {}", corner.texture_index));
+                        INL_ASSERT(
+                            corner.texture_index - 1 < model.texture_vertices.size(), "Invalid obj texture index");
 
                         // Cut successfull, process next index
                         if (cut_index.success) {
                             Result<float> normal_index = TRY(extract_float(cut_index.right));
                             corner.normal_index = map_index(model, *normal_index);
-                            INL_ASSERT(corner.normal_index - 1 < model.vertex_normals.size(),
-                                std::format("Invalid obj normal index: {}", corner.normal_index));
+                            INL_ASSERT(
+                                corner.normal_index - 1 < model.vertex_normals.size(), "Invalid obj normal index");
                         }
                     }
 

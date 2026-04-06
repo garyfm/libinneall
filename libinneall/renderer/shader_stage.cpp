@@ -2,7 +2,7 @@
 #include <libinneall/base/string.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
 
-#include <string_view>
+#include <libinneall/base/string_view.hpp>
 
 namespace {
 
@@ -22,10 +22,10 @@ GLuint to_opengl(inl::ShaderType type) {
 
 namespace inl {
 
-ShaderStage::ShaderStage(ShaderType type, std::string_view source)
+ShaderStage::ShaderStage(ShaderType type, StringView source)
     : m_type { type } {
 
-    if (source.length() == 0) {
+    if (source.size() == 0) {
         throw std::runtime_error("Empty shader source");
     }
 
@@ -59,10 +59,10 @@ ShaderStage& ShaderStage::operator=(ShaderStage&& other) noexcept {
     return *this;
 }
 
-bool ShaderStage::compile(std::string_view source) {
+bool ShaderStage::compile(StringView source) {
 
     GLchar const* gl_source[] = { source.data() };
-    GLint gl_source_length[] = { static_cast<GLint>(source.length()) };
+    GLint gl_source_length[] = { static_cast<GLint>(source.size()) };
 
     glShaderSource(m_handle, 1, gl_source, gl_source_length);
     glCompileShader(m_handle);
@@ -76,8 +76,7 @@ bool ShaderStage::compile(std::string_view source) {
 
         glGetShaderInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
         info_log.resize(info_log_size);
-        log::error(
-            "Error compiling shader id {}: {}", m_handle.get(), std::string_view { info_log.data(), info_log.size() });
+        log::error("Error compiling shader id {}: {}", m_handle.get(), StringView { info_log.data(), info_log.size() });
 
         return false;
     }

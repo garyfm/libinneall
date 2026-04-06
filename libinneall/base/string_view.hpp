@@ -43,6 +43,9 @@ public:
         return { m_data + offset, size };
     }
 
+    std::optional<size_t> find(StringView needle, size_t start_pos = 0);
+    std::optional<size_t> rfind(StringView needle, size_t start_pos = 0);
+
     char const* data() const { return m_data; };
 
     char const* begin() const { return m_data; };

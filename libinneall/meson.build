@@ -4,7 +4,6 @@ source_files = files(
   'asset/asset.cpp',
   'asset/obj.cpp',
   'asset/ppm.cpp',
-  'base/assert.cpp',
   'base/hash.cpp',
   'base/result.cpp',
   'base/string.cpp',

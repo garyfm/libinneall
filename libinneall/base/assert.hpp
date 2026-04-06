@@ -1,15 +1,24 @@
 #pragma once
 
+#include <print>
 #include <source_location>
-#include <string_view>
+#include <stddef.h>
+#include <stdlib.h>
 
-// TODO: libbacktrace is supported yet ???
-// Check this and add if possible
 #define INL_ASSERT(predicate, msg) inl::assert((predicate), (#predicate), (msg), std::source_location::current())
 
 namespace inl {
 
-void assert(bool predicate, std::string_view predicate_str, std::string_view msg = {},
-    std::source_location location = std::source_location::current());
+template <size_t PN, size_t MN>
+inline constexpr void assert(bool predicate, char const (&predicate_str)[PN], char const (&msg)[MN] = {},
+    std::source_location location = std::source_location::current()) {
+    if (predicate) {
+        return;
+    }
+
+    std::println("FATAL: Assertion failed ({}:{}): ({}) {}", location.file_name(), location.line(), predicate_str, msg);
+
+    std::abort();
+}
 
 } // namespace inl

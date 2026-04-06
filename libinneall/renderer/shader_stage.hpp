@@ -5,7 +5,7 @@
 
 #include <subprojects/glad/include/glad/glad.h>
 
-#include <string_view>
+#include <libinneall/base/string_view.hpp>
 
 namespace inl {
 
@@ -14,7 +14,7 @@ enum class ShaderType { Vertex, Fragment };
 class ShaderStage {
 public:
     ShaderStage() = default;
-    explicit ShaderStage(ShaderType type, std::string_view source);
+    explicit ShaderStage(ShaderType type, StringView source);
 
     ShaderStage(const ShaderStage&) = delete;
     ShaderStage operator=(const ShaderStage&) = delete;
@@ -25,7 +25,7 @@ public:
     GLuint native_handle() const { return m_handle; }
 
 private:
-    bool compile(std::string_view source);
+    bool compile(StringView source);
 
     static constexpr size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
 

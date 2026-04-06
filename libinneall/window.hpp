@@ -18,7 +18,7 @@ public:
     using ScrollCallback = void (*)(GLFWwindow*, double, double);
     using ResizeCallback = void (*)(GLFWwindow*, int32_t, int32_t);
 
-    Window(uint32_t width, uint32_t height, std::string_view title, InputCallback input_callback,
+    Window(uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
         MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback);
 
     Window(const Window&) = delete;

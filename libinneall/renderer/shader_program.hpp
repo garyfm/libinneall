@@ -6,7 +6,7 @@
 
 #include <subprojects/glad/include/glad/glad.h>
 
-#include <string_view>
+#include <libinneall/base/string_view.hpp>
 #include <unordered_map>
 
 namespace inl {
@@ -29,7 +29,7 @@ public:
 
     void use() const { glUseProgram(m_handle); }
 
-    GLuint uniform_location(std::string_view name) const;
+    GLuint uniform_location(StringView name) const;
 
 private:
     struct UniformInfo {

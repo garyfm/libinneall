@@ -14,7 +14,7 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
         return;
 
-    std::string_view source_str {};
+    inl::StringView source_str {};
     switch (source) {
     case GL_DEBUG_SOURCE_API:
         source_str = "api";
@@ -38,7 +38,7 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
         source_str = "unknown";
     }
 
-    std::string_view type_str {};
+    inl::StringView type_str {};
     switch (type) {
     case GL_DEBUG_TYPE_ERROR:
         type_str = "error";
@@ -71,7 +71,7 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
         type_str = "unknown";
     }
 
-    std::string_view severity_str {};
+    inl::StringView severity_str {};
     switch (severity) {
     case GL_DEBUG_SEVERITY_HIGH:
         severity_str = "high";
@@ -101,7 +101,7 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
 
 namespace inl {
 
-Window::Window(uint32_t width, uint32_t height, std::string_view title, InputCallback input_callback,
+Window::Window(uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
     MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback)
     : m_width { width }
     , m_height { height }

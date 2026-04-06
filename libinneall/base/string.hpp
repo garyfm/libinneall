@@ -5,8 +5,8 @@
 #include <libinneall/base/string_utils.hpp>
 #include <libinneall/base/string_view.hpp>
 
+#include <libinneall/base/string_view.hpp>
 #include <stdint.h>
-#include <string_view>
 
 namespace inl {
 
@@ -33,7 +33,7 @@ public:
         m_buffer[m_size] = '\0';
     }
 
-    String(std::string_view sv) {
+    String(StringView sv) {
         INL_ASSERT(sv.size() <= N, "String view is to greater than capacity");
 
         if (sv.size() > 0) {
@@ -72,15 +72,6 @@ public:
         return memcmp(m_buffer, other.data(), m_size) == 0;
     }
 
-    bool operator==(std::string_view other) const {
-
-        if (m_size != other.size()) {
-            return false;
-        }
-
-        return memcmp(m_buffer, other.data(), m_size) == 0;
-    }
-
     bool operator==(StringView other) const {
 
         if (m_size != other.size()) {
@@ -107,7 +98,6 @@ public:
         return m_buffer[index];
     }
 
-    operator std::string_view() const { return { data(), size() }; }
     operator StringView() const { return { data(), size() }; }
 
     void resize(size_t new_size) {
@@ -116,7 +106,7 @@ public:
         m_buffer[m_size] = '\0';
     }
 
-    String& append(std::string_view sv) {
+    String& append(StringView sv) {
         INL_ASSERT(m_size + sv.size() <= m_capacity, "append string is greater than capactiy");
 
         if (sv.size() > 0) {
@@ -140,7 +130,7 @@ public:
         m_buffer[m_size] = '\0';
     }
 
-    String& replace(std::string_view sv, size_t pos = 0) {
+    String& replace(StringView sv, size_t pos = 0) {
         INL_ASSERT(sv.size() + pos <= m_size, "replace string overflows the capactiy");
 
         if (sv.size() > 0) {
@@ -150,7 +140,7 @@ public:
         return *this;
     }
 
-    String& overwrite(std::string_view sv, size_t pos = 0) {
+    String& overwrite(StringView sv, size_t pos = 0) {
         INL_ASSERT(sv.size() + pos <= m_capacity, "overwrite string overflows the capactiy");
 
         if (sv.size() > 0) {
@@ -190,7 +180,7 @@ template <size_t Len> String(const char (&str)[Len]) -> String<Len - 1>;
 struct StringHash {
     template <size_t N> size_t operator()(inl::String<N> const& str) const { return hash_fnv1a(str); }
 
-    size_t operator()(std::string_view sv) const { return hash_fnv1a(sv); }
+    size_t operator()(StringView sv) const { return hash_fnv1a(sv); }
 };
 
 uint8_t digit_count(uint32_t number);

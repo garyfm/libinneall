@@ -19,10 +19,10 @@ constexpr size_t MAX_ASSET_PATH_SIZE { 128 };
 using ByteBuffer = std::vector<uint8_t>;
 
 std::optional<ByteBuffer> load_file(std::filesystem::path path);
-std::optional<std::string_view> load_text_file(std::filesystem::path path, Span<uint8_t> buffer);
+std::optional<StringView> load_text_file(std::filesystem::path path, Span<uint8_t> buffer);
 std::optional<ppm::Image> load_image(std::filesystem::path path);
 std::optional<inl::Texture> load_texture(std::filesystem::path path, bool flip_vertically);
-std::optional<Cubemap> load_cubemap(std::string_view path, bool flip_vertically);
+std::optional<Cubemap> load_cubemap(StringView path, bool flip_vertically);
 std::optional<inl::ShaderProgram> load_shader(
     std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path, Span<uint8_t> buffer);
 std::optional<inl::Mesh> load_mesh(std::filesystem::path path, Span<uint8_t> buffer);

@@ -1,67 +1,8 @@
-
 #include <libinneall/base/string.hpp>
 #include <libinneall/math/math.hpp>
 
 #include <doctest.h>
 #include <stdint.h>
-
-TEST_CASE("String: Test strlen") {
-    {
-        char str[] = "Hello, World!";
-
-        CHECK(inl::strlen(str) == 13);
-    }
-
-    {
-        char str[] = "Hello\0,World!";
-
-        CHECK(inl::strlen(str) == 5);
-    }
-
-    { CHECK(inl::strlen("Hello, World!") == 13); }
-}
-
-TEST_CASE("String: Test memcmp") {
-
-    {
-        char str1[] = "Hello, World!";
-        char str2[] = "Hello, World!";
-
-        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == 0);
-    }
-
-    {
-        char str1[] = "Hello, World!";
-        char str2[] = "Hfllo, World!";
-
-        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == -1);
-    }
-
-    {
-        char str1[] = "Hello, World!";
-        char str2[] = "Aello, World!";
-
-        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == 1);
-    }
-
-    {
-        char str1[] = "Hello, World!";
-        char str2[] = "Hello, Worlda";
-
-        CHECK(inl::memcmp(str1, str2, inl::strlen(str1)) == -1);
-    }
-}
-
-TEST_CASE("String: Test isspace") {
-    {
-        char c = ' ';
-        CHECK(inl::isspace(c));
-        c = '\n';
-        CHECK(inl::isspace(c));
-        c = '\t';
-        CHECK(inl::isspace(c));
-    }
-}
 
 TEST_CASE("String: Test String construction") {
     {
@@ -236,57 +177,6 @@ TEST_CASE("String: Test String mutating") {
         CHECK(str[3] == 'c');
         CHECK(str.size() == 4);
         CHECK(str.capacity() == 10);
-    }
-}
-
-TEST_CASE("String: trim") {
-    const inl::String expected { "hello, world!" };
-    inl::String s_left { "    hello, world!" };
-    inl::String s_right { "hello, world!    " };
-    inl::String s_both { "    hello, world!    " };
-    inl::String s_escape { "\t    hello, world! \r\n" };
-
-    CHECK(inl::trim_left(s_left) == expected);
-    CHECK(inl::trim_right(s_right) == expected);
-    CHECK(inl::trim(s_both) == expected);
-    CHECK(inl::trim(s_escape) == expected);
-}
-
-TEST_CASE("String: cut") {
-    {
-        inl::String input { "hello, world!" };
-        const inl::String expected_left { "hello" };
-        const inl::String expected_right { " world!" };
-
-        inl::Cut result { inl::cut(input, ',') };
-
-        CHECK(result.success);
-        CHECK(result.left == expected_left);
-        CHECK(result.right == expected_right);
-    }
-
-    {
-        inl::String input { "user=alice" };
-        const inl::String expected_left { "user" };
-        const inl::String expected_right { "alice" };
-
-        inl::Cut result { inl::cut(input, '=') };
-
-        CHECK(result.success);
-        CHECK(result.left == expected_left);
-        CHECK(result.right == expected_right);
-    }
-
-    {
-        inl::String input { "hello" };
-        const inl::String expected_left { "hello" };
-        // const std::string_view expected_right { "" };
-
-        inl::Cut result { inl::cut(input, ' ') };
-
-        CHECK(result.success == false);
-        CHECK(result.left == expected_left);
-        // CHECK(result.right == expected_right);
     }
 }
 

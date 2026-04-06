@@ -2,16 +2,17 @@
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/string.hpp>
+#include <libinneall/base/string_view.hpp>
 
 #include <format>
 
 namespace {
 
-inl::obj::Result<float> extract_float(std::string_view buffer) {
+inl::obj::Result<float> extract_float(inl::StringView buffer) {
 
     float value { 0 };
 
-    std::string_view trimed = inl::trim(buffer);
+    inl::StringView trimed = inl::trim(buffer);
     std::from_chars_result result = std::from_chars(trimed.data(), trimed.data() + trimed.size(), value);
     if (result.ec != std::errc()) {
         return std::unexpected(inl::obj::Error::FailedToExtractFloat);
@@ -28,12 +29,12 @@ uint32_t map_index(inl::obj::Model const& model, float index) {
     }
 }
 
-constexpr std::string_view DATA_TYPE_GEOMETRIC_VERTICES = "v";
-constexpr std::string_view DATA_TYPE_TEXTURE_VERTICES = "vt";
-constexpr std::string_view DATA_TYPE_VERTEX_NORMALS = "vn";
-constexpr std::string_view DATA_TYPE_FACE = "f";
+constexpr inl::StringView DATA_TYPE_GEOMETRIC_VERTICES = "v";
+constexpr inl::StringView DATA_TYPE_TEXTURE_VERTICES = "vt";
+constexpr inl::StringView DATA_TYPE_VERTEX_NORMALS = "vn";
+constexpr inl::StringView DATA_TYPE_FACE = "f";
 
-inl::obj::Result<inl::Vector3> parse_vector3(std::string_view data_values) {
+inl::obj::Result<inl::Vector3> parse_vector3(inl::StringView data_values) {
     inl::Vector3 vector {};
     inl::Cut cut_vertex = inl::cut(data_values, ' ');
 
@@ -53,7 +54,7 @@ inl::obj::Result<inl::Vector3> parse_vector3(std::string_view data_values) {
 
 namespace inl::obj {
 
-Result<Model> load(std::string_view buffer) {
+Result<Model> load(StringView buffer) {
     Model model {};
 
     while (buffer.size()) {
@@ -65,7 +66,7 @@ Result<Model> load(std::string_view buffer) {
 
         buffer = cut_line.right;
 
-        std::string_view line = trim(cut_line.left);
+        StringView line = trim(cut_line.left);
         if (line.empty()) {
             continue;
         }
@@ -73,8 +74,8 @@ Result<Model> load(std::string_view buffer) {
         {
             Cut cut_data = cut(line, ' ');
 
-            std::string_view data_type = trim(cut_data.left);
-            std::string_view data_values = trim(cut_data.right);
+            StringView data_type = trim(cut_data.left);
+            StringView data_values = trim(cut_data.right);
 
             if (data_type == DATA_TYPE_GEOMETRIC_VERTICES) {
                 Result<Vector3> vector = TRY(parse_vector3(data_values));

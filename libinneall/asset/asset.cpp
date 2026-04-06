@@ -172,7 +172,7 @@ std::optional<inl::Mesh> load_mesh(std::filesystem::path path, Span<uint8_t> buf
         return std::nullopt;
     }
 
-    obj::Result<obj::Model> obj_model = obj::load(*obj_data);
+    obj::Result<obj::Model> obj_model = obj::load({ obj_data->data(), obj_data->size() });
     if (!obj_model) {
         log::error("Failed to load obj file error: {}", static_cast<int32_t>(obj_model.error()));
         return std::nullopt;

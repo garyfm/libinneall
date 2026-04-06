@@ -1,10 +1,10 @@
 #pragma once
 
+#include <libinneall/base/string_view.hpp>
 #include <libinneall/math/vector2.hpp>
 #include <libinneall/math/vector3.hpp>
 
 #include <expected>
-#include <string_view>
 #include <vector>
 
 namespace inl::obj {
@@ -33,6 +33,6 @@ enum class Error {
 };
 
 template <typename T> using Result = std::expected<T, Error>;
-Result<Model> load(std::string_view raw_data);
+Result<Model> load(StringView raw_data);
 
 } // namespace inl

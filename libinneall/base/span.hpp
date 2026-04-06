@@ -30,8 +30,8 @@ public:
         return m_data[index];
     }
 
-    Span<T> subspan(size_t offset, size_t size) {
-        INL_ASSERT(offset + size < m_size, "Inavlid offset + size");
+    Span<T> subspan(size_t offset, size_t size) const {
+        INL_ASSERT(offset + size <= m_size, "Inavlid offset + size");
         return { m_data + offset, size };
     }
 

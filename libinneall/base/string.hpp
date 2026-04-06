@@ -2,41 +2,13 @@
 
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/hash.hpp>
+#include <libinneall/base/string_utils.hpp>
+#include <libinneall/base/string_view.hpp>
 
 #include <stdint.h>
 #include <string_view>
 
 namespace inl {
-
-int memcmp(void const* lhs, void const* rhs, size_t size);
-void memcpy(void* dst, void const* src, size_t size);
-
-inline constexpr size_t strlen(char const* str) {
-    INL_ASSERT(str != nullptr, "Invalid pointer");
-
-    char const* end = str;
-
-    while (*end != '\0') {
-        ++end;
-    }
-
-    return end - str;
-}
-
-template <size_t N> inline constexpr size_t strlen(char const (&str)[N]) {
-    size_t len { 0 };
-    while ((len < N) && (str[len] != '\0')) {
-        ++len;
-    }
-
-    return len;
-}
-
-inline constexpr bool isspace(char c) {
-    return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
-}
-
-inline constexpr bool isdigit(char c) { return (c >= '0' && c <= '9'); }
 
 template <size_t N> class String {
 public:
@@ -109,6 +81,15 @@ public:
         return memcmp(m_buffer, other.data(), m_size) == 0;
     }
 
+    bool operator==(StringView other) const {
+
+        if (m_size != other.size()) {
+            return false;
+        }
+
+        return memcmp(m_buffer, other.data(), m_size) == 0;
+    }
+
     template <size_t LenNullTerm> bool operator==(const char (&str)[LenNullTerm]) const {
         if (m_size != LenNullTerm - 1) {
             return false;
@@ -127,6 +108,7 @@ public:
     }
 
     operator std::string_view() const { return { data(), size() }; }
+    operator StringView() const { return { data(), size() }; }
 
     void resize(size_t new_size) {
         INL_ASSERT(new_size <= m_capacity, "new_size is greater than capactiy");
@@ -210,18 +192,6 @@ struct StringHash {
 
     size_t operator()(std::string_view sv) const { return hash_fnv1a(sv); }
 };
-
-struct Cut {
-    std::string_view left;
-    std::string_view right;
-    bool success;
-};
-
-std::string_view trim_left(std::string_view sv);
-std::string_view trim_right(std::string_view sv);
-std::string_view trim(std::string_view sv);
-
-Cut cut(std::string_view sv, char deliminator);
 
 uint8_t digit_count(uint32_t number);
 

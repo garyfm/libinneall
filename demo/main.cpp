@@ -4,6 +4,7 @@
 #include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/log.hpp>
+#include <libinneall/base/option.hpp>
 #include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_resource.hpp>
 #include <libinneall/camera.hpp>
@@ -25,7 +26,6 @@
 #include <libinneall/renderer/vertex_array.hpp>
 #include <libinneall/vertex_data.hpp>
 #include <libinneall/window.hpp>
-#include <optional>
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <chrono>
@@ -143,25 +143,25 @@ int main(int argc, char* argv[]) {
         const std::filesystem::path model_path { assets_path.append("/backpack").data() };
         const std::filesystem::path shader_path { assets_path.overwrite("/shaders", assets_path_root_pos).data() };
 
-        std::optional<ShaderProgram> shader_program_lighting { load_shader(
+        Option<ShaderProgram> shader_program_lighting { load_shader(
             shader_path / "lighting_phong.vert.glsl", shader_path / "lighting_phong.frag.glsl", scratch_buffer) };
         INL_ASSERT(shader_program_lighting.has_value(), "Failed to load shader lighting");
 
-        std::optional<ShaderProgram> shader_program_debug { load_shader(
+        Option<ShaderProgram> shader_program_debug { load_shader(
             shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl", scratch_buffer) };
         INL_ASSERT(shader_program_debug.has_value(), "Failed to load shader debug");
 
-        std::optional<ShaderProgram> shader_program_skybox { load_shader(
+        Option<ShaderProgram> shader_program_skybox { load_shader(
             shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl", scratch_buffer) };
         INL_ASSERT(shader_program_skybox.has_value(), "Failed to load shader skybox");
 
-        std::optional<Mesh> mesh { load_mesh(model_path / "mesh.obj", scratch_buffer) };
+        Option<Mesh> mesh { load_mesh(model_path / "mesh.obj", scratch_buffer) };
         INL_ASSERT(mesh.has_value(), "Failed to load mesh");
 
-        std::optional<Texture> texture_albedo { load_texture(model_path / "albedo.ppm", false) };
+        Option<Texture> texture_albedo { load_texture(model_path / "albedo.ppm", false) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
-        std::optional<Texture> texture_specular { load_texture(model_path / "specular.ppm", false) };
+        Option<Texture> texture_specular { load_texture(model_path / "specular.ppm", false) };
         INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
 
         Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program_lighting.value() };
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
         // Skybox
         assets_path.overwrite("/skybox", assets_path_root_pos);
 
-        std::optional<Cubemap> skybox = load_cubemap(assets_path, false);
+        Option<Cubemap> skybox = load_cubemap(assets_path, false);
         if (!skybox) {
             log::error("Failed to load skybox");
             return -1;

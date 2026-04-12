@@ -14,8 +14,8 @@ public:
     Texture() = default;
     explicit Texture(size_t width, size_t height, uint8_t n_components, uint8_t const* data);
 
-    Texture(const Texture&) = delete;
-    Texture operator=(const Texture&) = delete;
+    Texture(Texture const&) = delete;
+    Texture operator=(Texture const&) = delete;
 
     Texture(Texture&& other) noexcept;
     Texture& operator=(Texture&& other) noexcept;

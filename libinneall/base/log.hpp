@@ -1,7 +1,9 @@
 #pragma once
 
-#include <format>
+#include <libinneall/base/option.hpp>
 #include <libinneall/base/string_view.hpp>
+
+#include <format>
 #include <print>
 #include <source_location>
 
@@ -17,8 +19,8 @@ enum class Level : char {
 constexpr StringView get_module_name(const std::source_location& location) {
     StringView file_name { location.file_name() };
 
-    const std::optional<size_t> slash_pos = file_name.rfind("/");
-    const std::optional<size_t> dot_pos = file_name.rfind(".");
+    const Option<size_t> slash_pos = file_name.rfind("/");
+    const Option<size_t> dot_pos = file_name.rfind(".");
 
     if (!slash_pos || !dot_pos) {
         return "";

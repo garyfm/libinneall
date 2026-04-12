@@ -1,3 +1,4 @@
+#include <libinneall/base/option.hpp>
 #include <libinneall/base/string_view.hpp>
 #include <libinneall/math/math.hpp>
 
@@ -5,9 +6,9 @@
 
 namespace inl {
 
-std::optional<size_t> StringView::find(StringView needle, size_t start_pos) {
+Option<size_t> StringView::find(StringView needle, size_t start_pos) {
     if (m_size < needle.size() || start_pos > m_size) {
-        return std::nullopt;
+        return None;
     }
 
     for (size_t i = start_pos; i < m_size; ++i) {
@@ -17,7 +18,7 @@ std::optional<size_t> StringView::find(StringView needle, size_t start_pos) {
         }
 
         if (m_size - i < needle.size()) {
-            return std::nullopt;
+            return None;
         }
 
         if (memcmp(m_data + i, needle.data(), needle.size()) == 0) {
@@ -25,12 +26,12 @@ std::optional<size_t> StringView::find(StringView needle, size_t start_pos) {
         }
     }
 
-    return std::nullopt;
+    return None;
 }
 
-std::optional<size_t> StringView::rfind(StringView needle, size_t start_pos) {
+Option<size_t> StringView::rfind(StringView needle, size_t start_pos) {
     if (m_size < needle.size() || start_pos > m_size) {
-        return std::nullopt;
+        return None;
     }
 
     size_t pos = (start_pos != 0) ? start_pos : m_size;
@@ -42,7 +43,7 @@ std::optional<size_t> StringView::rfind(StringView needle, size_t start_pos) {
         }
 
         if (m_size - i < needle.size()) {
-            return std::nullopt;
+            return None;
         }
 
         if (memcmp(m_data + i, needle.data(), needle.size()) == 0) {
@@ -50,7 +51,7 @@ std::optional<size_t> StringView::rfind(StringView needle, size_t start_pos) {
         }
     }
 
-    return std::nullopt;
+    return None;
 }
 
 StringView trim_left(StringView sv) {
@@ -102,4 +103,4 @@ Cut cut(StringView sv, char deliminator) {
     return result;
 }
 
-} // namepace inl
+} // namespace inl

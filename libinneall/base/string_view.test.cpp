@@ -1,3 +1,4 @@
+#include <libinneall/base/option.hpp>
 #include <libinneall/base/string_utils.hpp>
 #include <libinneall/base/string_view.hpp>
 #include <libinneall/math/math.hpp>
@@ -59,7 +60,7 @@ TEST_CASE("StringView: cut") {
 TEST_CASE("StringView: find") {
     {
         inl::StringView haystack { "hello, world!" };
-        std::optional<size_t> result = haystack.find("hello");
+        inl::Option<size_t> result = haystack.find("hello");
 
         CHECK(result.has_value() == true);
         CHECK(*result == 0);
@@ -88,7 +89,7 @@ TEST_CASE("StringView: find") {
 
     {
         inl::StringView haystack { "hello" };
-        std::optional<size_t> result = haystack.find("o");
+        inl::Option<size_t> result = haystack.find("o");
 
         CHECK(result.has_value() == true);
         CHECK(*result == 4);
@@ -101,7 +102,7 @@ TEST_CASE("StringView: find") {
 TEST_CASE("StringView: rfind") {
     {
         inl::StringView haystack { "hello, world!" };
-        std::optional<size_t> result = haystack.rfind("hello");
+        inl::Option<size_t> result = haystack.rfind("hello");
 
         CHECK(result.has_value() == true);
         CHECK(*result == 0);
@@ -130,7 +131,7 @@ TEST_CASE("StringView: rfind") {
 
     {
         inl::StringView haystack { "hello" };
-        std::optional<size_t> result = haystack.rfind("l");
+        inl::Option<size_t> result = haystack.rfind("l");
 
         CHECK(result.has_value() == true);
         CHECK(*result == 3);
@@ -141,7 +142,7 @@ TEST_CASE("StringView: rfind") {
 
     {
         inl::StringView haystack { "../test_dir/test_file.c" };
-        std::optional<size_t> result = haystack.rfind("/");
+        inl::Option<size_t> result = haystack.rfind("/");
 
         CHECK(result.has_value() == true);
         CHECK(*result == 11);

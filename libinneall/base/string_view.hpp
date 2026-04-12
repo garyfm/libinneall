@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/option.hpp>
 #include <libinneall/base/string_utils.hpp>
 
 #include <stddef.h>
@@ -43,8 +44,8 @@ public:
         return { m_data + offset, size };
     }
 
-    std::optional<size_t> find(StringView needle, size_t start_pos = 0);
-    std::optional<size_t> rfind(StringView needle, size_t start_pos = 0);
+    Option<size_t> find(StringView needle, size_t start_pos = 0);
+    Option<size_t> rfind(StringView needle, size_t start_pos = 0);
 
     char const* data() const { return m_data; };
 

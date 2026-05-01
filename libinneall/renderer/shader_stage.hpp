@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libinneall/base/log.hpp>
-#include <libinneall/base/unique_resource.hpp>
+#include <libinneall/base/unique_handle.hpp>
 
 #include <subprojects/glad/include/glad/glad.h>
 
@@ -10,6 +10,8 @@
 namespace inl {
 
 enum class ShaderType { Vertex, Fragment };
+
+inline void delete_shader(GLuint handle) { glDeleteShader(handle); }
 
 class ShaderStage {
 public:
@@ -22,14 +24,14 @@ public:
     ShaderStage(ShaderStage&& other) = delete;
     ShaderStage& operator=(ShaderStage&& other) = delete;
 
-    GLuint native_handle() const { return m_handle; }
+    GLuint handle() const { return m_handle; }
 
 private:
     bool compile(StringView source);
 
     static constexpr size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
 
-    UniqueResource<GLuint, decltype(glDeleteShader)> m_handle { 0, glDeleteShader };
+    UniqueHandle<GLuint, delete_shader> m_handle { 0 };
     ShaderType m_type {};
 };
 

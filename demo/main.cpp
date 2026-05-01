@@ -6,7 +6,7 @@
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/option.hpp>
 #include <libinneall/base/result.hpp>
-#include <libinneall/base/unique_resource.hpp>
+#include <libinneall/base/unique_handle.hpp>
 #include <libinneall/camera.hpp>
 #include <libinneall/light.hpp>
 #include <libinneall/math/math.hpp>
@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
         log::debug(
             "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
 
-        while (!glfwWindowShouldClose(g_window.native_handle())) {
+        while (!glfwWindowShouldClose(g_window.handle())) {
             float current_frame_time = static_cast<float>(glfwGetTime());
             g_delta_time = current_frame_time - g_last_frame_time;
             g_last_frame_time = current_frame_time;

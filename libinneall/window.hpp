@@ -29,7 +29,7 @@ public:
 
     ~Window();
 
-    GLFWwindow* native_handle() const { return m_window.get(); }
+    GLFWwindow* handle() const { return m_window.get(); }
     uint32_t width() const { return m_width; }
     uint32_t height() const { return m_height; }
     float aspect_ratio() const { return static_cast<float>(m_width) / static_cast<float>(m_height); }

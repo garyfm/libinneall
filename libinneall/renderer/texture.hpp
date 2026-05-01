@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinneall/base/unique_resource.hpp>
+#include <libinneall/base/unique_handle.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <stddef.h>
@@ -21,13 +21,13 @@ public:
     Texture(Texture&& other) noexcept;
     Texture& operator=(Texture&& other) noexcept;
 
-    GLuint native_handle() const { return m_handle; }
+    GLuint handle() const { return m_handle; }
     void bind(GLuint texture_unit);
 
     GLuint unit() const { return m_unit; }
 
 private:
-    UniqueResource<GLuint, decltype(&delete_texture)> m_handle { 0, delete_texture };
+    UniqueHandle<GLuint, delete_texture> m_handle { 0 };
     GLuint m_unit {};
 };
 

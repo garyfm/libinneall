@@ -80,10 +80,10 @@ Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path
 
     texture.create(image->width, image->height, 3, image->pixel_data.data());
 
-    glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(texture.native_handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(texture.native_handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTextureParameteri(texture.native_handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(texture.handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(texture.handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(texture.handle(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTextureParameteri(texture.handle(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     return Error::Ok;
 }

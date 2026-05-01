@@ -19,7 +19,7 @@ namespace inl {
 
 Renderer::Renderer() {
     ubo_render_view.create(sizeof(RenderView));
-    glBindBufferBase(GL_UNIFORM_BUFFER, ubo_bindpoint_render_view, ubo_render_view.native_handle());
+    glBindBufferBase(GL_UNIFORM_BUFFER, ubo_bindpoint_render_view, ubo_render_view.handle());
 }
 
 void Renderer::begin_frame() const {

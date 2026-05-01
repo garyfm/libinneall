@@ -14,13 +14,13 @@ enum class ShaderType { Vertex, Fragment };
 class ShaderStage {
 public:
     ShaderStage() = default;
-    explicit ShaderStage(ShaderType type, StringView source);
+    void create(ShaderType type, StringView source);
 
     ShaderStage(const ShaderStage&) = delete;
     ShaderStage operator=(const ShaderStage&) = delete;
 
-    ShaderStage(ShaderStage&& other) noexcept;
-    ShaderStage& operator=(ShaderStage&& other) noexcept;
+    ShaderStage(ShaderStage&& other) = delete;
+    ShaderStage& operator=(ShaderStage&& other) = delete;
 
     GLuint native_handle() const { return m_handle; }
 

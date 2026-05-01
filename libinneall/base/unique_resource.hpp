@@ -53,7 +53,7 @@ public:
 
 private:
     T m_resource {};
-    Deleter m_deleter { nullptr };
+    Deleter m_deleter { nullptr }; // TODO: Remove not needed
 };
 
 template <typename T, typename Deleter> UniqueResource(T, Deleter, T) -> UniqueResource<T, Deleter, T {}>;

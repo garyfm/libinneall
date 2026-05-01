@@ -15,9 +15,9 @@ public:
 
     Span(T* begin, T* end)
         : m_data { begin }
-        , m_size { end - begin } {
+        , m_size { static_cast<size_t>(end - begin) } {
 
-        static_assert(end >= begin, "end less than begin");
+        INL_ASSERT(end >= begin, "end less than begin");
     };
 
     T& operator[](size_t index) {
@@ -51,5 +51,7 @@ private:
     T* m_data {};
     size_t m_size {};
 };
+
+using ByteSpan = Span<uint8_t>;
 
 } // namespace inl

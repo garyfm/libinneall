@@ -6,38 +6,19 @@
 
 namespace inl {
 
-ShaderProgram::ShaderProgram(ShaderStage vertex_stage, ShaderStage fragment_stage)
-    : m_vertex { std::move(vertex_stage) }
-    , m_fragment { std::move(fragment_stage) } {
+void ShaderProgram::create(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
+
     m_handle.reset(glCreateProgram());
 
     if (!m_handle) {
         throw std::runtime_error("Failed to create program");
     }
 
-    link(m_vertex, m_fragment);
+    link(vertex_stage, fragment_stage);
 
     retrieve_uniforms();
 
     log::debug("Created shader program id {}", m_handle.get());
-}
-
-ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept
-    : m_handle { std::move(other.m_handle) }
-    , m_vertex { std::move(other.m_vertex) }
-    , m_fragment { std::move(other.m_fragment) }
-    , m_uniforms { std::move(other.m_uniforms) } { }
-
-ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
-
-    if (this != std::addressof(other)) {
-        m_handle = std::move(other.m_handle);
-        m_vertex = std::move(other.m_vertex);
-        m_fragment = std::move(other.m_fragment);
-        m_uniforms = std::move(other.m_uniforms);
-    }
-
-    return *this;
 }
 
 void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
@@ -55,8 +36,7 @@ void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fra
 
         glGetProgramInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
         info_log.resize(info_log_size);
-        log::error(
-            "Error compiling shader id {}: {}", m_handle.get(), StringView { info_log.data(), info_log.size() });
+        log::error("Error compiling shader id {}: {}", m_handle.get(), StringView { info_log.data(), info_log.size() });
         throw std::runtime_error("Failed to link program");
     }
 }

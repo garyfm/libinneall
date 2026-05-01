@@ -18,6 +18,7 @@ enum class TextureUnit : GLuint {
 namespace inl {
 
 Renderer::Renderer() {
+    ubo_render_view.create(sizeof(RenderView));
     glBindBufferBase(GL_UNIFORM_BUFFER, ubo_bindpoint_render_view, ubo_render_view.native_handle());
 }
 

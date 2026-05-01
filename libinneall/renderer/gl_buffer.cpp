@@ -2,14 +2,14 @@
 
 namespace inl {
 
-GlBuffer::GlBuffer(size_t size)
-    : m_size { size } {
+void GlBuffer::create(size_t size) {
+    m_size = size;
 
     create_buffer(nullptr, size);
 }
 
-GlBuffer::GlBuffer(Span<uint8_t const> data)
-    : m_size { data.size() } {
+void GlBuffer::create(Span<uint8_t const> data) {
+    m_size = data.size();
 
     create_buffer(data.data(), data.size());
 }
@@ -33,6 +33,7 @@ void GlBuffer::allocate(size_t size) {
 }
 
 void GlBuffer::upload(size_t offset, Span<uint8_t const> data) {
+    INL_ASSERT(m_handle != 0, "Accessing invalid handle");
     glNamedBufferSubData(m_handle, offset, data.size(), data.data());
 }
 

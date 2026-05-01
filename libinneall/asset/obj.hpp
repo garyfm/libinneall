@@ -15,6 +15,7 @@ struct FaceCorner {
     uint32_t normal_index;
 };
 
+// TODO:: Rework to use arena
 struct Model {
     std::vector<Vector3> geometric_vertices;
     std::vector<Vector2> texture_vertices;

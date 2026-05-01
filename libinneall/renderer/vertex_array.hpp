@@ -26,7 +26,10 @@ public:
 
     explicit VertexArray();
 
-    GLuint native_handle() const { return m_handle; }
+    GLuint native_handle() const {
+        INL_ASSERT(m_handle != 0, "Accessing invalid handle");
+        return m_handle;
+    }
 
     void set_attribute(Attribute const& attribute) const;
 

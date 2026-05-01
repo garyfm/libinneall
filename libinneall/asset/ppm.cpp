@@ -58,7 +58,7 @@ inl::ppm::Result<int32_t> extract_int(inl::Span<uint8_t> buffer, size_t& cursor)
 
 namespace inl::ppm {
 
-Result<Image> load(Span<uint8_t> raw_data) {
+Result<Image> load(ByteSpan raw_data) {
 
     size_t cursor { 0 };
     static constexpr uint8_t FORMAT_SIZE { 2 };
@@ -88,25 +88,26 @@ Result<Image> load(Span<uint8_t> raw_data) {
     // Skip the single whitespace prior to the image data
     ++cursor;
 
+    size_t size_bytes = width.value() * height.value() * 3;
     const Image image {
         .format { Format::P6 },
         .width { static_cast<size_t>(width.value()) },
         .height { static_cast<size_t>(height.value()) },
         .max_value { static_cast<uint16_t>(max_value.value()) },
-        .pixel_data { raw_data.begin() + cursor, raw_data.end() },
+        .pixel_data { raw_data.begin() + cursor, size_bytes },
     };
 
     INL_ASSERT((image.pixel_data.size() == image.width * image.height * 3), "PPM Image size is invalid");
     return image;
 }
 
-Image flip_vertically(Image const& image) {
+Image flip_vertically(ByteSpan buffer, Image const& image) {
     Image flipped {
         .format { image.format },
         .width { image.width },
         .height { image.height },
         .max_value { image.max_value },
-        .pixel_data {},
+        .pixel_data { buffer.data(), image.pixel_data.size() },
     };
 
     log::debug("pixel_data: {}, width: {}, height: {}", image.pixel_data.size(), image.width, image.height);
@@ -114,9 +115,9 @@ Image flip_vertically(Image const& image) {
     const uint8_t n_channels { 3 };
     const size_t row_size_bytes { image.width * n_channels };
 
-    flipped.pixel_data.resize(image.pixel_data.size());
     log::debug("flipped size: {}", flipped.pixel_data.size());
 
+    // TODO: This should do a copy in place using a temp row
     for (size_t row = 0; row < image.height; ++row) {
 
         size_t row_start { row * row_size_bytes };

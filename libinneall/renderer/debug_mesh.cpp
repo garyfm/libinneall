@@ -12,7 +12,8 @@ Mesh* debug_mesh_triangle() {
     } };
 
     static MeshData mesh_data { { debug_triangle_vertices.begin(), debug_triangle_vertices.end() }, {} };
-    static Mesh mesh { mesh_data };
+    static Mesh mesh {};
+    mesh.create(mesh_data);
 
     return &mesh;
 }
@@ -31,7 +32,8 @@ Mesh* debug_mesh_quad() {
     } };
 
     static MeshData mesh_data { { debug_quad_vertices.begin(), debug_quad_vertices.end() }, {} };
-    static Mesh mesh { mesh_data };
+    static Mesh mesh {};
+    mesh.create(mesh_data);
 
     return &mesh;
 }
@@ -83,7 +85,8 @@ Mesh* debug_mesh_cube() {
 
     // TODO: Avoid the copy here
     static MeshData mesh_data { { debug_cube_vertices.begin(), debug_cube_vertices.end() }, {} };
-    static Mesh mesh { mesh_data };
+    static Mesh mesh {};
+    mesh.create(mesh_data);
 
     return &mesh;
 }
@@ -135,7 +138,8 @@ Mesh* mesh_cubemap() {
 
     // TODO: Avoid the copy here
     static MeshData mesh_data { { cubemap_vertices.begin(), cubemap_vertices.end() }, {} };
-    static Mesh mesh { mesh_data };
+    static Mesh mesh {};
+    mesh.create(mesh_data);
 
     return &mesh;
 }

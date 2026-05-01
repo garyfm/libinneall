@@ -16,8 +16,13 @@
 namespace inl {
 
 enum class Error {
-    OK = 0,
-    ERROR = 1,
+    Ok = 0,
+    Error = 1,
+    AssetFailedToLoadFile,
+    AssetFailedToLoadTexture,
+    AssetFailedToLoadCubmap,
+    AssetFailedToLoadShader,
+    AssetFailedToLoadMesh,
     RENDERER_SHADER_PROGRAM_FAILED_TO_SET_UNIFORM,
 };
 

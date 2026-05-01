@@ -3,6 +3,7 @@
 #include <libinneall/base/unique_resource.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
+#include <stddef.h>
 #include <stdint.h>
 
 namespace inl {
@@ -12,7 +13,7 @@ void delete_texture(GLuint handle);
 class Texture {
 public:
     Texture() = default;
-    explicit Texture(size_t width, size_t height, uint8_t n_components, uint8_t const* data);
+    void create(size_t width, size_t height, uint8_t n_components, uint8_t const* data);
 
     Texture(Texture const&) = delete;
     Texture operator=(Texture const&) = delete;

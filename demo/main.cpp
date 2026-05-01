@@ -143,41 +143,45 @@ int main(int argc, char* argv[]) {
         const std::filesystem::path model_path { assets_path.append("/backpack").data() };
         const std::filesystem::path shader_path { assets_path.overwrite("/shaders", assets_path_root_pos).data() };
 
-        Option<ShaderProgram> shader_program_lighting { load_shader(
-            shader_path / "lighting_phong.vert.glsl", shader_path / "lighting_phong.frag.glsl", scratch_buffer) };
-        INL_ASSERT(shader_program_lighting.has_value(), "Failed to load shader lighting");
+        ShaderProgram shader_program_lighting {};
+        Error result = load_shader(scratch_buffer, shader_program_lighting, shader_path / "lighting_phong.vert.glsl",
+            shader_path / "lighting_phong.frag.glsl");
+        INL_ASSERT(result == Error::Ok, "Failed to load shader lighting");
 
-        Option<ShaderProgram> shader_program_debug { load_shader(
-            shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl", scratch_buffer) };
-        INL_ASSERT(shader_program_debug.has_value(), "Failed to load shader debug");
+        ShaderProgram shader_program_debug {};
+        result = load_shader(
+            scratch_buffer, shader_program_debug, shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl");
+        INL_ASSERT(result == Error::Ok, "Failed to load shader lighting");
 
-        Option<ShaderProgram> shader_program_skybox { load_shader(
-            shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl", scratch_buffer) };
-        INL_ASSERT(shader_program_skybox.has_value(), "Failed to load shader skybox");
+        ShaderProgram shader_program_skybox {};
+        result = load_shader(
+            scratch_buffer, shader_program_skybox, shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl");
+        INL_ASSERT(result == Error::Ok, "Failed to load shader lighting");
 
-        Option<Mesh> mesh { load_mesh(model_path / "mesh.obj", scratch_buffer) };
-        INL_ASSERT(mesh.has_value(), "Failed to load mesh");
+        Mesh mesh {};
+        result = load_mesh(scratch_buffer, mesh, model_path / "mesh.obj");
+        INL_ASSERT(result == Error::Ok, "Failed to load mesh");
 
-        Option<Texture> texture_albedo { load_texture(model_path / "albedo.ppm", false) };
-        INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
+        Texture texture_albedo {};
+        result = load_texture(scratch_buffer, texture_albedo, model_path / "albedo.ppm", false);
+        INL_ASSERT(result == Error::Ok, "Failed to load texture_albedo");
 
-        Option<Texture> texture_specular { load_texture(model_path / "specular.ppm", false) };
-        INL_ASSERT(texture_albedo.has_value(), "Failed to load texture_albedo");
+        Texture texture_specular {};
+        result = load_texture(scratch_buffer, texture_specular, model_path / "specular.ppm", false);
+        INL_ASSERT(result == Error::Ok, "Failed to load texture_albedo");
 
-        Material material { &texture_albedo.value(), &texture_specular.value(), 32, &shader_program_lighting.value() };
+        Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
 
         Matrix4 model_matrix { 1 };
 
-        Model model { &mesh.value(), &material, model_matrix };
+        Model model { &mesh, &material, model_matrix };
 
         // Skybox
         assets_path.overwrite("/skybox", assets_path_root_pos);
 
-        Option<Cubemap> skybox = load_cubemap(assets_path, false);
-        if (!skybox) {
-            log::error("Failed to load skybox");
-            return -1;
-        }
+        Cubemap skybox {};
+        result = load_cubemap(scratch_buffer, skybox, assets_path, false);
+        INL_ASSERT(result == Error::Ok, "Failed to load skyboz");
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
@@ -219,8 +223,8 @@ int main(int argc, char* argv[]) {
         };
 
         Renderer renderer;
-        renderer.set_debug_shader(shader_program_debug.value());
-        renderer.set_skybox_shader(shader_program_skybox.value());
+        renderer.set_debug_shader(shader_program_debug);
+        renderer.set_skybox_shader(shader_program_skybox);
 
         auto end_init = std::chrono::steady_clock::now();
         log::debug(
@@ -236,7 +240,7 @@ int main(int argc, char* argv[]) {
             render_scene.light_spot->pos = g_camera.position();
             render_scene.light_spot->dir = g_camera.front();
 
-            RenderView render_view {
+            [[maybe_unused]] RenderView render_view {
                 .view = g_camera.view_matrix(),
                 .projection = g_camera.perspective_matrix(g_window.aspect_ratio()),
                 .pos = g_camera.position(),
@@ -244,7 +248,7 @@ int main(int argc, char* argv[]) {
 
             renderer.begin_frame();
 
-            renderer.draw_skybox(skybox.value());
+            renderer.draw_skybox(skybox);
             renderer.render(render_scene, render_view);
             renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 

@@ -17,13 +17,15 @@ static constexpr size_t MAX_SHADER_UNIFORM_NAME = 128;
 
 class ShaderProgram {
 public:
-    ShaderProgram(ShaderStage vertex_stage, ShaderStage fragment_stage);
+    ShaderProgram() = default;
+
+    // TODO:: static method
+    void create(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);
 
     ShaderProgram(const ShaderProgram&) = delete;
     ShaderProgram operator=(const ShaderProgram&) = delete;
-
-    ShaderProgram(ShaderProgram&& other) noexcept;
-    ShaderProgram& operator=(ShaderProgram&& other) noexcept;
+    ShaderProgram(ShaderProgram&& other) = delete;
+    ShaderProgram& operator=(ShaderProgram&& other) = delete;
 
     GLuint native_handle() const { return m_handle; }
 
@@ -43,9 +45,6 @@ private:
     static constexpr size_t MAX_OPENGL_INFO_LOG_SIZE = 512;
 
     UniqueResource<GLuint, decltype(glDeleteProgram)> m_handle { 0, glDeleteProgram };
-
-    ShaderStage m_vertex {};
-    ShaderStage m_fragment {};
 
     std::unordered_map<String<MAX_SHADER_UNIFORM_NAME>, UniformInfo, StringHash> m_uniforms;
 };

@@ -5,7 +5,6 @@
 #include <expected>
 #include <stddef.h>
 #include <stdint.h>
-#include <vector>
 
 namespace inl::ppm {
 
@@ -25,8 +24,9 @@ struct Image {
     size_t width;
     size_t height;
     uint16_t max_value;
-    // TODO: should this own the data ?
-    std::vector<uint8_t> pixel_data;
+    ByteSpan pixel_data;
+
+    size_t size_bytes() const { return width * height * 3; }
 };
 
 enum class Error {
@@ -39,8 +39,8 @@ enum class Error {
 };
 
 template <typename T> using Result = std::expected<T, Error>;
-Result<Image> load(Span<uint8_t> raw_data);
+Result<Image> load(ByteSpan raw_data);
 
-Image flip_vertically(Image const& image);
+Image flip_vertically(ByteSpan buffer, Image const& image);
 
 } // namespace inl

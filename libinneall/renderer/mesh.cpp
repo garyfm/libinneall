@@ -4,10 +4,11 @@
 
 namespace inl {
 
-Mesh::Mesh(MeshData const& mesh_data)
-    : m_vertex_count { mesh_data.vertex_data.size() }
-    , m_index_count { mesh_data.index_data.size() }
-    , m_vertex_buffer { to_bytes(Span { mesh_data.vertex_data.data(), mesh_data.vertex_data.size() }) } {
+void Mesh::create(MeshData const& mesh_data) {
+    m_vertex_count = mesh_data.vertex_data.size();
+    m_index_count = mesh_data.index_data.size();
+    m_vertex_buffer.create(to_bytes(Span { mesh_data.vertex_data.data(), mesh_data.vertex_data.size() }));
+
     m_vertex_array.bind_vertex_buffer({
         .index = 0,
         .buffer = m_vertex_buffer,
@@ -16,7 +17,7 @@ Mesh::Mesh(MeshData const& mesh_data)
     });
 
     if (mesh_data.index_data.size() != 0) {
-        m_index_buffer = GlBuffer(to_bytes(Span { mesh_data.index_data.data(), mesh_data.index_data.size() }));
+        m_index_buffer.create(to_bytes(Span { mesh_data.index_data.data(), mesh_data.index_data.size() }));
         m_vertex_array.bind_element_buffer(m_index_buffer);
     }
 
@@ -46,34 +47,6 @@ Mesh::Mesh(MeshData const& mesh_data)
         .type = GL_FLOAT,
         .normalise = false,
     });
-}
-
-Mesh::Mesh(Mesh&& other) noexcept
-    : m_vertex_count { other.m_vertex_count }
-    , m_index_count { other.m_index_count }
-    , m_vertex_buffer { std::move(other.m_vertex_buffer) }
-    , m_index_buffer { std::move(other.m_index_buffer) }
-    , m_vertex_array { std::move(other.m_vertex_array) } {
-    other.m_vertex_count = 0;
-    other.m_index_count = 0;
-}
-
-Mesh& Mesh::operator=(Mesh&& other) noexcept {
-    if (this != std::addressof(other)) {
-        if (is_bound()) {
-            unbind();
-        }
-        m_vertex_count = other.m_vertex_count;
-        m_index_count = other.m_index_count;
-        m_vertex_buffer = std::move(other.m_vertex_buffer);
-        m_index_buffer = std::move(other.m_index_buffer);
-        m_vertex_array = std::move(other.m_vertex_array);
-
-        other.m_vertex_count = 0;
-        other.m_index_count = 0;
-    }
-
-    return *this;
 }
 
 Mesh::~Mesh() {

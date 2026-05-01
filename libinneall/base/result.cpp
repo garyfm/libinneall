@@ -4,9 +4,9 @@ namespace inl {
 
 StringView to_string(inl::Error e) {
     switch (e) {
-    case inl::Error::OK:
+    case inl::Error::Ok:
         return "OK";
-    case inl::Error::ERROR:
+    case inl::Error::Error:
         return "ERROR";
     default:
         return "Unknown";

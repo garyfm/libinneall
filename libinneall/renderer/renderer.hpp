@@ -44,7 +44,7 @@ private:
 
     ShaderProgram* debug_shader { nullptr };
     ShaderProgram* skybox_shader { nullptr };
-    GlBuffer ubo_render_view { sizeof(RenderView) };
+    GlBuffer ubo_render_view {};
 };
 
 } // namespace inl

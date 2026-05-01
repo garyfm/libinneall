@@ -12,7 +12,8 @@ void delete_texture(GLuint handle);
 
 class Cubemap {
 public:
-    explicit Cubemap(size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces);
+    Cubemap() = default;
+    void create(size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces);
 
     Cubemap(const Cubemap&) = delete;
     Cubemap operator=(const Cubemap&) = delete;

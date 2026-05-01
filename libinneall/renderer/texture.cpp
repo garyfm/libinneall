@@ -7,7 +7,7 @@ namespace inl {
 
 void delete_texture(GLuint handle) { glDeleteTextures(1, &handle); }
 
-Texture::Texture(size_t width, size_t height, uint8_t n_components, uint8_t const* data) {
+void Texture::create(size_t width, size_t height, uint8_t n_components, uint8_t const* data) {
     glCreateTextures(GL_TEXTURE_2D, 1, &m_handle);
 
     GLenum size_format {};

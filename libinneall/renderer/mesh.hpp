@@ -8,13 +8,13 @@ namespace inl {
 
 class Mesh {
 public:
-    explicit Mesh(MeshData const& data);
+    Mesh() = default;
+    void create(MeshData const& data);
 
     Mesh(Mesh const&) = delete;
     Mesh operator=(Mesh const&) = delete;
-
-    Mesh(Mesh&& other) noexcept;
-    Mesh& operator=(Mesh&& other) noexcept;
+    Mesh(Mesh&& other) = delete;
+    Mesh& operator=(Mesh&& other) = delete;
 
     ~Mesh();
 

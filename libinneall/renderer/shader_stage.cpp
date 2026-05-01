@@ -22,9 +22,9 @@ GLuint to_opengl(inl::ShaderType type) {
 
 namespace inl {
 
-ShaderStage::ShaderStage(ShaderType type, StringView source)
-    : m_type { type } {
+void ShaderStage::create(ShaderType type, StringView source) {
 
+    m_type = type;
     if (source.size() == 0) {
         throw std::runtime_error("Empty shader source");
     }
@@ -40,24 +40,6 @@ ShaderStage::ShaderStage(ShaderType type, StringView source)
 
     log::info("Created shader stage id {}", m_handle.get());
 };
-
-ShaderStage::ShaderStage(ShaderStage&& other) noexcept
-    : m_handle { std::move(other.m_handle) }
-    , m_type { other.m_type } {
-    other.m_type = ShaderType {};
-}
-
-ShaderStage& ShaderStage::operator=(ShaderStage&& other) noexcept {
-
-    if (this != std::addressof(other)) {
-        m_handle = std::move(other.m_handle);
-        m_type = other.m_type;
-
-        other.m_type = ShaderType {};
-    }
-
-    return *this;
-}
 
 bool ShaderStage::compile(StringView source) {
 

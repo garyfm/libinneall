@@ -4,7 +4,7 @@
 namespace inl {
 
 // TODO: This overlaps heavily with Texture. Possibly Texture could be generalised to handle multiple sub images??
-Cubemap::Cubemap(size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces) {
+void Cubemap::create(size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces) {
 
     glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &m_handle);
 

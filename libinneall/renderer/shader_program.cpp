@@ -22,8 +22,8 @@ void ShaderProgram::create(ShaderStage const& vertex_stage, ShaderStage const& f
 }
 
 void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
-    glAttachShader(m_handle, vertex_stage.native_handle());
-    glAttachShader(m_handle, fragment_stage.native_handle());
+    glAttachShader(m_handle, vertex_stage.handle());
+    glAttachShader(m_handle, fragment_stage.handle());
 
     glLinkProgram(m_handle);
 

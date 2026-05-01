@@ -9,13 +9,13 @@ void VertexArray::delete_array(GLuint buffer) { glDeleteVertexArrays(1, &buffer)
 void VertexArray::bind_vertex_buffer(BindPoint const& bind_point) const {
 
     // Bind the vertex buffer to a bind point
-    glVertexArrayVertexBuffer(m_handle, static_cast<GLuint>(bind_point.index), bind_point.buffer.native_handle(),
+    glVertexArrayVertexBuffer(m_handle, static_cast<GLuint>(bind_point.index), bind_point.buffer.handle(),
         bind_point.offset_bytes, static_cast<GLsizei>(bind_point.stride_bytes));
 }
 
 void VertexArray::bind_element_buffer(GlBuffer& buffer) const {
 
-    glVertexArrayElementBuffer(m_handle, buffer.native_handle());
+    glVertexArrayElementBuffer(m_handle, buffer.handle());
 }
 
 void VertexArray::set_attribute(Attribute const& attribute) const {

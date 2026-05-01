@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinneall/base/unique_resource.hpp>
+#include <libinneall/base/unique_handle.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
@@ -26,7 +26,7 @@ public:
 
     explicit VertexArray();
 
-    GLuint native_handle() const {
+    GLuint handle() const {
         INL_ASSERT(m_handle != 0, "Accessing invalid handle");
         return m_handle;
     }
@@ -42,7 +42,7 @@ public:
 private:
     static void delete_array(GLuint array);
 
-    UniqueResource<GLuint, decltype(&delete_array)> m_handle { 0, delete_array };
+    UniqueHandle<GLuint, delete_array> m_handle { 0 };
 };
 
 } // namespace inl

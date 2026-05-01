@@ -6,38 +6,38 @@ namespace inl {
 
 void set_uniform(ShaderProgram& shader, StringView name, uint32_t value) {
     const GLuint location = shader.uniform_location(name);
-    glProgramUniform1i(shader.native_handle(), location, value);
+    glProgramUniform1i(shader.handle(), location, value);
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, int32_t value) {
     const GLuint location = shader.uniform_location(name);
-    glProgramUniform1i(shader.native_handle(), location, value);
+    glProgramUniform1i(shader.handle(), location, value);
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, float value) {
     const GLuint location = shader.uniform_location(name);
-    glProgramUniform1f(shader.native_handle(), location, value);
+    glProgramUniform1f(shader.handle(), location, value);
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, Color color) {
     const GLuint location = shader.uniform_location(name);
-    glProgramUniform3f(shader.native_handle(), location, color.r, color.g, color.b);
+    glProgramUniform3f(shader.handle(), location, color.r, color.g, color.b);
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, Vector3 const& vector) {
     const GLuint location = shader.uniform_location(name);
-    glProgramUniform3f(shader.native_handle(), location, vector.x, vector.y, vector.z);
+    glProgramUniform3f(shader.handle(), location, vector.x, vector.y, vector.z);
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, Matrix3 const& matrix) {
     const GLuint location = shader.uniform_location(name);
-    glProgramUniformMatrix3fv(shader.native_handle(), location, 1, GL_FALSE, matrix.elements().data());
+    glProgramUniformMatrix3fv(shader.handle(), location, 1, GL_FALSE, matrix.elements().data());
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, Matrix4 const& matrix) {
 
     const GLuint location = shader.uniform_location(name);
-    glProgramUniformMatrix4fv(shader.native_handle(), location, 1, GL_FALSE, matrix.elements().data());
+    glProgramUniformMatrix4fv(shader.handle(), location, 1, GL_FALSE, matrix.elements().data());
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, Material const& material) {

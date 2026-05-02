@@ -50,7 +50,6 @@ namespace inl {
 
 Error ShaderStage::create(ShaderStage& shader_stage, ShaderType type, StringView source) {
 
-    shader_stage.m_type = type;
     if (source.size() == 0) {
         return Error::RendererShaderStageInvalidSource;
     }
@@ -59,6 +58,8 @@ Error ShaderStage::create(ShaderStage& shader_stage, ShaderType type, StringView
     if (!shader_stage.m_handle) {
         return Error::RendererShaderStageFailedToCreate;
     }
+
+    shader_stage.m_type = type;
 
     if (!compile_shader(shader_stage, source)) {
         return Error::RendererShaderStageFailedToCompile;

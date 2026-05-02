@@ -29,6 +29,8 @@ enum class Error {
     RendererShaderStageFailedToCompile,
     RendererShaderProgramFailedToCreate,
     RendererShaderProgramFailedToLink,
+    RendererTextureFailedToCreate,
+    RendererCubemapFailedToCreate,
     RENDERER_SHADER_PROGRAM_FAILED_TO_SET_UNIFORM,
 };
 

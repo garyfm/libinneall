@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libinneall/base/utility.hpp>
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <libinneall/renderer/vertex_array.hpp>
@@ -9,12 +10,9 @@ namespace inl {
 class Mesh {
 public:
     Mesh() = default;
-    Error create(MeshData const& data);
+    static Error create(Mesh& mesh, MeshData const& data);
 
-    Mesh(Mesh const&) = delete;
-    Mesh operator=(Mesh const&) = delete;
-    Mesh(Mesh&& other) = delete;
-    Mesh& operator=(Mesh&& other) = delete;
+    INL_DEL_COPY_MOVE(Mesh);
 
     ~Mesh();
 
@@ -26,6 +24,8 @@ public:
     size_t index_count() const { return m_index_count; };
 
 private:
+    bool m_created { false };
+
     size_t m_vertex_count {};
     size_t m_index_count {};
 

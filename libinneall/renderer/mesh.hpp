@@ -9,7 +9,7 @@ namespace inl {
 class Mesh {
 public:
     Mesh() = default;
-    void create(MeshData const& data);
+    Error create(MeshData const& data);
 
     Mesh(Mesh const&) = delete;
     Mesh operator=(Mesh const&) = delete;

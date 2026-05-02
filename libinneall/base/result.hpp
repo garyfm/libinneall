@@ -23,6 +23,7 @@ enum class Error {
     AssetFailedToLoadCubmap,
     AssetFailedToLoadShader,
     AssetFailedToLoadMesh,
+    RendererFailedToCreateGlBuffer,
     RENDERER_SHADER_PROGRAM_FAILED_TO_SET_UNIFORM,
 };
 

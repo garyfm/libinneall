@@ -17,12 +17,20 @@ enum class TextureUnit : GLuint {
 
 namespace inl {
 
-Renderer::Renderer() {
-    ubo_render_view.create(sizeof(RenderView));
-    glBindBufferBase(GL_UNIFORM_BUFFER, ubo_bindpoint_render_view, ubo_render_view.handle());
+Error Renderer::create(Renderer& renderer) {
+    Error error = GlBuffer::create(renderer.m_ubo_render_view, sizeof(RenderView));
+
+    if (error == Error::Ok) {
+        glBindBufferBase(GL_UNIFORM_BUFFER, ubo_bindpoint_render_view, renderer.m_ubo_render_view.handle());
+        renderer.m_created = true;
+    }
+
+    return error;
 }
 
 void Renderer::begin_frame() const {
+    INL_ASSERT(m_created, "Invalid Renderer");
+
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -33,12 +41,13 @@ void Renderer::begin_frame() const {
 }
 
 void Renderer::render(RenderScene& scene, RenderView const& view) {
+    INL_ASSERT(m_created, "Invalid Renderer");
 
     for (auto& model : scene.models) {
         ShaderProgram* const shader = model.material->shader;
         shader->use();
 
-        ubo_render_view.upload(0, to_bytes(view));
+        m_ubo_render_view.upload(to_bytes(view));
 
         if (scene.light_directional != nullptr) {
             set_uniform(*shader, "u_light_dir", *scene.light_directional);
@@ -59,6 +68,7 @@ void Renderer::render(RenderScene& scene, RenderView const& view) {
 }
 
 void Renderer::render(Model& model) {
+    INL_ASSERT(m_created, "Invalid Renderer");
 
     INL_ASSERT(model.mesh != nullptr, "Empty mesh");
     INL_ASSERT(model.material != nullptr, "Empty material");
@@ -92,48 +102,53 @@ void Renderer::render(Model& model) {
 }
 
 void Renderer::draw_debug_mesh(Mesh& mesh, const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
+    INL_ASSERT(m_created, "Invalid Renderer");
+    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
 
     mesh.bind();
-    debug_shader->use();
-    set_uniform(*debug_shader, "u_color", color);
-    set_uniform(*debug_shader, "u_model", model_matrix);
+    m_debug_shader->use();
+    set_uniform(*m_debug_shader, "u_color", color);
+    set_uniform(*m_debug_shader, "u_model", model_matrix);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mesh.vertext_count()));
     mesh.unbind();
 }
 
 void Renderer::draw_debug_triangle(const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
+    INL_ASSERT(m_created, "Invalid Renderer");
+    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_triangle();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
 void Renderer::draw_debug_quad(const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
+    INL_ASSERT(m_created, "Invalid Renderer");
+    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_quad();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
 void Renderer::draw_debug_cube(const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(debug_shader != nullptr, "Debug shader not set");
+    INL_ASSERT(m_created, "Invalid Renderer");
+    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_cube();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
 void Renderer::draw_skybox(Cubemap& skybox) {
-    INL_ASSERT(skybox_shader != nullptr, "skybox shader not set");
+    INL_ASSERT(m_created, "Invalid Renderer");
+    INL_ASSERT(m_skybox_shader != nullptr, "skybox shader not set");
 
     glDepthMask(GL_FALSE);
 
     Mesh* mesh = mesh_cubemap();
     mesh->bind();
 
-    skybox_shader->use();
+    m_skybox_shader->use();
     skybox.bind(static_cast<GLuint>(TextureUnit::Skybox));
-    set_uniform(*skybox_shader, "skybox", skybox.unit());
+    set_uniform(*m_skybox_shader, "skybox", skybox.unit());
 
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mesh->vertext_count()));
     mesh->unbind();

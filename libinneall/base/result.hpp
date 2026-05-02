@@ -31,6 +31,7 @@ enum class Error {
     RendererShaderProgramFailedToLink,
     RendererTextureFailedToCreate,
     RendererCubemapFailedToCreate,
+    RendererVertexArrayFailedToCreate,
     RENDERER_SHADER_PROGRAM_FAILED_TO_SET_UNIFORM,
 };
 

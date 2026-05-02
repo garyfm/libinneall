@@ -18,10 +18,20 @@ public:
 
     void bind();
     void unbind();
-    bool is_bound() const { return m_is_bound; }
+    bool is_bound() const {
+        INL_ASSERT(m_created, "Invalid Mesh");
+        return m_is_bound;
+    }
 
-    size_t vertext_count() const { return m_vertex_count; };
-    size_t index_count() const { return m_index_count; };
+    size_t vertext_count() const {
+        INL_ASSERT(m_created, "Invalid Mesh");
+        return m_vertex_count;
+    };
+
+    size_t index_count() const {
+        INL_ASSERT(m_created, "Invalid Mesh");
+        return m_index_count;
+    };
 
 private:
     bool m_created { false };

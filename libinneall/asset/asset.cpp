@@ -78,7 +78,11 @@ Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path
         image = *image;
     }
 
-    texture.create(image->width, image->height, 3, image->pixel_data.data());
+    Error error = Texture::create(texture, image->width, image->height, 3, image->pixel_data.data());
+
+    if (error != Error::Ok) {
+        return error;
+    }
 
     glTextureParameteri(texture.handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTextureParameteri(texture.handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -139,7 +143,10 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
         cubemap_data[5].pixel_data.data(),
     } };
 
-    cubemap.create(cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces);
+    Error error = Cubemap::create(cubemap, cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces);
+    if (error != Error::Ok) {
+        return error;
+    }
 
     return Error::Ok;
 }

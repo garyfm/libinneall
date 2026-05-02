@@ -7,8 +7,13 @@ namespace inl {
 
 void delete_texture(GLuint handle) { glDeleteTextures(1, &handle); }
 
-void Texture::create(size_t width, size_t height, uint8_t n_components, uint8_t const* data) {
-    glCreateTextures(GL_TEXTURE_2D, 1, &m_handle);
+Error Texture::create(Texture& texture, size_t width, size_t height, uint8_t n_components, uint8_t const* data) {
+    texture.m_handle.reset();
+    glCreateTextures(GL_TEXTURE_2D, 1, &texture.m_handle);
+
+    if (texture.m_handle == 0) {
+        return Error::RendererTextureFailedToCreate;
+    }
 
     GLenum size_format {};
     GLenum base_format {};
@@ -26,31 +31,15 @@ void Texture::create(size_t width, size_t height, uint8_t n_components, uint8_t 
         INL_ASSERT(false, "Number of components unsupported");
     }
 
-    glTextureStorage2D(m_handle, 1, size_format, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
-    glTextureSubImage2D(m_handle, 0, 0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height), base_format,
-        GL_UNSIGNED_BYTE, data);
-    glGenerateTextureMipmap(m_handle);
-}
-
-Texture::Texture(Texture&& other) noexcept
-    : m_handle { std::move(other.m_handle) }
-    , m_unit { other.m_unit } {
-    other.m_unit = 0;
-}
-
-Texture& Texture::operator=(Texture&& other) noexcept {
-
-    if (this != std::addressof(other)) {
-        m_handle = std::move(other.m_handle);
-        m_unit = other.m_unit;
-
-        other.m_unit = 0;
-    }
-
-    return *this;
+    glTextureStorage2D(texture.m_handle, 1, size_format, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+    glTextureSubImage2D(texture.m_handle, 0, 0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height),
+        base_format, GL_UNSIGNED_BYTE, data);
+    glGenerateTextureMipmap(texture.m_handle);
+    return Error::Ok;
 }
 
 void Texture::bind(GLuint texture_unit) {
+    INL_ASSERT(m_handle != 0, "Invalid Texture");
     m_unit = texture_unit;
     glBindTextureUnit(m_unit, m_handle);
 }

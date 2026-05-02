@@ -1,7 +1,9 @@
 #pragma once
 
 #include <libinneall/base/array.hpp>
+#include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_handle.hpp>
+#include <libinneall/base/utility.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <stddef.h>
@@ -13,13 +15,11 @@ void delete_texture(GLuint handle);
 class Cubemap {
 public:
     Cubemap() = default;
-    void create(size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces);
 
-    Cubemap(const Cubemap&) = delete;
-    Cubemap operator=(const Cubemap&) = delete;
+    static Error create(
+        Cubemap& cubemap, size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces);
 
-    Cubemap(Cubemap&& other) noexcept;
-    Cubemap& operator=(Cubemap&& other) noexcept;
+    INL_DEL_COPY_MOVE(Cubemap);
 
     GLuint handle() const { return m_handle; }
     void bind(GLuint texture_unit);

@@ -21,13 +21,10 @@ class ShaderProgram {
 public:
     ShaderProgram() = default;
 
-    // TODO:: static method
-    void create(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);
+    static Error create(
+        ShaderProgram& shader_program, ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);
 
-    ShaderProgram(const ShaderProgram&) = delete;
-    ShaderProgram operator=(const ShaderProgram&) = delete;
-    ShaderProgram(ShaderProgram&& other) = delete;
-    ShaderProgram& operator=(ShaderProgram&& other) = delete;
+    INL_DEL_COPY_MOVE(ShaderProgram);
 
     GLuint handle() const { return m_handle; }
 
@@ -41,7 +38,6 @@ private:
         GLsizei count;
     };
 
-    void link(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);
     void retrieve_uniforms();
 
     static constexpr size_t MAX_OPENGL_INFO_LOG_SIZE = 512;

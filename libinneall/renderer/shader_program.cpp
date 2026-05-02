@@ -4,41 +4,54 @@
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
 
-namespace inl {
+namespace {
 
-void ShaderProgram::create(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
+inl::Error link_shader_program(
+    inl::ShaderProgram& shader_program, inl::ShaderStage const& vertex_stage, inl::ShaderStage const& fragment_stage) {
+    glAttachShader(shader_program.handle(), vertex_stage.handle());
+    glAttachShader(shader_program.handle(), fragment_stage.handle());
 
-    m_handle.reset(glCreateProgram());
-
-    if (!m_handle) {
-        throw std::runtime_error("Failed to create program");
-    }
-
-    link(vertex_stage, fragment_stage);
-
-    retrieve_uniforms();
-
-    log::debug("Created shader program id {}", m_handle.get());
-}
-
-void ShaderProgram::link(ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
-    glAttachShader(m_handle, vertex_stage.handle());
-    glAttachShader(m_handle, fragment_stage.handle());
-
-    glLinkProgram(m_handle);
+    glLinkProgram(shader_program.handle());
 
     GLint success { 0 };
-    glGetProgramiv(m_handle, GL_LINK_STATUS, &success);
+    glGetProgramiv(shader_program.handle(), GL_LINK_STATUS, &success);
 
     if (success != GL_TRUE) {
-        String<MAX_OPENGL_INFO_LOG_SIZE> info_log { MAX_OPENGL_INFO_LOG_SIZE };
+        inl::String<inl::MAX_OPENGL_INFO_LOG_SIZE> info_log { inl::MAX_OPENGL_INFO_LOG_SIZE };
         GLsizei info_log_size { 0 };
 
-        glGetProgramInfoLog(m_handle, MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
+        glGetProgramInfoLog(shader_program.handle(), inl::MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
         info_log.resize(info_log_size);
-        log::error("Error compiling shader id {}: {}", m_handle.get(), StringView { info_log.data(), info_log.size() });
-        throw std::runtime_error("Failed to link program");
+        inl::log::error("Error compiling shader id {}: {}", shader_program.handle(),
+            inl::StringView { info_log.data(), info_log.size() });
+        return inl::Error::RendererShaderProgramFailedToLink;
     }
+
+    return inl::Error::Ok;
+}
+}
+
+namespace inl {
+
+Error ShaderProgram::create(
+    ShaderProgram& shader_program, ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
+
+    shader_program.m_handle.reset(glCreateProgram());
+
+    if (!shader_program.m_handle) {
+        return Error::RendererShaderProgramFailedToCreate;
+    }
+
+    Error error = link_shader_program(shader_program, vertex_stage, fragment_stage);
+
+    if (error != Error::Ok) {
+        return error;
+    }
+
+    shader_program.retrieve_uniforms();
+
+    log::debug("Created shader program id {}", shader_program.m_handle.get());
+    return Error::Ok;
 }
 
 void ShaderProgram::retrieve_uniforms() {
@@ -77,13 +90,14 @@ void ShaderProgram::retrieve_uniforms() {
 }
 
 GLuint ShaderProgram::uniform_location(StringView name) const {
-
+    // NOTE: Maybe this shouldnt assert ?
     if (m_uniforms.find(name) == m_uniforms.end()) {
-        log::error("Shader({}) - Failed to find uniform with name {}", static_cast<int32_t>(m_handle), name.data());
-        throw std::runtime_error("Failed to find uniform");
+        INL_ASSERT(false, "Failed to find uniform");
+        return -1;
     }
 
     int32_t location = glGetUniformLocation(m_handle, name.data());
+    INL_ASSERT(location != -1, "Failed to find uniform");
     return location;
 }
 }

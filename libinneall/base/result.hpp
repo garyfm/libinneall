@@ -24,6 +24,11 @@ enum class Error {
     AssetFailedToLoadShader,
     AssetFailedToLoadMesh,
     RendererFailedToCreateGlBuffer,
+    RendererShaderStageInvalidSource,
+    RendererShaderStageFailedToCreate,
+    RendererShaderStageFailedToCompile,
+    RendererShaderProgramFailedToCreate,
+    RendererShaderProgramFailedToLink,
     RENDERER_SHADER_PROGRAM_FAILED_TO_SET_UNIFORM,
 };
 

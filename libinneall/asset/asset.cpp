@@ -155,18 +155,28 @@ Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesyste
         return Error::AssetFailedToLoadShader;
     }
     log::info("Loading shader: {}", fragment_shader_path.filename().c_str());
-    static ShaderStage vertex_stage {};
-    vertex_stage.create(ShaderType::Vertex, *vertex_shader_source);
+    ShaderStage vertex_stage {};
+    Error error = ShaderStage::create(vertex_stage, ShaderType::Vertex, *vertex_shader_source);
+    if (error != Error::Ok) {
+        return error;
+    }
 
     Option<StringView> fragment_shader_source = load_text_file(buffer, fragment_shader_path);
     if (!fragment_shader_source) {
         log::error("Failed to load shader stage: {}", fragment_shader_path.filename().c_str());
         return Error::AssetFailedToLoadShader;
     }
-    static ShaderStage fragment_stage {};
-    fragment_stage.create(ShaderType::Fragment, *fragment_shader_source);
 
-    shader_program.create(vertex_stage, fragment_stage);
+    ShaderStage fragment_stage {};
+    error = ShaderStage::create(fragment_stage, ShaderType::Fragment, *fragment_shader_source);
+    if (error != Error::Ok) {
+        return error;
+    }
+
+    error = ShaderProgram::create(shader_program, vertex_stage, fragment_stage);
+    if (error != Error::Ok) {
+        return error;
+    }
 
     return Error::Ok;
 }
@@ -189,7 +199,7 @@ Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path) {
     log::debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}", obj_model->geometric_vertices.size(),
         obj_model->texture_vertices.size(), obj_model->vertex_normals.size(), obj_model->face_corners.size());
 
-    static MeshData mesh_data = to_mesh_data(*obj_model);
+    MeshData mesh_data = to_mesh_data(*obj_model);
 
     mesh.create(mesh_data);
 

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <libinneall/base/result.hpp>
 #include <libinneall/base/string.hpp>
+#include <libinneall/base/utility.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <subprojects/glad/include/glad/glad.h>
@@ -18,16 +20,12 @@ public:
     using ScrollCallback = void (*)(GLFWwindow*, double, double);
     using ResizeCallback = void (*)(GLFWwindow*, int32_t, int32_t);
 
-    Window(uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
-        MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback);
-
-    Window(const Window&) = delete;
-    Window& operator=(const Window&) = delete;
-
-    Window(Window&&) = default;
-    Window& operator=(Window&&) = default;
-
+    Window() = default;
     ~Window();
+    INL_DEL_COPY_MOVE(Window);
+
+    static Error create(Window& window, uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
+        MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback);
 
     GLFWwindow* handle() const { return m_window.get(); }
     uint32_t width() const { return m_width; }
@@ -40,6 +38,7 @@ public:
 
 private:
     static constexpr size_t MAX_TITLE_SIZE { 128 };
+    bool m_created { false };
     uint32_t m_width { 0 };
     uint32_t m_height { 0 };
     String<MAX_TITLE_SIZE> m_title {};

@@ -32,6 +32,9 @@ enum class Error {
     RendererTextureFailedToCreate,
     RendererCubemapFailedToCreate,
     RendererVertexArrayFailedToCreate,
+    WindowGlfwFailedToInit,
+    WindowGlfwFailedToCreate,
+    WindowGladFailedToLoad,
     RENDERER_SHADER_PROGRAM_FAILED_TO_SET_UNIFORM,
 };
 

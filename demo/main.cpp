@@ -60,10 +60,10 @@ void process_input(GLFWwindow* g_window);
 void mouse_callback(GLFWwindow* g_window, double x_pos, double y_pos);
 void scroll_callback(GLFWwindow* g_window, double x_offset, double y_offset);
 void resize_callback(GLFWwindow* window, int width, int height);
-inl::Window g_window { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo", process_input, mouse_callback,
-    scroll_callback, resize_callback };
+inl::Window g_window;
 
 void process_input(GLFWwindow* window) {
+
     // TODO: Pull this out
     static constexpr float movement_speed = 2.5f;
 
@@ -135,6 +135,10 @@ int main(int argc, char* argv[]) {
             log::error("Usage: game <assets_path>");
             return -1;
         }
+        Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
+            process_input, mouse_callback, scroll_callback, resize_callback);
+
+        INL_ASSERT(error == Error::Ok, "Failed to create Window");
 
         String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
         log::info("Asset path: {}", assets_path.data());
@@ -144,31 +148,31 @@ int main(int argc, char* argv[]) {
         const std::filesystem::path shader_path { assets_path.overwrite("/shaders", assets_path_root_pos).data() };
 
         ShaderProgram shader_program_lighting {};
-        Error result = load_shader(scratch_buffer, shader_program_lighting, shader_path / "lighting_phong.vert.glsl",
+        error = load_shader(scratch_buffer, shader_program_lighting, shader_path / "lighting_phong.vert.glsl",
             shader_path / "lighting_phong.frag.glsl");
-        INL_ASSERT(result == Error::Ok, "Failed to load shader lighting");
+        INL_ASSERT(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_debug {};
-        result = load_shader(
+        error = load_shader(
             scratch_buffer, shader_program_debug, shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl");
-        INL_ASSERT(result == Error::Ok, "Failed to load shader lighting");
+        INL_ASSERT(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_skybox {};
-        result = load_shader(
+        error = load_shader(
             scratch_buffer, shader_program_skybox, shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl");
-        INL_ASSERT(result == Error::Ok, "Failed to load shader lighting");
+        INL_ASSERT(error == Error::Ok, "Failed to load shader lighting");
 
         Mesh mesh {};
-        result = load_mesh(scratch_buffer, mesh, model_path / "mesh.obj");
-        INL_ASSERT(result == Error::Ok, "Failed to load mesh");
+        error = load_mesh(scratch_buffer, mesh, model_path / "mesh.obj");
+        INL_ASSERT(error == Error::Ok, "Failed to load mesh");
 
         Texture texture_albedo {};
-        result = load_texture(scratch_buffer, texture_albedo, model_path / "albedo.ppm", false);
-        INL_ASSERT(result == Error::Ok, "Failed to load texture_albedo");
+        error = load_texture(scratch_buffer, texture_albedo, model_path / "albedo.ppm", false);
+        INL_ASSERT(error == Error::Ok, "Failed to load texture_albedo");
 
         Texture texture_specular {};
-        result = load_texture(scratch_buffer, texture_specular, model_path / "specular.ppm", false);
-        INL_ASSERT(result == Error::Ok, "Failed to load texture_albedo");
+        error = load_texture(scratch_buffer, texture_specular, model_path / "specular.ppm", false);
+        INL_ASSERT(error == Error::Ok, "Failed to load texture_albedo");
 
         Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
 
@@ -180,8 +184,8 @@ int main(int argc, char* argv[]) {
         assets_path.overwrite("/skybox", assets_path_root_pos);
 
         Cubemap skybox {};
-        result = load_cubemap(scratch_buffer, skybox, assets_path, false);
-        INL_ASSERT(result == Error::Ok, "Failed to load skyboz");
+        error = load_cubemap(scratch_buffer, skybox, assets_path, false);
+        INL_ASSERT(error == Error::Ok, "Failed to load skyboz");
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
@@ -223,7 +227,7 @@ int main(int argc, char* argv[]) {
         };
 
         Renderer renderer {};
-        Error error = Renderer::create(renderer);
+        error = Renderer::create(renderer);
         INL_ASSERT(error == Error::Ok, "Failed to create renderer");
 
         renderer.set_debug_shader(shader_program_debug);
@@ -243,7 +247,7 @@ int main(int argc, char* argv[]) {
             render_scene.light_spot->pos = g_camera.position();
             render_scene.light_spot->dir = g_camera.front();
 
-            [[maybe_unused]] RenderView render_view {
+            RenderView render_view {
                 .view = g_camera.view_matrix(),
                 .projection = g_camera.perspective_matrix(g_window.aspect_ratio()),
                 .pos = g_camera.position(),

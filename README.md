@@ -66,7 +66,8 @@ Misc:
 - [x] Unique Resource
 - [x] Setup testing
 - [x] Debug meshs
-- [ ] Static String
+- [x] Static String
+- [x] Use static constructors
 - [ ] Add platform layer (Remove GLFW)
 - [ ] Remove GLAD
 
@@ -77,13 +78,13 @@ Size: 5116096
 - [x] std::array
 - [x] std::span
 - [x] std::string
-- [ ] std::string_view
+- [x] std::string_view
+- [x] std::optional
+- [x] remove execptions
 - [ ] std::vector
 - [ ] std::print
-- [ ] std::optional
 - [ ] std::expected
 - [ ] math
 - [ ] std::unqiue_ptr
 - [ ] file handling
 - [ ] hashmap
-- [ ] remove execptions

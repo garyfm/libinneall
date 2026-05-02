@@ -93,7 +93,8 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
         type_str, message);
 
     if (type == GL_DEBUG_TYPE_ERROR) {
-        throw std::runtime_error("OpenGL debug error");
+        inl::log::error("OpenGL Debug Error... Abort");
+        abort();
     }
 }
 
@@ -101,40 +102,42 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
 
 namespace inl {
 
-Window::Window(uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
-    MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback)
-    : m_width { width }
-    , m_height { height }
-    , m_title { title }
-    , m_input_callback { input_callback } {
-    log::debug("Creating window: {} {}x{}", m_title.data(), m_width, m_height);
+Error Window::create(Window& window, uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
+    MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback) {
+
+    window.m_width = width;
+    window.m_height = height;
+    window.m_title = title;
+    window.m_input_callback = input_callback;
+
+    log::debug("Creating window: {} {}x{}", window.m_title.data(), window.m_width, window.m_height);
 
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit()) {
-        throw std::runtime_error("Failed to initialize GLFW");
+        return Error::WindowGlfwFailedToInit;
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_window.reset(glfwCreateWindow(m_width, m_height, m_title.data(), nullptr, nullptr));
+    window.m_window.reset(glfwCreateWindow(window.m_width, window.m_height, window.m_title.data(), nullptr, nullptr));
 
-    if (!m_window) {
+    if (!window.m_window) {
         glfwTerminate();
-        throw std::runtime_error("Failed to create GLFW window");
+        return Error::WindowGlfwFailedToCreate;
     }
 
-    glfwMakeContextCurrent(m_window.get());
+    glfwMakeContextCurrent(window.m_window.get());
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         glfwTerminate();
-        throw std::runtime_error("Failed to load GLAD");
+        return Error::WindowGladFailedToLoad;
     }
 
-    glfwSetFramebufferSizeCallback(m_window.get(), resize_callback);
-    glViewport(0, 0, m_width, m_height);
+    glfwSetFramebufferSizeCallback(window.m_window.get(), resize_callback);
+    glViewport(0, 0, window.m_width, window.m_height);
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -143,15 +146,20 @@ Window::Window(uint32_t width, uint32_t height, StringView title, InputCallback 
     // NOTE: This can be used to filter opengl debug messages
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-    glfwSetInputMode(m_window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window.m_window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    glfwSetCursorPosCallback(m_window.get(), mouse_callback);
-    glfwSetScrollCallback(m_window.get(), scroll_callback);
+    glfwSetCursorPosCallback(window.m_window.get(), mouse_callback);
+    glfwSetScrollCallback(window.m_window.get(), scroll_callback);
+
+    window.m_created = true;
+
+    return Error::Ok;
 }
 
 Window::~Window() { glfwTerminate(); }
 
 void Window::process_input() {
+    INL_ASSERT(m_created, "Invalid Window");
     glfwPollEvents();
     if (glfwGetKey(m_window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(m_window.get(), true);
@@ -160,9 +168,13 @@ void Window::process_input() {
     m_input_callback(m_window.get());
 }
 
-void Window::swap_buffers() { glfwSwapBuffers(m_window.get()); }
+void Window::swap_buffers() {
+    INL_ASSERT(m_created, "Invalid Window");
+    glfwSwapBuffers(m_window.get());
+}
 
 void Window::resize(uint32_t width, uint32_t height) {
+    INL_ASSERT(m_created, "Invalid Window");
     m_width = width;
     m_height = height;
     glViewport(0, 0, m_width, m_height);

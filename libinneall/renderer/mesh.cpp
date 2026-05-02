@@ -14,6 +14,10 @@ Error Mesh::create(Mesh& mesh, MeshData const& mesh_data) {
         return error;
     }
 
+    error = VertexArray::create(mesh.m_vertex_array);
+    if (error != Error::Ok) {
+        return error;
+    }
     mesh.m_vertex_array.bind_vertex_buffer({
         .index = 0,
         .buffer = mesh.m_vertex_buffer,

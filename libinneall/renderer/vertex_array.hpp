@@ -1,10 +1,14 @@
 #pragma once
 
+#include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_handle.hpp>
+#include <libinneall/base/utility.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
 namespace inl {
+
+inline void delete_vertex_array(GLuint handle) { glDeleteVertexArrays(1, &handle); }
 
 class VertexArray {
 public:
@@ -24,25 +28,31 @@ public:
         size_t stride_bytes;
     };
 
-    explicit VertexArray();
+    VertexArray() = default;
 
-    GLuint handle() const {
-        INL_ASSERT(m_handle != 0, "Accessing invalid handle");
-        return m_handle;
-    }
+    static Error create(VertexArray& vertex_array);
+
+    INL_DEL_COPY_MOVE(VertexArray);
+
+    GLuint handle() const { return m_handle; }
 
     void set_attribute(Attribute const& attribute) const;
 
     void bind_vertex_buffer(BindPoint const& bind_point) const;
     void bind_element_buffer(GlBuffer& buffer) const;
 
-    void bind() const { glBindVertexArray(m_handle); }
-    void unbind() const { glBindVertexArray(0); }
+    void bind() const {
+        INL_ASSERT(m_handle, "Invalid VertexArray");
+        glBindVertexArray(m_handle);
+    }
+
+    void unbind() const {
+        INL_ASSERT(m_handle, "Invalid VertexArray");
+        glBindVertexArray(0);
+    }
 
 private:
-    static void delete_array(GLuint array);
-
-    UniqueHandle<GLuint, delete_array> m_handle { 0 };
+    UniqueHandle<GLuint, delete_vertex_array> m_handle { 0 };
 };
 
 } // namespace inl

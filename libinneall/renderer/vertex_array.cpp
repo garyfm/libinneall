@@ -2,11 +2,19 @@
 
 namespace inl {
 
-VertexArray::VertexArray() { glCreateVertexArrays(1, &m_handle); }
+Error VertexArray::create(VertexArray& vertex_array) {
 
-void VertexArray::delete_array(GLuint buffer) { glDeleteVertexArrays(1, &buffer); }
+    vertex_array.m_handle.reset();
+    glCreateVertexArrays(1, &vertex_array.m_handle);
+
+    if (vertex_array.m_handle == 0) {
+        return Error::RendererVertexArrayFailedToCreate;
+    }
+    return Error::Ok;
+}
 
 void VertexArray::bind_vertex_buffer(BindPoint const& bind_point) const {
+    INL_ASSERT(m_handle, "Invalid VertexArray");
 
     // Bind the vertex buffer to a bind point
     glVertexArrayVertexBuffer(m_handle, static_cast<GLuint>(bind_point.index), bind_point.buffer.handle(),
@@ -14,11 +22,12 @@ void VertexArray::bind_vertex_buffer(BindPoint const& bind_point) const {
 }
 
 void VertexArray::bind_element_buffer(GlBuffer& buffer) const {
-
+    INL_ASSERT(m_handle, "Invalid VertexArray");
     glVertexArrayElementBuffer(m_handle, buffer.handle());
 }
 
 void VertexArray::set_attribute(Attribute const& attribute) const {
+    INL_ASSERT(m_handle, "Invalid VertexArray");
 
     // Enable the attribtute
     glEnableVertexArrayAttrib(m_handle, static_cast<GLuint>(attribute.index));

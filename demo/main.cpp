@@ -222,7 +222,10 @@ int main(int argc, char* argv[]) {
             .light_spot = &light_spot,
         };
 
-        Renderer renderer;
+        Renderer renderer {};
+        Error error = Renderer::create(renderer);
+        INL_ASSERT(error == Error::Ok, "Failed to create renderer");
+
         renderer.set_debug_shader(shader_program_debug);
         renderer.set_skybox_shader(shader_program_skybox);
 

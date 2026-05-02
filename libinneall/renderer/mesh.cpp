@@ -4,10 +4,15 @@
 
 namespace inl {
 
-void Mesh::create(MeshData const& mesh_data) {
+Error Mesh::create(MeshData const& mesh_data) {
     m_vertex_count = mesh_data.vertex_data.size();
     m_index_count = mesh_data.index_data.size();
-    m_vertex_buffer.create(to_bytes(Span { mesh_data.vertex_data.data(), mesh_data.vertex_data.size() }));
+
+    Error error = GlBuffer::create(
+        m_vertex_buffer, to_bytes(Span { mesh_data.vertex_data.data(), mesh_data.vertex_data.size() }));
+    if (error != Error::Ok) {
+        return error;
+    }
 
     m_vertex_array.bind_vertex_buffer({
         .index = 0,
@@ -17,7 +22,12 @@ void Mesh::create(MeshData const& mesh_data) {
     });
 
     if (mesh_data.index_data.size() != 0) {
-        m_index_buffer.create(to_bytes(Span { mesh_data.index_data.data(), mesh_data.index_data.size() }));
+        error = GlBuffer::create(
+            m_index_buffer, to_bytes(Span { mesh_data.index_data.data(), mesh_data.index_data.size() }));
+        if (error != Error::Ok) {
+            return error;
+        }
+
         m_vertex_array.bind_element_buffer(m_index_buffer);
     }
 
@@ -47,6 +57,8 @@ void Mesh::create(MeshData const& mesh_data) {
         .type = GL_FLOAT,
         .normalise = false,
     });
+
+    return Error::Ok;
 }
 
 Mesh::~Mesh() {

@@ -143,12 +143,7 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
         cubemap_data[5].pixel_data.data(),
     } };
 
-    Error error = Cubemap::create(cubemap, cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces);
-    if (error != Error::Ok) {
-        return error;
-    }
-
-    return Error::Ok;
+    return Cubemap::create(cubemap, cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces);
 }
 
 Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
@@ -180,12 +175,7 @@ Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesyste
         return error;
     }
 
-    error = ShaderProgram::create(shader_program, vertex_stage, fragment_stage);
-    if (error != Error::Ok) {
-        return error;
-    }
-
-    return Error::Ok;
+    return ShaderProgram::create(shader_program, vertex_stage, fragment_stage);
 }
 
 Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path) {
@@ -208,9 +198,7 @@ Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path) {
 
     MeshData mesh_data = to_mesh_data(*obj_model);
 
-    mesh.create(mesh_data);
-
-    return Error::Ok;
+    return Mesh::create(mesh, mesh_data);
 }
 
 } // namespace inl

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinneall/base/result.hpp>
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/unique_handle.hpp>
 #include <libinneall/base/utility.hpp>
 #include <subprojects/glad/include/glad/glad.h>

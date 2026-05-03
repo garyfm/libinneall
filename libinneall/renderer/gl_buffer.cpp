@@ -1,4 +1,3 @@
-#include "base/result.hpp"
 #include <libinneall/renderer/gl_buffer.hpp>
 
 namespace {

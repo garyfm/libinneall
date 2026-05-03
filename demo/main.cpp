@@ -3,9 +3,9 @@
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/option.hpp>
-#include <libinneall/base/result.hpp>
 #include <libinneall/base/unique_handle.hpp>
 #include <libinneall/camera.hpp>
 #include <libinneall/light.hpp>

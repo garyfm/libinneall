@@ -1,8 +1,8 @@
 #pragma once
 
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/span.hpp>
 
-#include <expected>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -26,21 +26,14 @@ struct Image {
     uint16_t max_value;
     ByteSpan pixel_data;
 
-    size_t size_bytes() const { return width * height * 3; }
+    static constexpr uint8_t n_channels = 3;
+
+    size_t size_bytes() const { return width * height * n_channels; }
+    size_t row_size_bytes() const { return width * n_channels; }
+    size_t height_size_bytes() const { return height * n_channels; }
 };
 
-enum class Error {
-    InvalidFormat,
-    UnsupportedFormat,
-    EOFReachedUnexpectedly,
-    FailedToExtractInteger,
-    InvalidWidth,
-    InvalidMaxValue,
-};
-
-template <typename T> using Result = std::expected<T, Error>;
-Result<Image> load(ByteSpan raw_data);
-
-Image flip_vertically(ByteSpan buffer, Image const& image);
+Error load(Image& image, ByteSpan raw_data);
+void flip_vertically(ByteSpan buffer, Image& image);
 
 } // namespace inl

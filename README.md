@@ -81,9 +81,9 @@ Size: 5116096
 - [x] std::string_view
 - [x] std::optional
 - [x] remove execptions
-- [ ] std::vector
+- [x] std::expected
 - [ ] std::print
-- [ ] std::expected
+- [ ] std::vector
 - [ ] math
 - [ ] std::unqiue_ptr
 - [ ] file handling

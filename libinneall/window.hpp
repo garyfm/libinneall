@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinneall/base/result.hpp>
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/string.hpp>
 #include <libinneall/base/utility.hpp>
 

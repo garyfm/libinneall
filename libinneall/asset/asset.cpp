@@ -1,3 +1,4 @@
+#include "asset/ppm.hpp"
 #include <libinneall/asset/asset.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
@@ -42,43 +43,34 @@ Option<StringView> load_text_file(ByteSpan buffer, std::filesystem::path path) {
     return StringView { reinterpret_cast<char const*>(raw_file_data->data()), raw_file_data->size() };
 }
 
-Option<ppm::Image> load_image(ByteSpan buffer, std::filesystem::path path) {
+Error load_image(ByteSpan buffer, ppm::Image& image, std::filesystem::path path) {
     Option<ByteSpan> raw_image_data { load_file(buffer, path) };
 
     if (!raw_image_data) {
-        log::error("Failed to load file");
-        return None;
+        return Error::AssetFailedToLoadFile;
     }
 
-    ppm::Result<ppm::Image> image { ppm::load(*raw_image_data) };
-    if (!image) {
-        log::error("Failed to load ppm image error: {}", static_cast<int32_t>(image.error()));
-        return None;
-    }
+    TRY(ppm::load(image, *raw_image_data));
 
-    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int32_t>(image->format), image->width,
-        image->height, image->max_value, image->pixel_data.size());
+    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int32_t>(image.format), image.width,
+        image.height, image.max_value, image.pixel_data.size());
 
-    return *image;
+    return Error::Ok;
 }
 
 Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path, bool flip_vertically) {
 
     log::info("Loading texture: {}", path.filename().c_str());
 
-    Option<ppm::Image> image { load_image(buffer, path) };
-    if (!image) {
-        return Error::AssetFailedToLoadTexture;
-    }
+    ppm::Image image {};
+    TRY(load_image(buffer, image, path));
 
     // TODO:: Buffer needs to be twice the size of image to flip, not ideal
     if (flip_vertically) {
-        image = ppm::flip_vertically({ &buffer[image->size_bytes()], image->size_bytes() }, *image);
-    } else {
-        image = *image;
+        ppm::flip_vertically({ &buffer[image.size_bytes()], image.size_bytes() }, image);
     }
 
-    Error error = Texture::create(texture, image->width, image->height, 3, image->pixel_data.data());
+    Error error = Texture::create(texture, image.width, image.height, 3, image.pixel_data.data());
 
     if (error != Error::Ok) {
         return error;
@@ -118,20 +110,16 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
             image_path.overwrite(cubemap_files[i], path.size());
         }
 
-        Option<ppm::Image> image { load_image({ &buffer[cursor_pos], buffer.size() }, image_path.data()) };
-        if (!image) {
-            return Error::AssetFailedToLoadCubmap;
-        }
+        ppm::Image image {};
+        TRY(load_image({ &buffer[cursor_pos], buffer.size() }, image, image_path.data()));
 
-        cursor_pos += image->size_bytes();
+        cursor_pos += image.size_bytes();
 
         if (flip_vertically) {
-            image = ppm::flip_vertically(buffer, *image);
-        } else {
-            image = *image;
+            ppm::flip_vertically(buffer, image);
         }
 
-        cubemap_data[i] = *image;
+        cubemap_data[i] = image;
     }
 
     Array<uint8_t const*, 6> skybox_faces { {
@@ -158,10 +146,7 @@ Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesyste
     }
     log::info("Loading shader: {}", fragment_shader_path.filename().c_str());
     ShaderStage vertex_stage {};
-    Error error = ShaderStage::create(vertex_stage, ShaderType::Vertex, *vertex_shader_source);
-    if (error != Error::Ok) {
-        return error;
-    }
+    TRY(ShaderStage::create(vertex_stage, ShaderType::Vertex, *vertex_shader_source));
 
     Option<StringView> fragment_shader_source = load_text_file(buffer, fragment_shader_path);
     if (!fragment_shader_source) {
@@ -170,10 +155,7 @@ Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesyste
     }
 
     ShaderStage fragment_stage {};
-    error = ShaderStage::create(fragment_stage, ShaderType::Fragment, *fragment_shader_source);
-    if (error != Error::Ok) {
-        return error;
-    }
+    TRY(ShaderStage::create(fragment_stage, ShaderType::Fragment, *fragment_shader_source));
 
     return ShaderProgram::create(shader_program, vertex_stage, fragment_stage);
 }
@@ -187,16 +169,13 @@ Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path) {
         return Error::AssetFailedToLoadMesh;
     }
 
-    obj::Result<obj::Model> obj_model = obj::load({ obj_data->data(), obj_data->size() });
-    if (!obj_model) {
-        log::error("Failed to load obj file error: {}", static_cast<int32_t>(obj_model.error()));
-        return Error::AssetFailedToLoadMesh;
-    }
+    obj::Model obj_model {};
+    TRY(obj::load(obj_model, { obj_data->data(), obj_data->size() }));
 
-    log::debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}", obj_model->geometric_vertices.size(),
-        obj_model->texture_vertices.size(), obj_model->vertex_normals.size(), obj_model->face_corners.size());
+    log::debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}", obj_model.geometric_vertices.size(),
+        obj_model.texture_vertices.size(), obj_model.vertex_normals.size(), obj_model.face_corners.size());
 
-    MeshData mesh_data = to_mesh_data(*obj_model);
+    MeshData mesh_data = to_mesh_data(obj_model);
 
     return Mesh::create(mesh, mesh_data);
 }

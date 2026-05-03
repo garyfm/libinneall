@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/string_view.hpp>
 #include <libinneall/math/vector2.hpp>
 #include <libinneall/math/vector3.hpp>
@@ -23,17 +24,6 @@ struct Model {
     std::vector<FaceCorner> face_corners;
 };
 
-// TODO: Add structured error so the failed line can be reported
-enum class Error {
-    InvalidFormat,
-    UnsupportedFormat,
-    EOFReachedUnexpectedly,
-    FailedToExtractInteger,
-    FailedToExtractFloat,
-    FaceNotTriangulated,
-};
-
-template <typename T> using Result = std::expected<T, Error>;
-Result<Model> load(StringView raw_data);
+Error load(Model& model, StringView raw_data);
 
 } // namespace inl

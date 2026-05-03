@@ -1,7 +1,7 @@
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/array.hpp>
 #include <libinneall/base/option.hpp>
-#include <libinneall/base/result.hpp>
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/span.hpp>
 #include <libinneall/base/string_view.hpp>
 #include <libinneall/renderer/cubemap.hpp>
@@ -22,7 +22,7 @@ using ByteBuffer = std::vector<uint8_t>;
 
 Option<ByteSpan> load_file(ByteSpan buffer, std::filesystem::path path);
 Option<StringView> load_text_file(Span<uint8_t> buffer, std::filesystem::path path);
-Option<ppm::Image> load_image(ByteSpan buffer, std::filesystem::path path);
+Error load_image(ByteSpan buffer, ppm::Image& image, std::filesystem::path path);
 
 Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path, bool flip_vertically);
 Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip_vertically);

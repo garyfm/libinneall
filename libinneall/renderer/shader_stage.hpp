@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libinneall/base/log.hpp>
-#include <libinneall/base/result.hpp>
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/unique_handle.hpp>
 #include <libinneall/base/utility.hpp>
 

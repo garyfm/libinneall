@@ -1,15 +1,16 @@
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/error.hpp>
 #include <libinneall/base/log.hpp>
-#include <libinneall/base/result.hpp>
 #include <libinneall/base/string.hpp>
+#include <libinneall/base/string_utils.hpp>
 
 #include <algorithm>
 #include <charconv>
 
 namespace {
 
-inl::ppm::Result<void> skip_whitespace(inl::Span<uint8_t> buffer, size_t& cursor) {
+void skip_whitespace(inl::Span<uint8_t> buffer, size_t& cursor) {
 
     unsigned char c {};
     while (cursor < buffer.size()) {
@@ -30,11 +31,9 @@ inl::ppm::Result<void> skip_whitespace(inl::Span<uint8_t> buffer, size_t& cursor
         }
         // Continue to skip any white space after the comment
     }
-
-    return {};
 }
 
-inl::ppm::Result<int32_t> extract_int(inl::Span<uint8_t> buffer, size_t& cursor) {
+inl::Error extract_int(inl::Span<uint8_t> buffer, int32_t& value, size_t& cursor) {
 
     inl::String<inl::MAX_STRING_SIZE_OF_NUMBER> str {};
     while (cursor < buffer.size() && inl::isdigit(buffer[cursor])) {
@@ -43,22 +42,21 @@ inl::ppm::Result<int32_t> extract_int(inl::Span<uint8_t> buffer, size_t& cursor)
     }
 
     if (str.empty()) {
-        return std::unexpected(inl::ppm::Error::FailedToExtractInteger);
+        return inl::Error::PpmFailedToExtractInteger;
     }
 
-    int32_t result;
-    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
 
     if (ec != std::errc()) {
-        return std::unexpected(inl::ppm::Error::FailedToExtractInteger);
+        return inl::Error::PpmFailedToExtractInteger;
     }
-    return result;
+    return inl::Error::Ok;
 }
 } // namespace
 
 namespace inl::ppm {
 
-Result<Image> load(ByteSpan raw_data) {
+Error load(Image& image, ByteSpan raw_data) {
 
     size_t cursor { 0 };
     static constexpr uint8_t FORMAT_SIZE { 2 };
@@ -69,65 +67,51 @@ Result<Image> load(ByteSpan raw_data) {
     ++cursor;
 
     if (format[0] != 'P') {
-        return std::unexpected { Error::InvalidFormat };
+        return Error::PpmInvalidFormat;
     }
 
     if (format[1] != '6') {
-        return std::unexpected { Error::UnsupportedFormat };
+        return Error::PpmUnsupportedFormat;
     }
 
-    TRY(skip_whitespace(raw_data, cursor));
-    Result<int32_t> width = TRY(extract_int(raw_data, cursor));
+    skip_whitespace(raw_data, cursor);
+    int32_t width {};
+    TRY(extract_int(raw_data, width, cursor));
 
-    TRY(skip_whitespace(raw_data, cursor));
-    Result<int32_t> height = TRY(extract_int(raw_data, cursor));
+    skip_whitespace(raw_data, cursor);
+    int32_t height {};
+    TRY(extract_int(raw_data, height, cursor));
 
-    TRY(skip_whitespace(raw_data, cursor));
-    Result<int32_t> max_value = TRY(extract_int(raw_data, cursor));
+    skip_whitespace(raw_data, cursor);
+    int32_t max_value {};
+    TRY(extract_int(raw_data, max_value, cursor));
 
     // Skip the single whitespace prior to the image data
     ++cursor;
 
-    size_t size_bytes = width.value() * height.value() * 3;
-    const Image image {
-        .format { Format::P6 },
-        .width { static_cast<size_t>(width.value()) },
-        .height { static_cast<size_t>(height.value()) },
-        .max_value { static_cast<uint16_t>(max_value.value()) },
-        .pixel_data { raw_data.begin() + cursor, size_bytes },
-    };
+    size_t size_bytes = width * height * 3;
+    image.format = Format::P6;
+    image.width = static_cast<size_t>(width);
+    image.height = static_cast<size_t>(height);
+    image.max_value = static_cast<uint16_t>(max_value);
+    image.pixel_data = { raw_data.begin() + cursor, size_bytes };
 
     INL_ASSERT((image.pixel_data.size() == image.width * image.height * 3), "PPM Image size is invalid");
-    return image;
+
+    return Error::Ok;
 }
 
-Image flip_vertically(ByteSpan buffer, Image const& image) {
-    Image flipped {
-        .format { image.format },
-        .width { image.width },
-        .height { image.height },
-        .max_value { image.max_value },
-        .pixel_data { buffer.data(), image.pixel_data.size() },
-    };
+void flip_vertically(ByteSpan buffer, Image& image) {
 
-    log::debug("pixel_data: {}, width: {}, height: {}", image.pixel_data.size(), image.width, image.height);
+    ByteSpan temp_row = { buffer.data(), image.row_size_bytes() };
 
-    const uint8_t n_channels { 3 };
-    const size_t row_size_bytes { image.width * n_channels };
-
-    log::debug("flipped size: {}", flipped.pixel_data.size());
-
-    // TODO: This should do a copy in place using a temp row
     for (size_t row = 0; row < image.height; ++row) {
+        size_t top_cursor { row * image.row_size_bytes() };
+        size_t bottom_cursor { (image.height - 1 - row) * image.row_size_bytes() };
 
-        size_t row_start { row * row_size_bytes };
-        size_t row_end { row_start + row_size_bytes };
-        size_t flipped_cursor { (image.height - 1 - row) * row_size_bytes };
-
-        std::copy(image.pixel_data.begin() + row_start, image.pixel_data.begin() + row_end,
-            flipped.pixel_data.begin() + flipped_cursor);
+        memcpy(temp_row.data(), &image.pixel_data[top_cursor], image.row_size_bytes());
+        memcpy(&image.pixel_data[top_cursor], &image.pixel_data[bottom_cursor], image.row_size_bytes());
+        memcpy(&image.pixel_data[bottom_cursor], temp_row.data(), image.row_size_bytes());
     }
-
-    return flipped;
 }
 } // namespace inl::ppm

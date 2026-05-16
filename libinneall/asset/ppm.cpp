@@ -96,7 +96,7 @@ Error load(Image& image, ByteSpan raw_data) {
     image.max_value = static_cast<uint16_t>(max_value);
     image.pixel_data = { raw_data.begin() + cursor, size_bytes };
 
-    INL_ASSERT((image.pixel_data.size() == image.width * image.height * 3), "PPM Image size is invalid");
+    inl_assert((image.pixel_data.size() == image.width * image.height * 3), "PPM Image size is invalid");
 
     return Error::Ok;
 }

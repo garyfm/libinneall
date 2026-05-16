@@ -42,22 +42,22 @@ public:
     operator bool() const { return m_has_value; }
 
     T* operator->() {
-        INL_ASSERT(m_has_value, "Option does not contain a value");
+        inl_assert(m_has_value, "Option does not contain a value");
         return &m_value;
     }
 
     T const* operator->() const {
-        INL_ASSERT(m_has_value, "Option does not contain a value");
+        inl_assert(m_has_value, "Option does not contain a value");
         return &m_value;
     }
 
     T const& operator*() const {
-        INL_ASSERT(m_has_value, "Option does not contain a value");
+        inl_assert(m_has_value, "Option does not contain a value");
         return m_value;
     }
 
     T value() {
-        INL_ASSERT(m_has_value, "Option does not contain a value");
+        inl_assert(m_has_value, "Option does not contain a value");
         return m_value;
     }
 

@@ -28,7 +28,7 @@ MeshData to_mesh_data(obj::Model const& model) {
     std::unordered_map<VertexData, uint32_t, HasherVertexData> vertex_map;
     uint32_t ebo_index { 0 };
 
-    INL_ASSERT(model.face_corners.size() % 3 == 0, "Mesh data is not triangulated");
+    inl_assert(model.face_corners.size() % 3 == 0, "Mesh data is not triangulated");
 
     for (size_t i { 0 }; i < model.face_corners.size(); ++i) {
 

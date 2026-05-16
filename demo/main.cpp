@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
         Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
             process_input, mouse_callback, scroll_callback, resize_callback);
 
-        INL_ASSERT(error == Error::Ok, "Failed to create Window");
+        inl_assert(error == Error::Ok, "Failed to create Window");
 
         String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
         log_info("Asset path: {}", assets_path.data());
@@ -151,29 +151,29 @@ int main(int argc, char* argv[]) {
         ShaderProgram shader_program_lighting {};
         error = load_shader(scratch_buffer, shader_program_lighting, shader_path / "lighting_phong.vert.glsl",
             shader_path / "lighting_phong.frag.glsl");
-        INL_ASSERT(error == Error::Ok, "Failed to load shader lighting");
+        inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_debug {};
         error = load_shader(
             scratch_buffer, shader_program_debug, shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl");
-        INL_ASSERT(error == Error::Ok, "Failed to load shader lighting");
+        inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_skybox {};
         error = load_shader(
             scratch_buffer, shader_program_skybox, shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl");
-        INL_ASSERT(error == Error::Ok, "Failed to load shader lighting");
+        inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         Mesh mesh {};
         error = load_mesh(scratch_buffer, mesh, model_path / "mesh.obj");
-        INL_ASSERT(error == Error::Ok, "Failed to load mesh");
+        inl_assert(error == Error::Ok, "Failed to load mesh");
 
         Texture texture_albedo {};
         error = load_texture(scratch_buffer, texture_albedo, model_path / "albedo.ppm", false);
-        INL_ASSERT(error == Error::Ok, "Failed to load texture_albedo");
+        inl_assert(error == Error::Ok, "Failed to load texture_albedo");
 
         Texture texture_specular {};
         error = load_texture(scratch_buffer, texture_specular, model_path / "specular.ppm", false);
-        INL_ASSERT(error == Error::Ok, "Failed to load texture_albedo");
+        inl_assert(error == Error::Ok, "Failed to load texture_albedo");
 
         Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
 
@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
 
         Cubemap skybox {};
         error = load_cubemap(scratch_buffer, skybox, assets_path, false);
-        INL_ASSERT(error == Error::Ok, "Failed to load skyboz");
+        inl_assert(error == Error::Ok, "Failed to load skyboz");
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
 
         Renderer renderer {};
         error = Renderer::create(renderer);
-        INL_ASSERT(error == Error::Ok, "Failed to create renderer");
+        inl_assert(error == Error::Ok, "Failed to create renderer");
 
         renderer.set_debug_shader(shader_program_debug);
         renderer.set_skybox_shader(shader_program_skybox);

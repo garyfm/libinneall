@@ -14,12 +14,12 @@ template <typename T, size_t N> struct Array {
     bool operator==(const Array& other) const = default;
 
     T& operator[](size_t index) {
-        INL_ASSERT(index < N, "Out of bounds access");
+        inl_assert(index < N, "Out of bounds access");
         return _m_elements[index];
     }
 
     T const& operator[](size_t index) const {
-        INL_ASSERT(index < N, "Out of bounds access");
+        inl_assert(index < N, "Out of bounds access");
         return _m_elements[index];
     }
 

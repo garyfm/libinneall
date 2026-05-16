@@ -35,12 +35,12 @@ public:
     }
 
     char const& operator[](size_t index) const {
-        INL_ASSERT(index < m_size, "Out of bounds access");
+        inl_assert(index < m_size, "Out of bounds access");
         return m_data[index];
     }
 
     StringView substr(size_t offset, size_t size) const {
-        INL_ASSERT(offset + size <= m_size, "Inavlid offset + size");
+        inl_assert(offset + size <= m_size, "Inavlid offset + size");
         return { m_data + offset, size };
     }
 

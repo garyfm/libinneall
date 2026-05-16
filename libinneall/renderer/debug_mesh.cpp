@@ -14,7 +14,7 @@ Mesh* debug_mesh_triangle() {
     static MeshData mesh_data { { debug_triangle_vertices.begin(), debug_triangle_vertices.end() }, {} };
     static Mesh mesh {};
     Error error = Mesh::create(mesh, mesh_data);
-    INL_ASSERT(error == Error::Ok, "Failed to create debug mesh");
+    inl_assert(error == Error::Ok, "Failed to create debug mesh");
 
     return &mesh;
 }
@@ -35,7 +35,7 @@ Mesh* debug_mesh_quad() {
     static MeshData mesh_data { { debug_quad_vertices.begin(), debug_quad_vertices.end() }, {} };
     static Mesh mesh {};
     Error error = Mesh::create(mesh, mesh_data);
-    INL_ASSERT(error == Error::Ok, "Failed to create debug mesh");
+    inl_assert(error == Error::Ok, "Failed to create debug mesh");
 
     return &mesh;
 }
@@ -89,7 +89,7 @@ Mesh* debug_mesh_cube() {
     static MeshData mesh_data { { debug_cube_vertices.begin(), debug_cube_vertices.end() }, {} };
     static Mesh mesh {};
     Error error = Mesh::create(mesh, mesh_data);
-    INL_ASSERT(error == Error::Ok, "Failed to create debug mesh");
+    inl_assert(error == Error::Ok, "Failed to create debug mesh");
 
     return &mesh;
 }
@@ -143,7 +143,7 @@ Mesh* mesh_cubemap() {
     static MeshData mesh_data { { cubemap_vertices.begin(), cubemap_vertices.end() }, {} };
     static Mesh mesh {};
     Error error = Mesh::create(mesh, mesh_data);
-    INL_ASSERT(error == Error::Ok, "Failed to create debug mesh");
+    inl_assert(error == Error::Ok, "Failed to create debug mesh");
 
     return &mesh;
 }

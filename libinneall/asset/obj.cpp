@@ -96,7 +96,7 @@ Error load(Model& model, StringView buffer) {
                     float vertex_index {};
                     TRY(extract_float(vertex_index, cut_index.left));
                     corner.vertex_index = map_index(model, vertex_index);
-                    INL_ASSERT(corner.vertex_index - 1 < model.geometric_vertices.size(), "Invalid obj vertex index");
+                    inl_assert(corner.vertex_index - 1 < model.geometric_vertices.size(), "Invalid obj vertex index");
 
                     // Cut successful, process next index
                     if (cut_index.success) {
@@ -105,7 +105,7 @@ Error load(Model& model, StringView buffer) {
                         float texture_index {};
                         TRY(extract_float(texture_index, cut_index.left));
                         corner.texture_index = map_index(model, texture_index);
-                        INL_ASSERT(
+                        inl_assert(
                             corner.texture_index - 1 < model.texture_vertices.size(), "Invalid obj texture index");
 
                         // Cut successfull, process next index
@@ -113,7 +113,7 @@ Error load(Model& model, StringView buffer) {
                             float normal_index {};
                             TRY(extract_float(normal_index, cut_index.right));
                             corner.normal_index = map_index(model, normal_index);
-                            INL_ASSERT(
+                            inl_assert(
                                 corner.normal_index - 1 < model.vertex_normals.size(), "Invalid obj normal index");
                         }
                     }

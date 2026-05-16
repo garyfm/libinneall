@@ -42,12 +42,12 @@ public:
     void bind_element_buffer(GlBuffer& buffer) const;
 
     void bind() const {
-        INL_ASSERT(m_handle, "Invalid VertexArray");
+        inl_assert(m_handle, "Invalid VertexArray");
         glBindVertexArray(m_handle);
     }
 
     void unbind() const {
-        INL_ASSERT(m_handle, "Invalid VertexArray");
+        inl_assert(m_handle, "Invalid VertexArray");
         glBindVertexArray(0);
     }
 

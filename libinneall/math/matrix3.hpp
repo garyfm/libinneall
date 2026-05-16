@@ -14,7 +14,7 @@ public:
     explicit Matrix3(const Array<float, 9>& elements);
 
     float operator[](size_t i) const {
-        INL_ASSERT(i < 9, "Out of bounds array access");
+        inl_assert(i < 9, "Out of bounds array access");
         return m_elements[i];
     }
 

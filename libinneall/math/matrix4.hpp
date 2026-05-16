@@ -17,7 +17,7 @@ public:
     explicit Matrix4(const Array<float, 16>& elements);
 
     float operator[](size_t i) const {
-        INL_ASSERT(i < 16, "Out of bounds array access");
+        inl_assert(i < 16, "Out of bounds array access");
         return m_elements[i];
     }
 

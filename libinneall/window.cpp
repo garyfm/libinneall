@@ -157,7 +157,7 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
 Window::~Window() { glfwTerminate(); }
 
 void Window::process_input() {
-    INL_ASSERT(m_created, "Invalid Window");
+    inl_assert(m_created, "Invalid Window");
     glfwPollEvents();
     if (glfwGetKey(m_window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(m_window.get(), true);
@@ -167,12 +167,12 @@ void Window::process_input() {
 }
 
 void Window::swap_buffers() {
-    INL_ASSERT(m_created, "Invalid Window");
+    inl_assert(m_created, "Invalid Window");
     glfwSwapBuffers(m_window.get());
 }
 
 void Window::resize(uint32_t width, uint32_t height) {
-    INL_ASSERT(m_created, "Invalid Window");
+    inl_assert(m_created, "Invalid Window");
     m_width = width;
     m_height = height;
     glViewport(0, 0, m_width, m_height);

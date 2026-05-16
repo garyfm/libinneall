@@ -14,7 +14,7 @@ Error VertexArray::create(VertexArray& vertex_array) {
 }
 
 void VertexArray::bind_vertex_buffer(BindPoint const& bind_point) const {
-    INL_ASSERT(m_handle, "Invalid VertexArray");
+    inl_assert(m_handle, "Invalid VertexArray");
 
     // Bind the vertex buffer to a bind point
     glVertexArrayVertexBuffer(m_handle, static_cast<GLuint>(bind_point.index), bind_point.buffer.handle(),
@@ -22,12 +22,12 @@ void VertexArray::bind_vertex_buffer(BindPoint const& bind_point) const {
 }
 
 void VertexArray::bind_element_buffer(GlBuffer& buffer) const {
-    INL_ASSERT(m_handle, "Invalid VertexArray");
+    inl_assert(m_handle, "Invalid VertexArray");
     glVertexArrayElementBuffer(m_handle, buffer.handle());
 }
 
 void VertexArray::set_attribute(Attribute const& attribute) const {
-    INL_ASSERT(m_handle, "Invalid VertexArray");
+    inl_assert(m_handle, "Invalid VertexArray");
 
     // Enable the attribtute
     glEnableVertexArrayAttrib(m_handle, static_cast<GLuint>(attribute.index));

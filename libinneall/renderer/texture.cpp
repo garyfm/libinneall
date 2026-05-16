@@ -28,7 +28,7 @@ Error Texture::create(Texture& texture, size_t width, size_t height, uint8_t n_c
         base_format = GL_RGBA;
         break;
     default:
-        INL_ASSERT(false, "Number of components unsupported");
+        inl_assert(false, "Number of components unsupported");
     }
 
     glTextureStorage2D(texture.m_handle, 1, size_format, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
@@ -39,7 +39,7 @@ Error Texture::create(Texture& texture, size_t width, size_t height, uint8_t n_c
 }
 
 void Texture::bind(GLuint texture_unit) {
-    INL_ASSERT(m_handle != 0, "Invalid Texture");
+    inl_assert(m_handle != 0, "Invalid Texture");
     m_unit = texture_unit;
     glBindTextureUnit(m_unit, m_handle);
 }

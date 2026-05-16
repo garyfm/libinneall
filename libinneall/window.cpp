@@ -4,9 +4,7 @@
 #include <memory>
 
 namespace {
-void error_callback(int32_t error, const char* description) {
-    inl::log::error("GLFW error: {}({})", description, error);
-}
+void error_callback(int32_t error, const char* description) { log_error("GLFW error: {}({})", description, error); }
 
 void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
     [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
@@ -89,11 +87,11 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
         severity_str = "unknown";
     }
 
-    inl::log::info("OpenGL debug callback - servierty: {} source: {} type: {} msg: {} ", severity_str, source_str,
-        type_str, message);
+    log_info("OpenGL debug callback - servierty: {} source: {} type: {} msg: {} ", severity_str, source_str, type_str,
+        message);
 
     if (type == GL_DEBUG_TYPE_ERROR) {
-        inl::log::error("OpenGL Debug Error... Abort");
+        log_error("OpenGL Debug Error... Abort");
         abort();
     }
 }
@@ -110,7 +108,7 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
     window.m_title = title;
     window.m_input_callback = input_callback;
 
-    log::debug("Creating window: {} {}x{}", window.m_title.data(), window.m_width, window.m_height);
+    log_debug("Creating window: {} {}x{}", window.m_title.data(), window.m_width, window.m_height);
 
     glfwSetErrorCallback(error_callback);
 

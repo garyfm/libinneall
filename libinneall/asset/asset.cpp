@@ -11,25 +11,25 @@ namespace inl {
 Option<ByteSpan> load_file(ByteSpan buffer, std::filesystem::path path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-        log::error("Failed to open file: {}", path.c_str());
+        log_error("Failed to open file: {}", path.c_str());
         return None;
     }
 
     size_t file_size = std::filesystem::file_size(path);
 
     if (file_size == 0) {
-        log::error("File is empty");
+        log_error("File is empty");
         return ByteSpan {};
     }
 
     if (file_size > buffer.size()) {
-        log::error("File ({}) wont fit in buffer ()", file_size, buffer.size());
+        log_error("File ({}) wont fit in buffer ()", file_size, buffer.size());
         return None;
     }
 
     file.read(reinterpret_cast<char*>(buffer.data()), file_size);
 
-    log::info("file_size {}", file_size);
+    log_info("file_size {}", file_size);
     return ByteSpan { buffer.data(), file_size };
 }
 
@@ -37,7 +37,7 @@ Option<StringView> load_text_file(ByteSpan buffer, std::filesystem::path path) {
 
     Option<ByteSpan> raw_file_data = load_file(buffer, path);
     if (!raw_file_data) {
-        log::error("Failed to load file");
+        log_error("Failed to load file");
         return None;
     }
     return StringView { reinterpret_cast<char const*>(raw_file_data->data()), raw_file_data->size() };
@@ -52,7 +52,7 @@ Error load_image(ByteSpan buffer, ppm::Image& image, std::filesystem::path path)
 
     TRY(ppm::load(image, *raw_image_data));
 
-    log::debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int32_t>(image.format), image.width,
+    log_debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int32_t>(image.format), image.width,
         image.height, image.max_value, image.pixel_data.size());
 
     return Error::Ok;
@@ -60,7 +60,7 @@ Error load_image(ByteSpan buffer, ppm::Image& image, std::filesystem::path path)
 
 Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path, bool flip_vertically) {
 
-    log::info("Loading texture: {}", path.filename().c_str());
+    log_info("Loading texture: {}", path.filename().c_str());
 
     ppm::Image image {};
     TRY(load_image(buffer, image, path));
@@ -102,7 +102,7 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
     size_t cursor_pos { 0 };
     for (size_t i = 0; i < cubemap_data.size(); ++i) {
 
-        log::info("Loading texture: {}", path[i]);
+        log_info("Loading texture: {}", path[i]);
 
         if (i == 0) {
             image_path.append(cubemap_files[i]);
@@ -137,20 +137,20 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
 Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
     std::filesystem::path fragment_shader_path) {
 
-    log::info("Loading shader: {}", vertex_shader_path.filename().c_str());
+    log_info("Loading shader: {}", vertex_shader_path.filename().c_str());
 
     Option<StringView> vertex_shader_source = load_text_file(buffer, vertex_shader_path);
     if (!vertex_shader_source) {
-        log::error("Failed to load shader stage: {}", vertex_shader_path.filename().c_str());
+        log_error("Failed to load shader stage: {}", vertex_shader_path.filename().c_str());
         return Error::AssetFailedToLoadShader;
     }
-    log::info("Loading shader: {}", fragment_shader_path.filename().c_str());
+    log_info("Loading shader: {}", fragment_shader_path.filename().c_str());
     ShaderStage vertex_stage {};
     TRY(ShaderStage::create(vertex_stage, ShaderType::Vertex, *vertex_shader_source));
 
     Option<StringView> fragment_shader_source = load_text_file(buffer, fragment_shader_path);
     if (!fragment_shader_source) {
-        log::error("Failed to load shader stage: {}", fragment_shader_path.filename().c_str());
+        log_error("Failed to load shader stage: {}", fragment_shader_path.filename().c_str());
         return Error::AssetFailedToLoadShader;
     }
 
@@ -162,7 +162,7 @@ Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesyste
 
 Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path) {
 
-    log::info("Loading mesh: {}", path.filename().c_str());
+    log_info("Loading mesh: {}", path.filename().c_str());
 
     Option<StringView> obj_data { load_text_file(buffer, path) };
     if (!obj_data) {
@@ -172,7 +172,7 @@ Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path) {
     obj::Model obj_model {};
     TRY(obj::load(obj_model, { obj_data->data(), obj_data->size() }));
 
-    log::debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}", obj_model.geometric_vertices.size(),
+    log_debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}", obj_model.geometric_vertices.size(),
         obj_model.texture_vertices.size(), obj_model.vertex_normals.size(), obj_model.face_corners.size());
 
     MeshData mesh_data = to_mesh_data(obj_model);

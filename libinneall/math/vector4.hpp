@@ -4,7 +4,6 @@
 #include <libinneall/math/vector3.hpp>
 
 #include <cmath>
-#include <format>
 
 namespace inl {
 
@@ -74,11 +73,3 @@ Vector4 normalise(Vector4 const& vector);
 float dot(Vector4 const& vector1, Vector4 const& vector2);
 
 } // namespace inl
-  //
-template <> struct std::formatter<inl::Vector4> {
-    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-
-    auto format(const inl::Vector4& vector, std::format_context& ctx) const {
-        return std::format_to(ctx.out(), "x: {}, y: {}, z: {}, w: {}", vector.x, vector.y, vector.z, vector.w);
-    }
-};

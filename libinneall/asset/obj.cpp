@@ -4,6 +4,8 @@
 #include <libinneall/base/string.hpp>
 #include <libinneall/base/string_view.hpp>
 
+#include <print>
+
 namespace {
 
 inl::Error extract_float(float& value, inl::StringView buffer) {

@@ -7,8 +7,6 @@
 #include <libinneall/math/vector3.hpp>
 #include <libinneall/math/vector4.hpp>
 
-#include <format>
-
 namespace inl {
 
 class Matrix4 {
@@ -72,12 +70,3 @@ Matrix4 inverse(Matrix4 const& matrix);
 Vector4 operator*(Matrix4 const& matrix, Vector4 const& vector);
 
 } // namespace inl
-
-template <> struct std::formatter<inl::Matrix4> {
-    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-
-    auto format(const inl::Matrix4& m, std::format_context& ctx) const {
-        return std::format_to(ctx.out(), "\n{} {} {} {}\n{} {} {} {}\n{} {} {} {}\n{} {} {} {}", m[0], m[4], m[8],
-            m[12], m[1], m[5], m[9], m[13], m[2], m[6], m[10], m[14], m[3], m[7], m[11], m[15]);
-    }
-};

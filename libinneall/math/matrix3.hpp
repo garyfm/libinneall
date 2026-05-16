@@ -4,8 +4,6 @@
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/span.hpp>
 
-#include <format>
-
 namespace inl {
 
 class Matrix3 {
@@ -58,12 +56,3 @@ Matrix3 transpose(Matrix3 const& matrix);
 Matrix3 inverse(Matrix3 const& matrix);
 
 } // namespace inl
-
-template <> struct std::formatter<inl::Matrix3> {
-    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-
-    auto format(const inl::Matrix3& m, std::format_context& ctx) const {
-        return std::format_to(
-            ctx.out(), "\n{} {} {}\n{} {} {}\n{} {} {}", m[0], m[3], m[6], m[1], m[4], m[7], m[2], m[5], m[8]);
-    }
-};

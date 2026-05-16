@@ -4,7 +4,7 @@ namespace {
 
 inl::Error create_buffer(GLuint* handle, uint8_t const* data, size_t size) {
     // NOTE: You might want to do this ? unsure
-    INL_ASSERT(size != 0, "Creating zero sized GlBuffer");
+    inl_assert(size != 0, "Creating zero sized GlBuffer");
 
     glCreateBuffers(1, handle);
     if (handle == 0) {
@@ -32,8 +32,8 @@ Error GlBuffer::create(GlBuffer& buffer, Span<uint8_t const> data) {
 }
 
 void GlBuffer::upload(Span<uint8_t const> data, size_t offset) {
-    INL_ASSERT(m_handle != 0, "Invalid GlBuffer");
-    INL_ASSERT(data.size() <= m_size, "Data exceeds GlBuffer");
+    inl_assert(m_handle != 0, "Invalid GlBuffer");
+    inl_assert(data.size() <= m_size, "Data exceeds GlBuffer");
 
     glNamedBufferSubData(m_handle, offset, data.size(), data.data());
 }

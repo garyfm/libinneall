@@ -34,7 +34,7 @@ public:
     }
 
     String(StringView sv) {
-        INL_ASSERT(sv.size() <= N, "String view is to greater than capacity");
+        inl_assert(sv.size() <= N, "String view is to greater than capacity");
 
         if (sv.size() > 0) {
             memcpy(m_buffer, sv.data(), sv.size());
@@ -45,7 +45,7 @@ public:
     }
 
     String(size_t size) {
-        INL_ASSERT(size <= N, "Size is greater than capacity");
+        inl_assert(size <= N, "Size is greater than capacity");
 
         m_size = size;
     }
@@ -89,25 +89,25 @@ public:
     }
 
     char& operator[](size_t index) {
-        INL_ASSERT(index < m_size, "Out of bounds access");
+        inl_assert(index < m_size, "Out of bounds access");
         return m_buffer[index];
     }
 
     char const& operator[](size_t index) const {
-        INL_ASSERT(index < m_size, "Out of bounds access");
+        inl_assert(index < m_size, "Out of bounds access");
         return m_buffer[index];
     }
 
     operator StringView() const { return { data(), size() }; }
 
     void resize(size_t new_size) {
-        INL_ASSERT(new_size <= m_capacity, "new_size is greater than capactiy");
+        inl_assert(new_size <= m_capacity, "new_size is greater than capactiy");
         m_size = new_size;
         m_buffer[m_size] = '\0';
     }
 
     String& append(StringView sv) {
-        INL_ASSERT(m_size + sv.size() <= m_capacity, "append string is greater than capactiy");
+        inl_assert(m_size + sv.size() <= m_capacity, "append string is greater than capactiy");
 
         if (sv.size() > 0) {
             memcpy(m_buffer + m_size, sv.data(), sv.size());
@@ -131,7 +131,7 @@ public:
     }
 
     String& replace(StringView sv, size_t pos = 0) {
-        INL_ASSERT(sv.size() + pos <= m_size, "replace string overflows the capactiy");
+        inl_assert(sv.size() + pos <= m_size, "replace string overflows the capactiy");
 
         if (sv.size() > 0) {
             memcpy(m_buffer + pos, sv.data(), sv.size());
@@ -141,7 +141,7 @@ public:
     }
 
     String& overwrite(StringView sv, size_t pos = 0) {
-        INL_ASSERT(sv.size() + pos <= m_capacity, "overwrite string overflows the capactiy");
+        inl_assert(sv.size() + pos <= m_capacity, "overwrite string overflows the capactiy");
 
         if (sv.size() > 0) {
             memcpy(m_buffer + pos, sv.data(), sv.size());

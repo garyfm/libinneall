@@ -74,14 +74,14 @@ Mesh::~Mesh() {
 }
 
 void Mesh::bind() {
-    INL_ASSERT(m_created, "Invalid Mesh");
+    inl_assert(m_created, "Invalid Mesh");
 
     m_vertex_array.bind();
     m_is_bound = true;
 }
 
 void Mesh::unbind() {
-    INL_ASSERT(m_created, "Invalid Mesh");
+    inl_assert(m_created, "Invalid Mesh");
     m_vertex_array.unbind();
     m_is_bound = false;
 }

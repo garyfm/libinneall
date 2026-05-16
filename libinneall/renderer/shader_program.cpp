@@ -92,12 +92,12 @@ void ShaderProgram::retrieve_uniforms() {
 GLuint ShaderProgram::uniform_location(StringView name) const {
     // NOTE: Maybe this shouldnt assert ?
     if (m_uniforms.find(name) == m_uniforms.end()) {
-        INL_ASSERT(false, "Failed to find uniform");
+        inl_assert(false, "Failed to find uniform");
         return -1;
     }
 
     int32_t location = glGetUniformLocation(m_handle, name.data());
-    INL_ASSERT(location != -1, "Failed to find uniform");
+    inl_assert(location != -1, "Failed to find uniform");
     return location;
 }
 }

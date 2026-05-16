@@ -18,21 +18,21 @@ public:
         : m_data { begin }
         , m_size { static_cast<size_t>(end - begin) } {
 
-        INL_ASSERT(end >= begin, "end less than begin");
+        inl_assert(end >= begin, "end less than begin");
     };
 
     T& operator[](size_t index) {
-        INL_ASSERT(index < m_size, "Out of bounds access");
+        inl_assert(index < m_size, "Out of bounds access");
         return m_data[index];
     }
 
     T const& operator[](size_t index) const {
-        INL_ASSERT(index < m_size, "Out of bounds access");
+        inl_assert(index < m_size, "Out of bounds access");
         return m_data[index];
     }
 
     Span<T> subspan(size_t offset, size_t size) const {
-        INL_ASSERT(offset + size <= m_size, "Inavlid offset + size");
+        inl_assert(offset + size <= m_size, "Inavlid offset + size");
         return { m_data + offset, size };
     }
 

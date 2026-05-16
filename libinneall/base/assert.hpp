@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define INL_ASSERT(predicate, msg) inl::assert((predicate), (#predicate), (msg))
+#define inl_assert(predicate, msg) inl::assert((predicate), (#predicate), (msg))
 
 namespace inl {
 

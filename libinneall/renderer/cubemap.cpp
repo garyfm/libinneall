@@ -27,7 +27,7 @@ Error Cubemap::create(
         base_format = GL_RGBA;
         break;
     default:
-        INL_ASSERT(false, "Number of components unsupported");
+        inl_assert(false, "Number of components unsupported");
     }
 
     glTextureStorage2D(cubemap.m_handle, 1, size_format, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
@@ -48,7 +48,7 @@ Error Cubemap::create(
 }
 
 void Cubemap::bind(GLuint texture_unit) {
-    INL_ASSERT(m_handle != 0, "Invalid Cubemap");
+    inl_assert(m_handle != 0, "Invalid Cubemap");
 
     m_unit = texture_unit;
     glBindTextureUnit(m_unit, m_handle);

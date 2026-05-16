@@ -29,7 +29,7 @@ Error Renderer::create(Renderer& renderer) {
 }
 
 void Renderer::begin_frame() const {
-    INL_ASSERT(m_created, "Invalid Renderer");
+    inl_assert(m_created, "Invalid Renderer");
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -41,7 +41,7 @@ void Renderer::begin_frame() const {
 }
 
 void Renderer::render(RenderScene& scene, RenderView const& view) {
-    INL_ASSERT(m_created, "Invalid Renderer");
+    inl_assert(m_created, "Invalid Renderer");
 
     for (auto& model : scene.models) {
         ShaderProgram* const shader = model.material->shader;
@@ -68,11 +68,11 @@ void Renderer::render(RenderScene& scene, RenderView const& view) {
 }
 
 void Renderer::render(Model& model) {
-    INL_ASSERT(m_created, "Invalid Renderer");
+    inl_assert(m_created, "Invalid Renderer");
 
-    INL_ASSERT(model.mesh != nullptr, "Empty mesh");
-    INL_ASSERT(model.material != nullptr, "Empty material");
-    INL_ASSERT(model.material->shader != nullptr, "Empty shader");
+    inl_assert(model.mesh != nullptr, "Empty mesh");
+    inl_assert(model.material != nullptr, "Empty material");
+    inl_assert(model.material->shader != nullptr, "Empty shader");
 
     model.mesh->bind();
     model.material->shader->use();
@@ -102,8 +102,8 @@ void Renderer::render(Model& model) {
 }
 
 void Renderer::draw_debug_mesh(Mesh& mesh, const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(m_created, "Invalid Renderer");
-    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
+    inl_assert(m_created, "Invalid Renderer");
+    inl_assert(m_debug_shader != nullptr, "Debug shader not set");
 
     mesh.bind();
     m_debug_shader->use();
@@ -114,32 +114,32 @@ void Renderer::draw_debug_mesh(Mesh& mesh, const Matrix4& model_matrix, const Ve
 }
 
 void Renderer::draw_debug_triangle(const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(m_created, "Invalid Renderer");
-    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
+    inl_assert(m_created, "Invalid Renderer");
+    inl_assert(m_debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_triangle();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
 void Renderer::draw_debug_quad(const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(m_created, "Invalid Renderer");
-    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
+    inl_assert(m_created, "Invalid Renderer");
+    inl_assert(m_debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_quad();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
 void Renderer::draw_debug_cube(const Matrix4& model_matrix, const Vector3& color) {
-    INL_ASSERT(m_created, "Invalid Renderer");
-    INL_ASSERT(m_debug_shader != nullptr, "Debug shader not set");
+    inl_assert(m_created, "Invalid Renderer");
+    inl_assert(m_debug_shader != nullptr, "Debug shader not set");
 
     Mesh* debug_mesh = debug_mesh_cube();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
 }
 
 void Renderer::draw_skybox(Cubemap& skybox) {
-    INL_ASSERT(m_created, "Invalid Renderer");
-    INL_ASSERT(m_skybox_shader != nullptr, "skybox shader not set");
+    inl_assert(m_created, "Invalid Renderer");
+    inl_assert(m_skybox_shader != nullptr, "skybox shader not set");
 
     glDepthMask(GL_FALSE);
 

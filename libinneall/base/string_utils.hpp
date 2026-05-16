@@ -12,7 +12,7 @@ void memcpy(void* dst, void const* src, size_t size);
 
 inline constexpr size_t strlen(char const* str) {
 
-    INL_ASSERT(str != nullptr, "Invalid string pointer");
+    inl_assert(str != nullptr, "Invalid string pointer");
 
     char const* end = str;
 

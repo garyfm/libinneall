@@ -3,7 +3,6 @@
 #include <libinneall/math/math.hpp>
 
 #include <cmath>
-#include <format>
 
 namespace inl {
 
@@ -54,11 +53,3 @@ float dot(Vector3 const& vector1, Vector3 const& vector2);
 Vector3 cross(Vector3 const& vector1, Vector3 const& vector2);
 
 } // namespace inl
-  //
-template <> struct std::formatter<inl::Vector3> {
-    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-
-    auto format(const inl::Vector3& vector, std::format_context& ctx) const {
-        return std::format_to(ctx.out(), "x: {}, y: {}, z: {}", vector.x, vector.y, vector.z);
-    }
-};

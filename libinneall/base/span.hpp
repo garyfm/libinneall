@@ -2,6 +2,7 @@
 #include <libinneall/base/assert.hpp>
 
 #include <stddef.h>
+#include <stdint.h>
 
 namespace inl {
 

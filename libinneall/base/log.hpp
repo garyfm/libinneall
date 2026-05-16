@@ -3,58 +3,32 @@
 #include <libinneall/base/option.hpp>
 #include <libinneall/base/string_view.hpp>
 
-#include <format>
-#include <print>
-#include <source_location>
+namespace inl {
 
-namespace inl::log {
-
-enum class Level : char {
-    Debug = 'd',
-    Info = 'i',
-    Warn = 'w',
-    Error = 'e',
+enum class LogLevel : char {
+    Debug = 'D',
+    Info = 'I',
+    Warn = 'W',
+    Error = 'E',
 };
 
-constexpr StringView get_module_name(const std::source_location& location) {
-    StringView file_name { location.file_name() };
+constexpr StringView get_module_name(StringView filename) {
 
-    const Option<size_t> slash_pos = file_name.rfind("/");
-    const Option<size_t> dot_pos = file_name.rfind(".");
+    const Option<size_t> slash_pos = filename.rfind("/");
+    const Option<size_t> dot_pos = filename.rfind(".");
 
     if (!slash_pos || !dot_pos) {
         return "";
     }
 
-    return file_name.substr(*slash_pos + 1, *dot_pos - *slash_pos - 1);
+    return filename.substr(*slash_pos + 1, *dot_pos - *slash_pos - 1);
 }
 
-// Use template deduction guide to get arround variadic args and defaulted args
-template <Level L, typename... Args> struct Log {
-    Log(std::format_string<Args...> fmt, Args&&... args,
-        const std::source_location location = std::source_location::current()) {
-        char level = '?';
+void log(char const* filename, size_t line, LogLevel lvl, char const* fmt, ...);
 
-        if constexpr (L == Level::Debug) {
-            level = 'D';
-        } else if constexpr (L == Level::Info) {
-            level = 'I';
-        } else if constexpr (L == Level::Warn) {
-            level = 'W';
-        } else if constexpr (L == Level::Error) {
-            level = 'E';
-        }
-
-        StringView module = get_module_name(location);
-        std::println("[{}][{:.{}}:{}] {}", level, module.data(), module.size(), location.line(),
-            std::format(fmt, std::forward<Args>(args)...));
-    }
-};
-
-template <Level L = {}, typename... Args> Log(StringView fmt, Args&&...) -> Log<L, Args...>;
-
-template <typename... Args> using debug = Log<Level::Debug, Args...>;
-template <typename... Args> using info = Log<Level::Info, Args...>;
-template <typename... Args> using warn = Log<Level::Warn, Args...>;
-template <typename... Args> using error = Log<Level::Error, Args...>;
-} // namespace inl::log
+} // namespace inl
+  //
+#define log_debug(fmt, ...) ::inl::log(__FILE__, __LINE__, ::inl::LogLevel::Info, fmt, ##__VA_ARGS__)
+#define log_info(fmt, ...) ::inl::log(__FILE__, __LINE__, ::inl::LogLevel::Debug, fmt, ##__VA_ARGS__)
+#define log_warn(fmt, ...) ::inl::log(__FILE__, __LINE__, ::inl::LogLevel::Warn, fmt, ##__VA_ARGS__)
+#define log_error(fmt, ...) ::inl::log(__FILE__, __LINE__, ::inl::LogLevel::Error, fmt, ##__VA_ARGS__)

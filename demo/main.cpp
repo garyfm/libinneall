@@ -114,7 +114,7 @@ void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] doubl
 }
 
 void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height) {
-    inl::log::debug("Window resized w: {} h: {}", width, height);
+    log_debug("Window resized w: {} h: {}", width, height);
     g_window.resize(width, height);
 }
 
@@ -129,10 +129,11 @@ int main(int argc, char* argv[]) {
     try {
 
         auto start_init = std::chrono::steady_clock::now();
-        log::debug("libinneall demo game");
+        log_debug("libinneall demo game");
+        log_info("LIBINNEALL demo game");
 
         if (argc < 2) {
-            log::error("Usage: game <assets_path>");
+            log_error("Usage: game <assets_path>");
             return -1;
         }
         Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
@@ -141,7 +142,7 @@ int main(int argc, char* argv[]) {
         INL_ASSERT(error == Error::Ok, "Failed to create Window");
 
         String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
-        log::info("Asset path: {}", assets_path.data());
+        log_info("Asset path: {}", assets_path.data());
         size_t assets_path_root_pos { assets_path.size() };
 
         const std::filesystem::path model_path { assets_path.append("/backpack").data() };
@@ -234,7 +235,7 @@ int main(int argc, char* argv[]) {
         renderer.set_skybox_shader(shader_program_skybox);
 
         auto end_init = std::chrono::steady_clock::now();
-        log::debug(
+        log_debug(
             "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
 
         while (!glfwWindowShouldClose(g_window.handle())) {
@@ -262,10 +263,10 @@ int main(int argc, char* argv[]) {
             g_window.swap_buffers();
         }
     } catch (const std::exception& e) {
-        log::error("Exception: {}", e.what());
+        log_error("Exception: {}", e.what());
         return -1;
     } catch (...) {
-        log::error("Unknown Exception");
+        log_error("Unknown Exception");
         return -1;
     }
 

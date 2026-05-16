@@ -36,7 +36,7 @@ bool compile_shader(inl::ShaderStage const& shader_stage, inl::StringView source
 
         glGetShaderInfoLog(shader_stage.handle(), inl::MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
         info_log.resize(info_log_size);
-        inl::log::error("Error compiling shader id {}: {}", shader_stage.handle(),
+        log_error("Error compiling shader id {}: {}", shader_stage.handle(),
             inl::StringView { info_log.data(), info_log.size() });
 
         return false;
@@ -65,7 +65,7 @@ Error ShaderStage::create(ShaderStage& shader_stage, ShaderType type, StringView
         return Error::RendererShaderStageFailedToCompile;
     }
 
-    log::info("Created shader stage id {}", shader_stage.m_handle.get());
+    log_info("Created shader stage id {}", shader_stage.m_handle.get());
 
     return Error::Ok;
 }

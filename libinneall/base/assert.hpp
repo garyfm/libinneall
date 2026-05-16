@@ -1,24 +1,22 @@
 #pragma once
 
-#include <print>
-#include <source_location>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-#define INL_ASSERT(predicate, msg) inl::assert((predicate), (#predicate), (msg), std::source_location::current())
+#define INL_ASSERT(predicate, msg) inl::assert((predicate), (#predicate), (msg))
 
 namespace inl {
 
-template <size_t PN, size_t MN>
-inline constexpr void assert(bool predicate, char const (&predicate_str)[PN], char const (&msg)[MN] = {},
-    std::source_location location = std::source_location::current()) {
+inline constexpr void assert(bool predicate, char const* predicate_str, char const* msg = "",
+    char const* filename = __builtin_FILE(), size_t line = __builtin_LINE()) {
     if (predicate) {
         return;
     }
 
-    std::println("FATAL: Assertion failed ({}:{}): ({}) {}", location.file_name(), location.line(), predicate_str, msg);
+    printf("FATAL: Assertion Failed (%s:%lu): (%s) %s", filename, line, predicate_str, msg);
 
-    std::abort();
+    abort();
 }
 
 } // namespace inl

@@ -1,7 +1,5 @@
 #include <libinneall/math/vector3.hpp>
 
-#include <cmath>
-
 namespace inl {
 
 Vector3 Vector3::operator-() const { return { -x, -y, -z }; }
@@ -92,9 +90,7 @@ Vector3 operator-(Vector3 const& left, Vector3 const& right) {
     return result;
 }
 
-float length(Vector3 const& vector) {
-    return std::sqrtf(std::powf(vector.x, 2) + std::powf(vector.y, 2) + std::powf(vector.z, 2));
-}
+float length(Vector3 const& vector) { return sqrtf(powf(vector.x, 2) + powf(vector.y, 2) + powf(vector.z, 2)); }
 
 Vector3 normalise(Vector3 const& vector) {
     float len = length(vector);

@@ -3,7 +3,7 @@
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/vector3.hpp>
 
-#include <cmath>
+#include <math.h>
 
 namespace inl {
 
@@ -39,8 +39,8 @@ struct Vector4 {
         , w { 1 } { }
 
     bool operator==(const Vector4& other) const {
-        return std::fabs(x - other.x) < EPSILON && std::fabs(y - other.y) < EPSILON && std::fabs(y - other.y) < EPSILON
-            && std::fabs(z - other.z) < EPSILON && std::fabs(w - other.w) < EPSILON;
+        return abs(x - other.x) < EPSILON && abs(y - other.y) < EPSILON && abs(y - other.y) < EPSILON
+            && abs(z - other.z) < EPSILON && abs(w - other.w) < EPSILON;
     }
 
     Vector4 operator-() const;

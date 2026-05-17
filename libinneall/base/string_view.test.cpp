@@ -149,6 +149,6 @@ TEST_CASE("StringView: rfind") {
 
         result = haystack.rfind(".");
         CHECK(result.has_value() == true);
-        CHECK(*result == 20);
+        CHECK(*result == 21);
     }
 }

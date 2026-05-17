@@ -4,17 +4,27 @@
 #include <libinneall/base/string.hpp>
 #include <libinneall/base/string_view.hpp>
 
-#include <print>
+#include <errno.h>
+#include <stdlib.h>
 
 namespace {
 
 inl::Error extract_float(float& value, inl::StringView buffer) {
 
-    inl::StringView trimed = inl::trim(buffer);
-    std::from_chars_result error = std::from_chars(trimed.data(), trimed.data() + trimed.size(), value);
-    if (error.ec != std::errc()) {
+    char* end;
+    errno = 0;
+    // TODO:: Implement a to_float funtion
+    // strtof assumes NULL terminate which StringView is not
+    float result = strtof(buffer.data(), &end);
+
+    if (end == buffer.data())
         return inl::Error::ObjFailedToExtractFloat;
-    }
+
+    if (errno == ERANGE)
+        return inl::Error::ObjFailedToExtractFloat;
+
+    value = result;
+
     return inl::Error::Ok;
 }
 

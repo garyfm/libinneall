@@ -45,11 +45,19 @@ inl::Error extract_int(inl::Span<uint8_t> buffer, int32_t& value, size_t& cursor
         return inl::Error::PpmFailedToExtractInteger;
     }
 
-    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    char* end;
+    errno = 0;
+    // TODO: Implement from_int rather than strtol
+    long int result = strtol(str.data(), &end, 10);
 
-    if (ec != std::errc()) {
+    if (end == str.data())
         return inl::Error::PpmFailedToExtractInteger;
-    }
+
+    if (errno == ERANGE)
+        return inl::Error::PpmFailedToExtractInteger;
+
+    value = static_cast<int32_t>(result);
+
     return inl::Error::Ok;
 }
 } // namespace

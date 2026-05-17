@@ -190,4 +190,6 @@ constexpr size_t MAX_STRING_SIZE_OF_NUMBER = 11;
 String<MAX_STRING_SIZE_OF_NUMBER> to_string(int32_t number);
 String<MAX_STRING_SIZE_OF_NUMBER> to_string(uint32_t number);
 
+float to_float(StringView str);
+
 } // namespace inl

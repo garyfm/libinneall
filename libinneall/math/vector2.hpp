@@ -2,7 +2,7 @@
 
 #include <libinneall/math/math.hpp>
 
-#include <cmath>
+#include <math.h>
 
 namespace inl {
 
@@ -18,7 +18,7 @@ struct Vector2 {
     };
 
     bool operator==(const Vector2& other) const {
-        return std::fabs(x - other.x) < EPSILON && std::fabs(y - other.y) < EPSILON && std::fabs(y - other.y) < EPSILON;
+        return abs(x - other.x) < EPSILON && abs(y - other.y) < EPSILON && abs(y - other.y) < EPSILON;
     }
 
     Vector2 operator-() const;

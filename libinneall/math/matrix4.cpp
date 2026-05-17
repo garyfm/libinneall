@@ -2,6 +2,8 @@
 #include <libinneall/math/matrix3.hpp>
 #include <libinneall/math/matrix4.hpp>
 
+#include <math.h>
+
 namespace inl {
 
 Matrix4::Matrix4(float identity)
@@ -206,8 +208,8 @@ Matrix4 Matrix4::create_translation(Vector3 translation) {
 
 Matrix4 Matrix4::create_rotation(float angle_radians, Vector3 const& unit_axis) {
 
-    const float cos_angle = std::cos(angle_radians);
-    const float sin_angle = std::sin(angle_radians);
+    const float cos_angle = cos(angle_radians);
+    const float sin_angle = sin(angle_radians);
 
     Vector3 normalized = normalise(unit_axis);
     const float x = normalized.x;
@@ -238,7 +240,7 @@ Matrix4 Matrix4::create_rotation(float angle_radians, Vector3 const& unit_axis) 
 
 Matrix4 Matrix4::create_perspective(float fov_y, float aspect, float z_near, float z_far) {
 
-    const float tan_fov = std::tan(fov_y / 2);
+    const float tan_fov = tan(fov_y / 2);
 
     const Matrix4 perspecitve { {
         1 / (aspect * tan_fov),

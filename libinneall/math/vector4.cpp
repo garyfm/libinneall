@@ -1,7 +1,5 @@
 #include <libinneall/math/vector4.hpp>
 
-#include <cmath>
-
 namespace inl {
 
 Vector4 Vector4::operator-() const { return { -x, -y, -z, -w }; }
@@ -99,8 +97,7 @@ Vector4 operator-(Vector4 const& left, Vector4 const& right) {
 }
 
 float length(Vector4 const& vector) {
-    return std::sqrtf(
-        std::powf(vector.x, 2) + std::powf(vector.y, 2) + std::powf(vector.z, 2) + std::powf(vector.w, 2));
+    return sqrtf(powf(vector.x, 2) + powf(vector.y, 2) + powf(vector.z, 2) + powf(vector.w, 2));
 }
 
 Vector4 normalise(Vector4 const& vector) {

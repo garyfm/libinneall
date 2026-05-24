@@ -14,7 +14,7 @@ inline constexpr void assert(bool predicate, char const* predicate_str, char con
         return;
     }
 
-    printf("FATAL: Assertion Failed (%s:%lu): (%s) %s", filename, line, predicate_str, msg);
+    printf("FATAL: Assertion Failed (%s:%lu): (%s) %s\n", filename, line, predicate_str, msg);
 
     abort();
 }

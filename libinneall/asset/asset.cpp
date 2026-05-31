@@ -1,5 +1,5 @@
-#include "asset/ppm.hpp"
 #include <libinneall/asset/asset.hpp>
+#include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
 #include <libinneall/renderer/texture.hpp>
@@ -8,73 +8,54 @@
 
 namespace inl {
 
-Option<ByteSpan> load_file(ByteSpan buffer, std::filesystem::path path) {
+Error load_file(Arena& arena, ByteSpan& file_data, std::filesystem::path path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         log_error("Failed to open file: {}", path.c_str());
-        return None;
+        return Error::AssetFailedToOpenFile;
     }
 
     size_t file_size = std::filesystem::file_size(path);
 
-    if (file_size == 0) {
-        log_error("File is empty");
-        return ByteSpan {};
-    }
+    uint8_t* buffer = static_cast<uint8_t*>(arena.alloc(file_size));
 
-    if (file_size > buffer.size()) {
-        log_error("File ({}) wont fit in buffer ()", file_size, buffer.size());
-        return None;
-    }
+    file.read(reinterpret_cast<char*>(buffer), file_size);
 
-    file.read(reinterpret_cast<char*>(buffer.data()), file_size);
+    file_data = ByteSpan { buffer, file_size };
 
-    log_info("file_size {}", file_size);
-    return ByteSpan { buffer.data(), file_size };
+    return Error::Ok;
 }
 
-Option<StringView> load_text_file(ByteSpan buffer, std::filesystem::path path) {
+Error load_text_file(Arena& arena, StringView& file_data, std::filesystem::path path) {
 
-    Option<ByteSpan> raw_file_data = load_file(buffer, path);
-    if (!raw_file_data) {
-        log_error("Failed to load file");
-        return None;
-    }
-    return StringView { reinterpret_cast<char const*>(raw_file_data->data()), raw_file_data->size() };
+    ByteSpan raw_data {};
+    TRY(load_file(arena, raw_data, path));
+    file_data = StringView { reinterpret_cast<char*>(raw_data.data()), raw_data.size() };
+    return Error::Ok;
 }
 
-Error load_image(ByteSpan buffer, ppm::Image& image, std::filesystem::path path) {
-    Option<ByteSpan> raw_image_data { load_file(buffer, path) };
+Error load_image(Arena& arena, ppm::Image& image, std::filesystem::path path) {
+    ByteSpan raw_image_data {};
+    TRY(load_file(arena, raw_image_data, path));
+    TRY(ppm::load(image, raw_image_data));
 
-    if (!raw_image_data) {
-        return Error::AssetFailedToLoadFile;
-    }
-
-    TRY(ppm::load(image, *raw_image_data));
-
-    log_debug("PPM image: f:{}, w:{}, h:{}, v:{}, size:{}", static_cast<int32_t>(image.format), image.width,
+    log_debug("PPM image: f:%d, w:%d, h:%d, v:%d size:%d", static_cast<int32_t>(image.format), image.width,
         image.height, image.max_value, image.pixel_data.size());
 
     return Error::Ok;
 }
 
-Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path, bool flip_vertically) {
-
-    log_info("Loading texture: {}", path.filename().c_str());
+Error load_texture(Arena& arena, Texture& texture, std::filesystem::path path, bool flip_vertically) {
+    log_info("Loading texture: %s", path.filename().c_str());
 
     ppm::Image image {};
-    TRY(load_image(buffer, image, path));
+    TRY(load_image(arena, image, path));
 
-    // TODO:: Buffer needs to be twice the size of image to flip, not ideal
     if (flip_vertically) {
-        ppm::flip_vertically({ &buffer[image.size_bytes()], image.size_bytes() }, image);
+        ppm::flip_vertically(arena, image);
     }
 
-    Error error = Texture::create(texture, image.width, image.height, 3, image.pixel_data.data());
-
-    if (error != Error::Ok) {
-        return error;
-    }
+    TRY(Texture::create(texture, image.width, image.height, 3, image.pixel_data.data()));
 
     glTextureParameteri(texture.handle(), GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTextureParameteri(texture.handle(), GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -84,8 +65,7 @@ Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path
     return Error::Ok;
 }
 
-Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip_vertically) {
-
+Error load_cubemap(Arena& arena, Cubemap& cubemap, StringView path, bool flip_vertically) {
     Array<ppm::Image, 6> cubemap_data {};
 
     const Array<StringView, 6> cubemap_files { {
@@ -99,10 +79,7 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
 
     String<MAX_ASSET_PATH_SIZE> image_path { path };
 
-    size_t cursor_pos { 0 };
     for (size_t i = 0; i < cubemap_data.size(); ++i) {
-
-        log_info("Loading texture: {}", path[i]);
 
         if (i == 0) {
             image_path.append(cubemap_files[i]);
@@ -110,13 +87,13 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
             image_path.overwrite(cubemap_files[i], path.size());
         }
 
-        ppm::Image image {};
-        TRY(load_image({ &buffer[cursor_pos], buffer.size() }, image, image_path.data()));
+        log_info("Loading texture: %s", image_path.data());
 
-        cursor_pos += image.size_bytes();
+        ppm::Image image {};
+        TRY(load_image(arena, image, image_path.data()));
 
         if (flip_vertically) {
-            ppm::flip_vertically(buffer, image);
+            ppm::flip_vertically(arena, image);
         }
 
         cubemap_data[i] = image;
@@ -134,45 +111,36 @@ Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip
     return Cubemap::create(cubemap, cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces);
 }
 
-Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
+Error load_shader(Arena& arena, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
     std::filesystem::path fragment_shader_path) {
+    log_info("Loading shader: %s", vertex_shader_path.filename().c_str());
 
-    log_info("Loading shader: {}", vertex_shader_path.filename().c_str());
+    StringView vertex_shader_source {};
+    TRY(load_text_file(arena, vertex_shader_source, vertex_shader_path));
 
-    Option<StringView> vertex_shader_source = load_text_file(buffer, vertex_shader_path);
-    if (!vertex_shader_source) {
-        log_error("Failed to load shader stage: {}", vertex_shader_path.filename().c_str());
-        return Error::AssetFailedToLoadShader;
-    }
-    log_info("Loading shader: {}", fragment_shader_path.filename().c_str());
+    log_info("Loading shader: %s", fragment_shader_path.filename().c_str());
     ShaderStage vertex_stage {};
-    TRY(ShaderStage::create(vertex_stage, ShaderType::Vertex, *vertex_shader_source));
+    TRY(ShaderStage::create(vertex_stage, ShaderType::Vertex, vertex_shader_source));
 
-    Option<StringView> fragment_shader_source = load_text_file(buffer, fragment_shader_path);
-    if (!fragment_shader_source) {
-        log_error("Failed to load shader stage: {}", fragment_shader_path.filename().c_str());
-        return Error::AssetFailedToLoadShader;
-    }
+    StringView fragment_shader_source {};
+    TRY(load_text_file(arena, fragment_shader_source, fragment_shader_path));
 
     ShaderStage fragment_stage {};
-    TRY(ShaderStage::create(fragment_stage, ShaderType::Fragment, *fragment_shader_source));
+    TRY(ShaderStage::create(fragment_stage, ShaderType::Fragment, fragment_shader_source));
 
     return ShaderProgram::create(shader_program, vertex_stage, fragment_stage);
 }
 
-Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path) {
+Error load_mesh(Arena& arena, Mesh& mesh, std::filesystem::path path) {
+    log_info("Loading mesh: %s", path.filename().c_str());
 
-    log_info("Loading mesh: {}", path.filename().c_str());
-
-    Option<StringView> obj_data { load_text_file(buffer, path) };
-    if (!obj_data) {
-        return Error::AssetFailedToLoadMesh;
-    }
+    StringView obj_data {};
+    TRY(load_text_file(arena, obj_data, path));
 
     obj::Model obj_model {};
-    TRY(obj::load(obj_model, { obj_data->data(), obj_data->size() }));
+    TRY(obj::load(obj_model, { obj_data.data(), obj_data.size() }));
 
-    log_debug("OBJ model: vertices:{}, textures:{}, normals:{}, faces:{}", obj_model.geometric_vertices.size(),
+    log_debug("OBJ model: vertices:%u, textures:%u, normals:5u, faces:%u", obj_model.geometric_vertices.size(),
         obj_model.texture_vertices.size(), obj_model.vertex_normals.size(), obj_model.face_corners.size());
 
     MeshData mesh_data = to_mesh_data(obj_model);

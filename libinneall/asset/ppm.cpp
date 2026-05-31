@@ -5,8 +5,7 @@
 #include <libinneall/base/string.hpp>
 #include <libinneall/base/string_utils.hpp>
 
-#include <algorithm>
-#include <charconv>
+#include <errno.h>
 
 namespace {
 
@@ -16,7 +15,7 @@ void skip_whitespace(inl::Span<uint8_t> buffer, size_t& cursor) {
     while (cursor < buffer.size()) {
         c = buffer[cursor];
 
-        if (inl::isspace(c)) {
+        if (inl::isspace(static_cast<char>(c))) {
             ++cursor;
             continue;
         }
@@ -69,9 +68,9 @@ Error load(Image& image, ByteSpan raw_data) {
     size_t cursor { 0 };
     static constexpr uint8_t FORMAT_SIZE { 2 };
     String<FORMAT_SIZE> format;
-    format.append(static_cast<uint8_t>(raw_data[cursor]));
+    format.append(static_cast<char>(raw_data[cursor]));
     ++cursor;
-    format.append(static_cast<uint8_t>(raw_data[cursor]));
+    format.append(static_cast<char>(raw_data[cursor]));
     ++cursor;
 
     if (format[0] != 'P') {
@@ -97,7 +96,7 @@ Error load(Image& image, ByteSpan raw_data) {
     // Skip the single whitespace prior to the image data
     ++cursor;
 
-    size_t size_bytes = width * height * 3;
+    size_t size_bytes = static_cast<size_t>(width * height * 3);
     image.format = Format::P6;
     image.width = static_cast<size_t>(width);
     image.height = static_cast<size_t>(height);
@@ -109,17 +108,18 @@ Error load(Image& image, ByteSpan raw_data) {
     return Error::Ok;
 }
 
-void flip_vertically(ByteSpan buffer, Image& image) {
+void flip_vertically(Arena& arena, Image& image) {
 
-    ByteSpan temp_row = { buffer.data(), image.row_size_bytes() };
+    ArenaTemp arena_temp { arena };
+    uint8_t* temp_row = static_cast<uint8_t*>(arena_temp.arena->alloc(image.row_size_bytes()));
 
     for (size_t row = 0; row < image.height; ++row) {
         size_t top_cursor { row * image.row_size_bytes() };
         size_t bottom_cursor { (image.height - 1 - row) * image.row_size_bytes() };
 
-        memcpy(temp_row.data(), &image.pixel_data[top_cursor], image.row_size_bytes());
+        memcpy(temp_row, &image.pixel_data[top_cursor], image.row_size_bytes());
         memcpy(&image.pixel_data[top_cursor], &image.pixel_data[bottom_cursor], image.row_size_bytes());
-        memcpy(&image.pixel_data[bottom_cursor], temp_row.data(), image.row_size_bytes());
+        memcpy(&image.pixel_data[bottom_cursor], temp_row, image.row_size_bytes());
     }
 }
 } // namespace inl::ppm

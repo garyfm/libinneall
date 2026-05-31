@@ -1,7 +1,8 @@
 #include <libinneall/asset/ppm.hpp>
+#include <libinneall/base/arena.hpp>
 #include <libinneall/base/array.hpp>
-#include <libinneall/base/option.hpp>
 #include <libinneall/base/error.hpp>
+#include <libinneall/base/option.hpp>
 #include <libinneall/base/span.hpp>
 #include <libinneall/base/string_view.hpp>
 #include <libinneall/renderer/cubemap.hpp>
@@ -20,14 +21,13 @@ using ByteBuffer = std::vector<uint8_t>;
 
 // TODO: Some kind of Asset manager should be used
 
-Option<ByteSpan> load_file(ByteSpan buffer, std::filesystem::path path);
-Option<StringView> load_text_file(Span<uint8_t> buffer, std::filesystem::path path);
-Error load_image(ByteSpan buffer, ppm::Image& image, std::filesystem::path path);
-
-Error load_texture(ByteSpan buffer, Texture& texture, std::filesystem::path path, bool flip_vertically);
-Error load_cubemap(ByteSpan buffer, Cubemap& cubemap, StringView path, bool flip_vertically);
-Error load_shader(ByteSpan buffer, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
+Error load_file(Arena* arena, ByteSpan& file_data, std::filesystem::path path);
+Error load_text_file(Arena& arena, ByteSpan& file_data, std::filesystem::path path);
+Error load_image(Arena& arena, ppm::Image& image, std::filesystem::path path);
+Error load_texture(Arena& arena, Texture& texture, std::filesystem::path path, bool flip_vertically);
+Error load_cubemap(Arena& arena, Cubemap& cubemap, StringView path, bool flip_vertically);
+Error load_shader(Arena& arena, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
     std::filesystem::path fragment_shader_path);
-Error load_mesh(ByteSpan buffer, Mesh& mesh, std::filesystem::path path);
+Error load_mesh(Arena& arena, Mesh& mesh, std::filesystem::path path);
 
 } // namespace inl

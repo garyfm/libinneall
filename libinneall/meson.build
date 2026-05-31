@@ -35,6 +35,7 @@ source_files = files(
 
 test_files = files(
     'doctest.cpp',
+    'base/arena.test.cpp',
     'base/array.test.cpp',
     'base/hash.test.cpp',
     'base/string.test.cpp',

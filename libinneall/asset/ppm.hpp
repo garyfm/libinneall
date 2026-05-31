@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libinneall/base/arena.hpp>
 #include <libinneall/base/error.hpp>
 #include <libinneall/base/span.hpp>
 
@@ -34,6 +35,6 @@ struct Image {
 };
 
 Error load(Image& image, ByteSpan raw_data);
-void flip_vertically(ByteSpan buffer, Image& image);
+void flip_vertically(Arena& arena, Image& image);
 
 } // namespace inl

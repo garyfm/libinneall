@@ -22,7 +22,7 @@ inl::Error link_shader_program(
 
         glGetProgramInfoLog(shader_program.handle(), inl::MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
         info_log.resize(info_log_size);
-        log_error("Error compiling shader id {}: {}", shader_program.handle(),
+        log_error("Error compiling shader id %s: %s", shader_program.handle(),
             inl::StringView { info_log.data(), info_log.size() });
         return inl::Error::RendererShaderProgramFailedToLink;
     }
@@ -50,7 +50,7 @@ Error ShaderProgram::create(
 
     shader_program.retrieve_uniforms();
 
-    log_debug("Created shader program id {}", shader_program.m_handle.get());
+    log_debug("Created shader program id %d", shader_program.m_handle.get());
     return Error::Ok;
 }
 
@@ -58,7 +58,7 @@ void ShaderProgram::retrieve_uniforms() {
     GLint uniform_count {};
     glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &uniform_count);
 
-    log_debug("Shader({}) - Uniform count: {}", static_cast<int32_t>(m_handle), uniform_count);
+    log_debug("Shader(%d) - Uniform count: %d", static_cast<int32_t>(m_handle), uniform_count);
 
     if (uniform_count == 0) {
         return;
@@ -66,7 +66,7 @@ void ShaderProgram::retrieve_uniforms() {
 
     GLint max_name_length {};
     glGetProgramiv(m_handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_length);
-    log_debug("Shader({}) - Uniform max name length: {}", static_cast<int32_t>(m_handle), max_name_length);
+    log_debug("Shader(%d) - Uniform max name length: {%d}", static_cast<int32_t>(m_handle), max_name_length);
 
     String<MAX_SHADER_UNIFORM_NAME> uniform_name { MAX_SHADER_UNIFORM_NAME };
 
@@ -82,7 +82,7 @@ void ShaderProgram::retrieve_uniforms() {
         UniformInfo info {};
         info.location = glGetUniformLocation(m_handle, uniform_name.data());
         info.count = count;
-        log_debug("Shader({}) - Retrived uniform: name {}, location {}, count {}", static_cast<int32_t>(m_handle),
+        log_debug("Shader(%d) - Retrived uniform: name %s, location %d, count %d", static_cast<int32_t>(m_handle),
             uniform_name.data(), info.location, info.count);
 
         m_uniforms[uniform_name] = info;

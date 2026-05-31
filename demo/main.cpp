@@ -1,6 +1,7 @@
 #include <libinneall/asset/asset.hpp>
 #include <libinneall/asset/obj.hpp>
 #include <libinneall/asset/ppm.hpp>
+#include <libinneall/base/arena.hpp>
 #include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/error.hpp>
@@ -28,8 +29,7 @@
 #include <libinneall/window.hpp>
 #include <subprojects/glad/include/glad/glad.h>
 
-#include <chrono>
-#include <cmath>
+#include <math.h>
 
 namespace {
 
@@ -120,15 +120,13 @@ void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height)
 
 } // namespace
 
-// TODO: This should be an arena of some kind
-static inl::Array<uint8_t, MB * 100> scratch_buffer {};
+static inl::Array<uint8_t, MB * 100> main_arena_backing {};
 
 int main(int argc, char* argv[]) {
     using namespace inl;
 
     try {
 
-        auto start_init = std::chrono::steady_clock::now();
         log_debug("libinneall demo game");
         log_info("LIBINNEALL demo game");
 
@@ -141,39 +139,45 @@ int main(int argc, char* argv[]) {
 
         inl_assert(error == Error::Ok, "Failed to create Window");
 
+        Arena main_arena { main_arena_backing.data(), main_arena_backing.size() };
+
         String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
-        log_info("Asset path: {}", assets_path.data());
+        log_info("Asset path: %s", assets_path.data());
         size_t assets_path_root_pos { assets_path.size() };
 
         const std::filesystem::path model_path { assets_path.append("/backpack").data() };
         const std::filesystem::path shader_path { assets_path.overwrite("/shaders", assets_path_root_pos).data() };
 
         ShaderProgram shader_program_lighting {};
-        error = load_shader(scratch_buffer, shader_program_lighting, shader_path / "lighting_phong.vert.glsl",
+        error = load_shader(main_arena, shader_program_lighting, shader_path / "lighting_phong.vert.glsl",
             shader_path / "lighting_phong.frag.glsl");
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_debug {};
         error = load_shader(
-            scratch_buffer, shader_program_debug, shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl");
+            main_arena, shader_program_debug, shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl");
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_skybox {};
         error = load_shader(
-            scratch_buffer, shader_program_skybox, shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl");
+            main_arena, shader_program_skybox, shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl");
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
+        main_arena.reset();
 
         Mesh mesh {};
-        error = load_mesh(scratch_buffer, mesh, model_path / "mesh.obj");
+        error = load_mesh(main_arena, mesh, model_path / "mesh.obj");
         inl_assert(error == Error::Ok, "Failed to load mesh");
+        main_arena.reset();
 
         Texture texture_albedo {};
-        error = load_texture(scratch_buffer, texture_albedo, model_path / "albedo.ppm", false);
+        error = load_texture(main_arena, texture_albedo, model_path / "albedo.ppm", false);
         inl_assert(error == Error::Ok, "Failed to load texture_albedo");
+        main_arena.reset();
 
         Texture texture_specular {};
-        error = load_texture(scratch_buffer, texture_specular, model_path / "specular.ppm", false);
+        error = load_texture(main_arena, texture_specular, model_path / "specular.ppm", false);
         inl_assert(error == Error::Ok, "Failed to load texture_albedo");
+        main_arena.reset();
 
         Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
 
@@ -185,8 +189,11 @@ int main(int argc, char* argv[]) {
         assets_path.overwrite("/skybox", assets_path_root_pos);
 
         Cubemap skybox {};
-        error = load_cubemap(scratch_buffer, skybox, assets_path, false);
+        error = load_cubemap(main_arena, skybox, assets_path, false);
         inl_assert(error == Error::Ok, "Failed to load skyboz");
+        main_arena.reset();
+
+        log_debug("Main arena highwater mark: %uMB", main_arena.highwater_mark() / MB);
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
@@ -233,10 +240,6 @@ int main(int argc, char* argv[]) {
 
         renderer.set_debug_shader(shader_program_debug);
         renderer.set_skybox_shader(shader_program_skybox);
-
-        auto end_init = std::chrono::steady_clock::now();
-        log_debug(
-            "Initialisation time: {}", std::chrono::duration_cast<std::chrono::milliseconds>(end_init - start_init));
 
         while (!glfwWindowShouldClose(g_window.handle())) {
             float current_frame_time = static_cast<float>(glfwGetTime());

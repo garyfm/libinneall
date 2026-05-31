@@ -29,6 +29,8 @@ namespace inl {
     apply(ObjFailedToExtractInteger) \
     apply(ObjFailedToExtractFloat) \
     apply(ObjFaceNotTriangulated) \
+    apply(AssetFailedToOpenFile) \
+    apply(AssetFailedToReadFile) \
     apply(AssetFailedToLoadFile) \
     apply(AssetFailedToLoadTexture) \
     apply(AssetFailedToLoadCubmap) \

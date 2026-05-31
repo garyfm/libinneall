@@ -16,5 +16,9 @@ add_project_arguments(
   language: ['c', 'cpp']
 )
 
+if get_option('debug')
+  add_project_arguments('-DBUILD_DEBUG=1', language: 'cpp')
+endif
+
 subdir('libinneall')
 subdir('demo')

@@ -9,6 +9,7 @@ namespace inl {
 
 class Arena {
 public:
+    Arena() = default;
     Arena(uint8_t* backing_memory, size_t size);
     INL_DEL_COPY_MOVE(Arena);
 
@@ -19,6 +20,7 @@ public:
     void reset_to(size_t pos) { m_offset = pos; }
 
     size_t offset() const { return m_offset; };
+    size_t capacity() const { return m_capcity; };
 #if BUILD_DEBUG
     size_t highwater_mark() const { return m_highwater_mark; };
 #else
@@ -38,6 +40,7 @@ private:
 class ArenaTemp {
 
 public:
+    ArenaTemp() = default;
     ArenaTemp(Arena& base_arena);
     ~ArenaTemp();
     INL_DEL_COPY_MOVE(ArenaTemp);

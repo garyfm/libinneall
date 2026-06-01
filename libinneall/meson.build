@@ -37,6 +37,7 @@ test_files = files(
     'doctest.cpp',
     'base/arena.test.cpp',
     'base/array.test.cpp',
+    'base/dyn_array.test.cpp',
     'base/hash.test.cpp',
     'base/string.test.cpp',
     'base/string_utils.test.cpp',

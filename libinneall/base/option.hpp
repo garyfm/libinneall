@@ -1,8 +1,7 @@
 #pragma once
 
 #include <libinneall/base/assert.hpp>
-
-#include <type_traits>
+#include <libinneall/base/utility.hpp>
 
 namespace inl {
 
@@ -12,9 +11,6 @@ struct NoneType {
 };
 
 static constexpr NoneType None {};
-
-template <typename T>
-concept PodType = std::is_trivially_copyable_v<T>;
 
 template <PodType T> class Option {
 public:

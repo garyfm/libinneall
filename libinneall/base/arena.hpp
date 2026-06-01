@@ -21,6 +21,8 @@ public:
 
     size_t offset() const { return m_offset; };
     size_t capacity() const { return m_capcity; };
+    uint8_t const* memory() const { return m_memory; };
+    uint8_t const* next_alloc() const { return m_memory + m_offset; };
 #if BUILD_DEBUG
     size_t highwater_mark() const { return m_highwater_mark; };
 #else
@@ -40,7 +42,6 @@ private:
 class ArenaTemp {
 
 public:
-    ArenaTemp() = default;
     ArenaTemp(Arena& base_arena);
     ~ArenaTemp();
     INL_DEL_COPY_MOVE(ArenaTemp);

@@ -1,6 +1,6 @@
 #include <libinneall/asset/obj.hpp>
 #include <libinneall/base/assert.hpp>
-#include <libinneall/base/dyn_array.hpp>
+#include <libinneall/base/buffer.hpp>
 #include <libinneall/base/error.hpp>
 #include <libinneall/base/string.hpp>
 #include <libinneall/base/string_view.hpp>
@@ -101,21 +101,23 @@ Error load(Arena& arena, Model& model, StringView obj_data) {
 
     ModelCount count = model_count(obj_data);
 
-    DynArray<Vector3> geometric_vertices { arena, count.n_verts };
-    DynArray<Vector2> texture_vertices { arena, count.n_texts };
-    DynArray<Vector3> vertex_normals { arena, count.n_norms };
-    DynArray<FaceCorner> face_corners { arena, count.n_faces };
+    Buffer<Vector3> geometric_vertices = arena.alloc_buffer<Vector3>(count.n_verts);
+    Buffer<Vector2> texture_vertices = arena.alloc_buffer<Vector2>(count.n_texts);
+    Buffer<Vector3> vertex_normals = arena.alloc_buffer<Vector3>(count.n_norms);
+    static constexpr size_t N_CORNERS_PER_FACE = 3;
+    Buffer<FaceCorner> face_corners = arena.alloc_buffer<FaceCorner>(count.n_faces * N_CORNERS_PER_FACE);
 
-    while (obj_data.size()) {
+    inl::Cut lines {};
+    lines.right = obj_data;
 
-        Cut cut_line = cut(obj_data, '\n');
-        if (!cut_line.success) {
+    while (lines.right.size()) {
+        lines = cut(lines.right, '\n');
+
+        if (!lines.success) {
             return Error::ObjInvalidFormat;
         }
 
-        obj_data = cut_line.right;
-
-        StringView line = trim(cut_line.left);
+        StringView line = trim(lines.left);
         if (line.empty()) {
             continue;
         }

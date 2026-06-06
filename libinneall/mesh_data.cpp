@@ -1,6 +1,6 @@
 #include <libinneall/asset/obj.hpp>
+#include <libinneall/base/array_dyn.hpp>
 #include <libinneall/base/assert.hpp>
-#include <libinneall/base/dyn_array.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/vertex_data.hpp>
@@ -25,8 +25,8 @@ struct HasherVertexData {
 
 MeshData to_mesh_data(Arena& arena, obj::Model const& model) {
 
-    DynArray<VertexData> vertex_data { arena, model.face_corners.size() };
-    DynArray<uint32_t> index_data { arena, model.face_corners.size() };
+    ArrayDyn<VertexData> vertex_data { arena, model.face_corners.size() };
+    ArrayDyn<uint32_t> index_data { arena, model.face_corners.size() };
 
     std::unordered_map<VertexData, uint32_t, HasherVertexData> vertex_map;
     uint32_t ebo_index { 0 };

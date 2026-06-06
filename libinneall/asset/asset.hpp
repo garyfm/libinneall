@@ -12,12 +12,10 @@
 #include <libinneall/renderer/texture.hpp>
 
 #include <filesystem>
-#include <vector>
 
 namespace inl {
 
 constexpr size_t MAX_ASSET_PATH_SIZE { 128 };
-using ByteBuffer = std::vector<uint8_t>;
 
 // TODO: Some kind of Asset manager should be used
 

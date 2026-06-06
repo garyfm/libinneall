@@ -1,5 +1,6 @@
 #include <libinneall/asset/obj.hpp>
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/dyn_array.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/vertex_data.hpp>
@@ -22,9 +23,11 @@ struct HasherVertexData {
     }
 };
 
-MeshData to_mesh_data(obj::Model const& model) {
+MeshData to_mesh_data(Arena& arena, obj::Model const& model) {
 
-    MeshData mesh_data {};
+    DynArray<VertexData> vertex_data { arena, model.face_corners.size() };
+    DynArray<uint32_t> index_data { arena, model.face_corners.size() };
+
     std::unordered_map<VertexData, uint32_t, HasherVertexData> vertex_map;
     uint32_t ebo_index { 0 };
 
@@ -51,17 +54,17 @@ MeshData to_mesh_data(obj::Model const& model) {
         // Reuse ebo index for duplicate vertices
         if (auto found = vertex_map.find(vertex); found != vertex_map.end()) {
             // Vertex exsists already, reuse the ebo_index
-            mesh_data.index_data.emplace_back(found->second);
+            index_data.push(found->second);
         } else {
             // New vertex, insert it and increment ebo_index
             vertex_map.emplace(vertex, ebo_index);
-            mesh_data.vertex_data.emplace_back(vertex);
-            mesh_data.index_data.emplace_back(ebo_index);
+            vertex_data.push(vertex);
+            index_data.push(ebo_index);
             ++ebo_index;
         }
     }
 
-    return mesh_data;
+    return { vertex_data, index_data };
 }
 
 } // namespace

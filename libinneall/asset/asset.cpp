@@ -138,12 +138,13 @@ Error load_mesh(Arena& arena, Mesh& mesh, std::filesystem::path path) {
     TRY(load_text_file(arena, obj_data, path));
 
     obj::Model obj_model {};
-    TRY(obj::load(obj_model, { obj_data.data(), obj_data.size() }));
+    TRY(obj::load(arena, obj_model, { obj_data.data(), obj_data.size() }));
 
     log_debug("OBJ model: vertices:%u, textures:%u, normals:5u, faces:%u", obj_model.geometric_vertices.size(),
         obj_model.texture_vertices.size(), obj_model.vertex_normals.size(), obj_model.face_corners.size());
 
-    MeshData mesh_data = to_mesh_data(obj_model);
+    // TODO: Free using temp
+    MeshData mesh_data = to_mesh_data(arena, obj_model);
 
     return Mesh::create(mesh, mesh_data);
 }

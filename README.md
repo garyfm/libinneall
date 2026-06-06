@@ -82,8 +82,8 @@ Size: 5116096
 - [x] std::optional
 - [x] remove execptions
 - [x] std::expected
-- [ ] std::print
-- [ ] std::vector
+- [x] std::print
+- [x] std::vector
 - [ ] math
 - [ ] std::unqiue_ptr
 - [ ] file handling

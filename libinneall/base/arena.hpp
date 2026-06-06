@@ -55,7 +55,6 @@ class ArenaTemp {
 
 public:
     ArenaTemp(Arena& base_arena);
-    void reset();
     ~ArenaTemp();
 
     Arena* arena {};

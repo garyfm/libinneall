@@ -7,9 +7,9 @@
 #include <libinneall/base/utility.hpp>
 
 namespace inl {
-template <PodType T> class DynArray {
+template <PodType T> class ArrayDyn {
 public:
-    DynArray(Arena& arena, size_t initial_capacity, size_t growth_factor = 2)
+    ArrayDyn(Arena& arena, size_t initial_capacity, size_t growth_factor = 2)
         : m_arena { &arena }
         , m_data {}
         , m_size {}
@@ -19,7 +19,7 @@ public:
         m_data = m_arena->alloc_array<T>(m_capacity);
     };
 
-    INL_DEL_COPY_MOVE(DynArray);
+    INL_DEL_COPY_MOVE(ArrayDyn);
 
     void push(T const& ele) {
         inl_assert(m_arena != nullptr, "Invalid arena");
@@ -35,7 +35,7 @@ public:
         } else {
             // Realloc array
             size_t new_capacity = m_capacity == 0 ? 1 : m_capacity * m_growth_factor;
-            T* new_memory = static_cast<T*>(m_arena->alloc(new_capacity * sizeof(T), alignof(T)));
+            T* new_memory = m_arena->alloc_array<T>(new_capacity);
             m_capacity = new_capacity;
 
             memcpy(new_memory, m_data, m_size * sizeof(T));

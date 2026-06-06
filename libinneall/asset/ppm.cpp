@@ -111,7 +111,7 @@ Error load(Image& image, ByteSpan raw_data) {
 void flip_vertically(Arena& arena, Image& image) {
 
     ArenaTemp arena_temp { arena };
-    uint8_t* temp_row = static_cast<uint8_t*>(arena_temp.arena->alloc(image.row_size_bytes()));
+    uint8_t* temp_row = arena_temp.arena->alloc_array<uint8_t>(image.row_size_bytes());
 
     for (size_t row = 0; row < image.height; ++row) {
         size_t top_cursor { row * image.row_size_bytes() };

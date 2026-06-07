@@ -145,37 +145,46 @@ int main(int argc, char* argv[]) {
         log_info("Asset path: %s", assets_path.data());
         size_t assets_path_root_pos { assets_path.size() };
 
-        const std::filesystem::path model_path { assets_path.append("/backpack").data() };
-        const std::filesystem::path shader_path { assets_path.overwrite("/shaders", assets_path_root_pos).data() };
+        assets_path.append("/shaders");
+        size_t shader_path_root_pos { assets_path.size() };
 
         ShaderProgram shader_program_lighting {};
-        error = load_shader(main_arena, shader_program_lighting, shader_path / "lighting_phong.vert.glsl",
-            shader_path / "lighting_phong.frag.glsl");
+        String<MAX_ASSET_PATH_SIZE> vert_shader_path = assets_path.append("/lighting_phong.vert.glsl");
+        String<MAX_ASSET_PATH_SIZE> frag_shader_path
+            = assets_path.overwrite("/lighting_phong.frag.glsl", shader_path_root_pos);
+        error = load_shader(main_arena, shader_program_lighting, vert_shader_path, frag_shader_path);
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_debug {};
-        error = load_shader(
-            main_arena, shader_program_debug, shader_path / "debug.vert.glsl", shader_path / "debug.frag.glsl");
+        vert_shader_path = assets_path.overwrite("/debug.vert.glsl", shader_path_root_pos);
+        frag_shader_path = assets_path.overwrite("/debug.frag.glsl", shader_path_root_pos);
+        error = load_shader(main_arena, shader_program_debug, vert_shader_path, frag_shader_path);
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_skybox {};
-        error = load_shader(
-            main_arena, shader_program_skybox, shader_path / "skybox.vert.glsl", shader_path / "skybox.frag.glsl");
+        vert_shader_path = assets_path.overwrite("/skybox.vert.glsl", shader_path_root_pos);
+        frag_shader_path = assets_path.overwrite("/skybox.frag.glsl", shader_path_root_pos);
+        error = load_shader(main_arena, shader_program_skybox, vert_shader_path, frag_shader_path);
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
         main_arena.reset();
 
+        assets_path.overwrite("/backpack", assets_path_root_pos);
+        size_t model_path_root_pos { assets_path.size() };
+
         Mesh mesh {};
-        error = load_mesh(main_arena, mesh, model_path / "mesh.obj");
+        error = load_mesh(main_arena, mesh, assets_path.append("/mesh.obj"));
         inl_assert(error == Error::Ok, "Failed to load mesh");
         main_arena.reset();
 
         Texture texture_albedo {};
-        error = load_texture(main_arena, texture_albedo, model_path / "albedo.ppm", false);
+        error = load_texture(
+            main_arena, texture_albedo, assets_path.overwrite("/albedo.ppm", model_path_root_pos), false);
         inl_assert(error == Error::Ok, "Failed to load texture_albedo");
         main_arena.reset();
 
         Texture texture_specular {};
-        error = load_texture(main_arena, texture_specular, model_path / "specular.ppm", false);
+        error = load_texture(
+            main_arena, texture_specular, assets_path.overwrite("/specular.ppm", model_path_root_pos), false);
         inl_assert(error == Error::Ok, "Failed to load texture_albedo");
         main_arena.reset();
 

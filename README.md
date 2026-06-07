@@ -84,7 +84,7 @@ Size: 5116096
 - [x] std::expected
 - [x] std::print
 - [x] std::vector
+- [x] file handling
 - [ ] math
 - [ ] std::unqiue_ptr
-- [ ] file handling
 - [ ] hashmap

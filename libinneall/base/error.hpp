@@ -30,6 +30,8 @@ namespace inl {
     apply(ObjFailedToExtractFloat) \
     apply(ObjFaceNotTriangulated) \
     apply(AssetFailedToOpenFile) \
+    apply(AssetFailedToSeekFile) \
+    apply(AssetInvalidFileSize) \
     apply(AssetFailedToReadFile) \
     apply(AssetFailedToLoadFile) \
     apply(AssetFailedToLoadTexture) \

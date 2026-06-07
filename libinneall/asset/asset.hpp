@@ -11,21 +11,19 @@
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/texture.hpp>
 
-#include <filesystem>
-
 namespace inl {
 
 constexpr size_t MAX_ASSET_PATH_SIZE { 128 };
 
 // TODO: Some kind of Asset manager should be used
 
-Error load_file(Arena* arena, ByteSpan& file_data, std::filesystem::path path);
-Error load_text_file(Arena& arena, ByteSpan& file_data, std::filesystem::path path);
-Error load_image(Arena& arena, ppm::Image& image, std::filesystem::path path);
-Error load_texture(Arena& arena, Texture& texture, std::filesystem::path path, bool flip_vertically);
+Error load_file(Arena* arena, ByteSpan& file_data, StringView path);
+Error load_text_file(Arena& arena, ByteSpan& file_data, StringView path);
+Error load_image(Arena& arena, ppm::Image& image, StringView path);
+Error load_texture(Arena& arena, Texture& texture, StringView path, bool flip_vertically);
 Error load_cubemap(Arena& arena, Cubemap& cubemap, StringView path, bool flip_vertically);
-Error load_shader(Arena& arena, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
-    std::filesystem::path fragment_shader_path);
-Error load_mesh(Arena& arena, Mesh& mesh, std::filesystem::path path);
+Error load_shader(
+    Arena& arena, ShaderProgram& shader_program, StringView vertex_shader_path, StringView fragment_shader_path);
+Error load_mesh(Arena& arena, Mesh& mesh, StringView path);
 
 } // namespace inl

@@ -9,6 +9,10 @@
 
 namespace inl {
 
+struct ArenaMark {
+    size_t offset;
+};
+
 class Arena {
 public:
     Arena() = default;
@@ -30,8 +34,10 @@ public:
 
     void reset() { m_offset = 0; }
     void reset_to(size_t pos) { m_offset = pos; }
+    void reset_to(ArenaMark mark) { m_offset = mark.offset; }
 
     size_t offset() const { return m_offset; };
+    ArenaMark mark() const { return { m_offset }; };
     size_t capacity() const { return m_capcity; };
     uint8_t const* memory() const { return m_memory; };
     uint8_t const* next_alloc() const { return m_memory + m_offset; };

@@ -9,7 +9,7 @@ void delete_texture(GLuint handle) { glDeleteTextures(1, &handle); }
 
 Error Texture::create(Texture& texture, size_t width, size_t height, uint8_t n_components, uint8_t const* data) {
     texture.m_handle.reset();
-    glCreateTextures(GL_TEXTURE_2D, 1, &texture.m_handle);
+    glCreateTextures(GL_TEXTURE_2D, 1, texture.m_handle.address_of());
 
     if (texture.m_handle == 0) {
         return Error::RendererTextureFailedToCreate;

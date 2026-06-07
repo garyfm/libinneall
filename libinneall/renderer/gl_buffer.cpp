@@ -22,13 +22,13 @@ namespace inl {
 Error GlBuffer::create(GlBuffer& buffer, size_t size) {
     buffer.m_size = size;
 
-    return create_buffer(&buffer.m_handle, nullptr, size);
+    return create_buffer(buffer.m_handle.address_of(), nullptr, size);
 }
 
 Error GlBuffer::create(GlBuffer& buffer, Span<uint8_t const> data) {
     buffer.m_size = data.size();
 
-    return create_buffer(&buffer.m_handle, data.data(), data.size());
+    return create_buffer(buffer.m_handle.address_of(), data.data(), data.size());
 }
 
 void GlBuffer::upload(Span<uint8_t const> data, size_t offset) {

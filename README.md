@@ -85,6 +85,5 @@ Size: 5116096
 - [x] std::print
 - [x] std::vector
 - [x] file handling
-- [ ] math
-- [ ] std::unqiue_ptr
+- [x] std::unqiue_ptr
 - [ ] hashmap

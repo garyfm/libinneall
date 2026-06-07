@@ -1,10 +1,8 @@
 #include <libinneall/base/log.hpp>
 #include <libinneall/window.hpp>
 
-#include <memory>
-
 namespace {
-void error_callback(int32_t error, const char* description) { log_error("GLFW error: {}({})", description, error); }
+void error_callback(int32_t error, const char* description) { log_error("GLFW error: %s (%u)", description, error); }
 
 void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
     [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {

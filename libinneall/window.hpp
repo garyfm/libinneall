@@ -2,20 +2,18 @@
 
 #include <libinneall/base/error.hpp>
 #include <libinneall/base/string.hpp>
+#include <libinneall/base/unique_ptr.hpp>
 #include <libinneall/base/utility.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <subprojects/glad/include/glad/glad.h>
 #include <subprojects/glfw-3.4/include/GLFW/glfw3.h>
 
-#include <functional>
-#include <memory>
-
 namespace inl {
 
 class Window {
 public:
-    using InputCallback = std::function<void(GLFWwindow*)>;
+    using InputCallback = void (*)(GLFWwindow*);
     using MouseCallback = void (*)(GLFWwindow*, double, double);
     using ScrollCallback = void (*)(GLFWwindow*, double, double);
     using ResizeCallback = void (*)(GLFWwindow*, int32_t, int32_t);
@@ -44,7 +42,7 @@ private:
     String<MAX_TITLE_SIZE> m_title {};
 
     static void framebuffer_resize_callback([[maybe_unused]] GLFWwindow* window, int32_t width, int32_t height);
-    std::unique_ptr<GLFWwindow, void (*)(GLFWwindow*)> m_window { nullptr, glfwDestroyWindow };
+    UniquePtr<GLFWwindow, glfwDestroyWindow> m_window { nullptr };
 
     // TODO: Temporary solution to allow game to handle input
     InputCallback m_input_callback;

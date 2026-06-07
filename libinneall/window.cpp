@@ -87,7 +87,7 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
         severity_str = "unknown";
     }
 
-    log_info("OpenGL debug callback - servierty: {} source: {} type: {} msg: {} ", severity_str, source_str, type_str,
+    log_info("OpenGL debug callback - servierty: %s source: %s type: %s msg: %s ", severity_str, source_str, type_str,
         message);
 
     if (type == GL_DEBUG_TYPE_ERROR) {
@@ -108,7 +108,7 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
     window.m_title = title;
     window.m_input_callback = input_callback;
 
-    log_debug("Creating window: {} {}x{}", window.m_title.data(), window.m_width, window.m_height);
+    log_debug("Creating window: '%s' %u x %u", window.m_title.data(), window.m_width, window.m_height);
 
     glfwSetErrorCallback(error_callback);
 

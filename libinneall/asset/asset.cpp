@@ -4,29 +4,57 @@
 #include <libinneall/renderer/shader_stage.hpp>
 #include <libinneall/renderer/texture.hpp>
 
-#include <fstream>
+#include <stdio.h>
 
 namespace inl {
 
-Error load_file(Arena& arena, ByteSpan& file_data, std::filesystem::path path) {
-    std::ifstream file(path, std::ios::in | std::ios::binary);
-    if (!file.is_open()) {
-        log_error("Failed to open file: {}", path.c_str());
+Error load_file(Arena& arena, ByteSpan& file_data, StringView path) {
+
+    FILE* file = fopen(path.data(), "rb");
+
+    if (!file) {
+        log_error("Failed to open file: {}", path.data());
         return Error::AssetFailedToOpenFile;
     }
 
-    size_t file_size = std::filesystem::file_size(path);
+    if (fseek(file, 0, SEEK_END) != 0) {
+        fclose(file);
+        return Error::AssetFailedToSeekFile;
+    }
 
-    uint8_t* buffer = static_cast<uint8_t*>(arena.alloc(file_size));
+    long size = ftell(file);
+    if (size < 0) {
+        fclose(file);
+        return Error::AssetInvalidFileSize;
+    }
 
-    file.read(reinterpret_cast<char*>(buffer), file_size);
+    size_t file_size = static_cast<size_t>(size);
+    inl_assert(file_size < arena.capacity(), "File exceeds arena capacity");
+
+    if (fseek(file, 0, SEEK_SET) != 0) {
+        fclose(file);
+        return Error::AssetFailedToSeekFile;
+    }
+
+    ArenaMark arena_mark = arena.mark();
+    uint8_t* buffer = arena.alloc_array<uint8_t>(file_size ? file_size : 1);
+
+    size_t bytes_read = fread(buffer, sizeof(uint8_t), file_size, file);
+
+    if (bytes_read != file_size) {
+        fclose(file);
+        arena.reset_to(arena_mark);
+        return Error::AssetFailedToReadFile;
+    }
+
+    fclose(file);
 
     file_data = ByteSpan { buffer, file_size };
 
     return Error::Ok;
 }
 
-Error load_text_file(Arena& arena, StringView& file_data, std::filesystem::path path) {
+Error load_text_file(Arena& arena, StringView& file_data, StringView path) {
 
     ByteSpan raw_data {};
     TRY(load_file(arena, raw_data, path));
@@ -34,7 +62,7 @@ Error load_text_file(Arena& arena, StringView& file_data, std::filesystem::path 
     return Error::Ok;
 }
 
-Error load_image(Arena& arena, ppm::Image& image, std::filesystem::path path) {
+Error load_image(Arena& arena, ppm::Image& image, StringView path) {
     ByteSpan raw_image_data {};
     TRY(load_file(arena, raw_image_data, path));
     TRY(ppm::load(image, raw_image_data));
@@ -45,8 +73,8 @@ Error load_image(Arena& arena, ppm::Image& image, std::filesystem::path path) {
     return Error::Ok;
 }
 
-Error load_texture(Arena& arena, Texture& texture, std::filesystem::path path, bool flip_vertically) {
-    log_info("Loading texture: %s", path.filename().c_str());
+Error load_texture(Arena& arena, Texture& texture, StringView path, bool flip_vertically) {
+    log_info("Loading texture: %s", path.data());
 
     ppm::Image image {};
     TRY(load_image(arena, image, path));
@@ -111,14 +139,14 @@ Error load_cubemap(Arena& arena, Cubemap& cubemap, StringView path, bool flip_ve
     return Cubemap::create(cubemap, cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces);
 }
 
-Error load_shader(Arena& arena, ShaderProgram& shader_program, std::filesystem::path vertex_shader_path,
-    std::filesystem::path fragment_shader_path) {
-    log_info("Loading shader: %s", vertex_shader_path.filename().c_str());
+Error load_shader(
+    Arena& arena, ShaderProgram& shader_program, StringView vertex_shader_path, StringView fragment_shader_path) {
+    log_info("Loading shader: %s", vertex_shader_path.data());
 
     StringView vertex_shader_source {};
     TRY(load_text_file(arena, vertex_shader_source, vertex_shader_path));
 
-    log_info("Loading shader: %s", fragment_shader_path.filename().c_str());
+    log_info("Loading shader: %s", fragment_shader_path.data());
     ShaderStage vertex_stage {};
     TRY(ShaderStage::create(vertex_stage, ShaderType::Vertex, vertex_shader_source));
 
@@ -131,8 +159,8 @@ Error load_shader(Arena& arena, ShaderProgram& shader_program, std::filesystem::
     return ShaderProgram::create(shader_program, vertex_stage, fragment_stage);
 }
 
-Error load_mesh(Arena& arena, Mesh& mesh, std::filesystem::path path) {
-    log_info("Loading mesh: %s", path.filename().c_str());
+Error load_mesh(Arena& arena, Mesh& mesh, StringView path) {
+    log_info("Loading mesh: %s", path.data());
 
     StringView obj_data {};
     TRY(load_text_file(arena, obj_data, path));

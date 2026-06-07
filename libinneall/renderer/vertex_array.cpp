@@ -5,7 +5,7 @@ namespace inl {
 Error VertexArray::create(VertexArray& vertex_array) {
 
     vertex_array.m_handle.reset();
-    glCreateVertexArrays(1, &vertex_array.m_handle);
+    glCreateVertexArrays(1, vertex_array.m_handle.address_of());
 
     if (vertex_array.m_handle == 0) {
         return Error::RendererVertexArrayFailedToCreate;

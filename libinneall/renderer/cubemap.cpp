@@ -8,7 +8,7 @@ Error Cubemap::create(
     Cubemap& cubemap, size_t width, size_t height, size_t n_components, Array<uint8_t const*, 6> faces) {
 
     cubemap.m_handle.reset();
-    glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &cubemap.m_handle);
+    glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, cubemap.m_handle.address_of());
 
     if (cubemap.m_handle == 0) {
         return Error::RendererCubemapFailedToCreate;

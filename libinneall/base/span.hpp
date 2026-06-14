@@ -26,6 +26,15 @@ public:
         return m_data[index];
     }
 
+    bool operator==(Span<T> other) const {
+
+        if (m_size != other.size()) {
+            return false;
+        }
+
+        return memcmp(m_data, other.data(), m_size * sizeof(T)) == 0;
+    }
+
     T const& operator[](size_t index) const {
         inl_assert(index < m_size, "Out of bounds access");
         return m_data[index];

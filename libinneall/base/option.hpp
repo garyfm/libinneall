@@ -35,7 +35,7 @@ public:
     void reset() { m_has_value = false; }
 
     bool has_value() const { return m_has_value; }
-    operator bool() const { return m_has_value; }
+    explicit operator bool() const { return m_has_value; }
 
     T* operator->() {
         inl_assert(m_has_value, "Option does not contain a value");

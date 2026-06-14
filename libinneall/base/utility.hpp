@@ -10,3 +10,5 @@ concept PodType = std::is_trivially_copyable_v<T> && std::is_trivially_destructi
     T& operator=(T const&) = delete;                                                                                   \
     T(T&&) = delete;                                                                                                   \
     T& operator=(T&&) = delete;
+
+#define COUNTOF(array) (sizeof(array) / sizeof(array[0]))

@@ -39,6 +39,7 @@ test_files = files(
     'base/array.test.cpp',
     'base/array_dyn.test.cpp',
     'base/hash.test.cpp',
+    'base/hash_map.test.cpp',
     'base/string.test.cpp',
     'base/string_utils.test.cpp',
     'base/string_view.test.cpp',

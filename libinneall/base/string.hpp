@@ -180,7 +180,9 @@ template <size_t Len> String(const char (&str)[Len]) -> String<Len - 1>;
 struct StringHash {
     template <size_t N> size_t operator()(inl::String<N> const& str) const { return hash_fnv1a(str); }
 
-    size_t operator()(StringView sv) const { return hash_fnv1a(sv); }
+    size_t operator()(StringView sv) const {
+        return hash_fnv1a({ reinterpret_cast<uint8_t const*>(sv.data()), sv.size() });
+    }
 };
 
 uint8_t digit_count(uint32_t number);

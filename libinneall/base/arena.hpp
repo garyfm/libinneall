@@ -16,7 +16,7 @@ struct ArenaMark {
 class Arena {
 public:
     Arena() = default;
-    Arena(uint8_t* backing_memory, size_t size);
+    Arena(uint8_t* backing_memory, size_t capacity);
 
     static constexpr size_t DEFAULT_ALIGNMENT = 16;
 
@@ -38,7 +38,7 @@ public:
 
     size_t offset() const { return m_offset; };
     ArenaMark mark() const { return { m_offset }; };
-    size_t capacity() const { return m_capcity; };
+    size_t capacity() const { return m_capacity; };
     uint8_t const* memory() const { return m_memory; };
     uint8_t const* next_alloc() const { return m_memory + m_offset; };
 #if BUILD_DEBUG
@@ -49,7 +49,7 @@ public:
 
 private:
     uint8_t* m_memory {};
-    size_t m_capcity {};
+    size_t m_capacity {};
     size_t m_offset {};
 
 #if BUILD_DEBUG
@@ -68,5 +68,8 @@ public:
 private:
     size_t m_reset_to_offset {};
 };
+
+uint8_t* allocate_backing(size_t capacity);
+void release_backing(uint8_t* backing);
 
 } // namespace inl

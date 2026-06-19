@@ -68,10 +68,10 @@ libinneall_dep = declare_dependency(
     link_with: libinneall,
 )
 
-libinneal_tests = executable('libinneal_tests',
+libinneal_tests = executable('libinneall_tests',
     test_files,
     link_with: libinneall,
     dependencies: [doctest_dep, libinneall_dep]
 )
-test('libinneal', libinneal_tests)
+test('libinneall', libinneal_tests)
 

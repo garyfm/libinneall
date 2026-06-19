@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libinneall/base/arena.hpp>
+#include <libinneall/base/hash_map.hpp>
 #include <libinneall/base/string.hpp>
 #include <libinneall/base/unique_handle.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
@@ -7,7 +9,6 @@
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <libinneall/base/string_view.hpp>
-#include <unordered_map>
 
 namespace inl {
 
@@ -21,8 +22,8 @@ class ShaderProgram {
 public:
     ShaderProgram() = default;
 
-    static Error create(
-        ShaderProgram& shader_program, ShaderStage const& vertex_stage, ShaderStage const& fragment_stage);
+    static Error create(Arena& arena, ShaderProgram& shader_program, ShaderStage const& vertex_stage,
+        ShaderStage const& fragment_stage);
 
     INL_DEL_COPY_MOVE(ShaderProgram);
 
@@ -44,7 +45,8 @@ private:
 
     UniqueHandle<GLuint, delete_program> m_handle { 0 };
 
-    std::unordered_map<String<MAX_SHADER_UNIFORM_NAME>, UniformInfo, StringHash> m_uniforms;
+    Arena* m_arena {};
+    HashMap<String<MAX_SHADER_UNIFORM_NAME>, UniformInfo> m_uniforms {};
 };
 
 } // namespace inl

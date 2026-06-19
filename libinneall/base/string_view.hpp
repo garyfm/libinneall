@@ -2,6 +2,7 @@
 
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/option.hpp>
+#include <libinneall/base/span.hpp>
 #include <libinneall/base/string_utils.hpp>
 
 #include <stddef.h>
@@ -74,4 +75,7 @@ StringView trim(StringView sv);
 
 Cut cut(StringView sv, char deliminator);
 
+template <size_t N> Span<uint8_t const> as_bytes(StringView const& value) {
+    return { reinterpret_cast<uint8_t const*>(value.data()), value.size() };
+}
 } // namespace inl

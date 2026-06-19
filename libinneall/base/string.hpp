@@ -99,6 +99,7 @@ public:
     }
 
     operator StringView() const { return { data(), size() }; }
+    operator Span<uint8_t>() const { return { data(), size() }; }
 
     void resize(size_t new_size) {
         inl_assert(new_size <= m_capacity, "new_size is greater than capactiy");
@@ -177,14 +178,6 @@ private:
 // the size of the literal by 1
 template <size_t Len> String(const char (&str)[Len]) -> String<Len - 1>;
 
-struct StringHash {
-    template <size_t N> size_t operator()(inl::String<N> const& str) const { return hash_fnv1a(str); }
-
-    size_t operator()(StringView sv) const {
-        return hash_fnv1a({ reinterpret_cast<uint8_t const*>(sv.data()), sv.size() });
-    }
-};
-
 uint8_t digit_count(uint32_t number);
 
 constexpr size_t MAX_STRING_SIZE_OF_NUMBER = 11;
@@ -193,5 +186,9 @@ String<MAX_STRING_SIZE_OF_NUMBER> to_string(int32_t number);
 String<MAX_STRING_SIZE_OF_NUMBER> to_string(uint32_t number);
 
 float to_float(StringView str);
+
+template <size_t N> Span<uint8_t const> as_bytes(String<N> const& value) {
+    return { reinterpret_cast<uint8_t const*>(value.data()), value.size() };
+}
 
 } // namespace inl

@@ -1,5 +1,7 @@
 #pragma once
+
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/utility.hpp>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -63,5 +65,9 @@ private:
 };
 
 using ByteSpan = Span<uint8_t>;
+
+template <PodType T> Span<uint8_t const> as_bytes(T const& value) {
+    return { reinterpret_cast<uint8_t const*>(&value), sizeof(value) };
+}
 
 } // namespace inl

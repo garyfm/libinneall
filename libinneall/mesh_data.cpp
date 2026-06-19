@@ -1,34 +1,19 @@
 #include <libinneall/asset/obj.hpp>
 #include <libinneall/base/array_dyn.hpp>
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/hash_map.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/mesh_data.hpp>
 #include <libinneall/vertex_data.hpp>
 
-#include <unordered_map>
-
 namespace inl {
-
-struct HasherVertexData {
-    size_t operator()(const VertexData& key) const {
-        using std::hash;
-
-        size_t hash_pos = hash<float>()(key.pos.x) ^ (hash<float>()(key.pos.y) << 1) ^ (hash<float>()(key.pos.z) << 2);
-
-        size_t hash_uv = hash<float>()(key.uv.x) ^ (hash<float>()(key.uv.y) << 1);
-        size_t hash_normal
-            = hash<float>()(key.normal.x) ^ (hash<float>()(key.normal.y) << 1) ^ (hash<float>()(key.normal.z) << 2);
-
-        return hash_pos ^ (hash_uv << 1) ^ (hash_normal << 2);
-    }
-};
 
 MeshData to_mesh_data(Arena& arena, obj::Model const& model) {
 
     ArrayDyn<VertexData> vertex_data { arena, model.face_corners.size() };
     ArrayDyn<uint32_t> index_data { arena, model.face_corners.size() };
 
-    std::unordered_map<VertexData, uint32_t, HasherVertexData> vertex_map;
+    auto vertex_map = HashMap<VertexData, uint32_t>::create(arena, model.face_corners.size());
     uint32_t ebo_index { 0 };
 
     inl_assert(model.face_corners.size() % 3 == 0, "Mesh data is not triangulated");
@@ -52,12 +37,12 @@ MeshData to_mesh_data(Arena& arena, obj::Model const& model) {
         }
 
         // Reuse ebo index for duplicate vertices
-        if (auto found = vertex_map.find(vertex); found != vertex_map.end()) {
+        if (auto found = vertex_map.find(vertex); found.has_value()) {
             // Vertex exsists already, reuse the ebo_index
-            index_data.push(found->second);
+            index_data.push(*found.value());
         } else {
             // New vertex, insert it and increment ebo_index
-            vertex_map.emplace(vertex, ebo_index);
+            vertex_map.insert(vertex, ebo_index);
             vertex_data.push(vertex);
             index_data.push(ebo_index);
             ++ebo_index;

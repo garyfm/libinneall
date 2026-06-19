@@ -34,9 +34,10 @@ inl::Error link_shader_program(
 namespace inl {
 
 Error ShaderProgram::create(
-    ShaderProgram& shader_program, ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
+    Arena& arena, ShaderProgram& shader_program, ShaderStage const& vertex_stage, ShaderStage const& fragment_stage) {
 
     shader_program.m_handle.reset(glCreateProgram());
+    shader_program.m_arena = &arena;
 
     if (!shader_program.m_handle) {
         return Error::RendererShaderProgramFailedToCreate;
@@ -55,8 +56,11 @@ Error ShaderProgram::create(
 }
 
 void ShaderProgram::retrieve_uniforms() {
+
     GLint uniform_count {};
     glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &uniform_count);
+
+    m_uniforms = HashMap<String<MAX_SHADER_UNIFORM_NAME>, UniformInfo>::create(*m_arena, uniform_count);
 
     log_debug("Shader(%d) - Uniform count: %d", static_cast<int32_t>(m_handle), uniform_count);
 
@@ -68,6 +72,7 @@ void ShaderProgram::retrieve_uniforms() {
     glGetProgramiv(m_handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_length);
     log_debug("Shader(%d) - Uniform max name length: {%d}", static_cast<int32_t>(m_handle), max_name_length);
 
+    // TODO: Use Dynamic string backed with arena
     String<MAX_SHADER_UNIFORM_NAME> uniform_name { MAX_SHADER_UNIFORM_NAME };
 
     for (GLint i = 0; i < uniform_count; ++i) {
@@ -85,19 +90,19 @@ void ShaderProgram::retrieve_uniforms() {
         log_debug("Shader(%d) - Retrived uniform: name %s, location %d, count %d", static_cast<int32_t>(m_handle),
             uniform_name.data(), info.location, info.count);
 
-        m_uniforms[uniform_name] = info;
+        m_uniforms.insert(uniform_name, info);
     }
 }
 
 GLuint ShaderProgram::uniform_location(StringView name) const {
-    // NOTE: Maybe this shouldnt assert ?
-    if (m_uniforms.find(name) == m_uniforms.end()) {
+
+    Option<UniformInfo*> uniform = m_uniforms.find(name);
+
+    if (!uniform.has_value()) {
+        // NOTE: Maybe this shouldnt assert ?
         inl_assert(false, "Failed to find uniform");
-        return -1;
     }
 
-    int32_t location = glGetUniformLocation(m_handle, name.data());
-    inl_assert(location != -1, "Failed to find uniform");
-    return location;
+    return uniform.value()->location;
 }
 }

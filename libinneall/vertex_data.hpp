@@ -11,7 +11,7 @@ struct VertexData {
     Vector3 normal;
 
     bool operator==(const VertexData& other) const {
-        return (pos == other.pos && uv == other.uv) && (normal == other.normal);
+        return (pos == other.pos) && (uv == other.uv) && (normal == other.normal);
     }
 };
 

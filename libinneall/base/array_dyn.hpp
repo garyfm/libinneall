@@ -67,6 +67,7 @@ public:
     T const* end() const { return m_data + m_size; };
 
     size_t size() const { return m_size; };
+    size_t size_bytes() const { return m_size * sizeof(T); };
     size_t capacity() const { return m_capacity; };
 
 private:

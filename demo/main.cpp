@@ -33,10 +33,6 @@
 
 namespace {
 
-static constexpr size_t KB = 1024;
-static constexpr size_t MB = KB * 1000;
-static constexpr size_t GB = MB * 1000;
-
 static constexpr unsigned DEFAULT_SCREEN_WIDTH = 800;
 static constexpr unsigned DEFAULT_SCREEN_HEIGHT = 600;
 
@@ -120,8 +116,6 @@ void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height)
 
 } // namespace
 
-static inl::Array<uint8_t, MB * 100> main_arena_backing {};
-
 int main(int argc, char* argv[]) {
     using namespace inl;
 
@@ -139,7 +133,11 @@ int main(int argc, char* argv[]) {
 
         inl_assert(error == Error::Ok, "Failed to create Window");
 
-        Arena main_arena { main_arena_backing.data(), main_arena_backing.size() };
+        ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
+        Arena scratch_arena { scratch_backing.data(), scratch_backing.size() };
+
+        ByteSpan main_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
+        Arena main_arena { main_backing.data(), main_backing.size() };
 
         String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
         log_info("Asset path: %s", assets_path.data());
@@ -152,41 +150,41 @@ int main(int argc, char* argv[]) {
         String<MAX_ASSET_PATH_SIZE> vert_shader_path = assets_path.append("/lighting_phong.vert.glsl");
         String<MAX_ASSET_PATH_SIZE> frag_shader_path
             = assets_path.overwrite("/lighting_phong.frag.glsl", shader_path_root_pos);
-        error = load_shader(main_arena, shader_program_lighting, vert_shader_path, frag_shader_path);
+        error = load_shader(main_arena, scratch_arena, shader_program_lighting, vert_shader_path, frag_shader_path);
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_debug {};
         vert_shader_path = assets_path.overwrite("/debug.vert.glsl", shader_path_root_pos);
         frag_shader_path = assets_path.overwrite("/debug.frag.glsl", shader_path_root_pos);
-        error = load_shader(main_arena, shader_program_debug, vert_shader_path, frag_shader_path);
+        error = load_shader(main_arena, scratch_arena, shader_program_debug, vert_shader_path, frag_shader_path);
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
 
         ShaderProgram shader_program_skybox {};
         vert_shader_path = assets_path.overwrite("/skybox.vert.glsl", shader_path_root_pos);
         frag_shader_path = assets_path.overwrite("/skybox.frag.glsl", shader_path_root_pos);
-        error = load_shader(main_arena, shader_program_skybox, vert_shader_path, frag_shader_path);
+        error = load_shader(main_arena, scratch_arena, shader_program_skybox, vert_shader_path, frag_shader_path);
         inl_assert(error == Error::Ok, "Failed to load shader lighting");
-        main_arena.reset();
+        scratch_arena.reset();
 
         assets_path.overwrite("/backpack", assets_path_root_pos);
         size_t model_path_root_pos { assets_path.size() };
 
         Mesh mesh {};
-        error = load_mesh(main_arena, mesh, assets_path.append("/mesh.obj"));
+        error = load_mesh(scratch_arena, mesh, assets_path.append("/mesh.obj"));
         inl_assert(error == Error::Ok, "Failed to load mesh");
-        main_arena.reset();
+        scratch_arena.reset();
 
         Texture texture_albedo {};
         error = load_texture(
-            main_arena, texture_albedo, assets_path.overwrite("/albedo.ppm", model_path_root_pos), false);
+            scratch_arena, texture_albedo, assets_path.overwrite("/albedo.ppm", model_path_root_pos), false);
         inl_assert(error == Error::Ok, "Failed to load texture_albedo");
-        main_arena.reset();
+        scratch_arena.reset();
 
         Texture texture_specular {};
         error = load_texture(
-            main_arena, texture_specular, assets_path.overwrite("/specular.ppm", model_path_root_pos), false);
+            scratch_arena, texture_specular, assets_path.overwrite("/specular.ppm", model_path_root_pos), false);
         inl_assert(error == Error::Ok, "Failed to load texture_albedo");
-        main_arena.reset();
+        scratch_arena.reset();
 
         Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
 
@@ -198,11 +196,12 @@ int main(int argc, char* argv[]) {
         assets_path.overwrite("/skybox", assets_path_root_pos);
 
         Cubemap skybox {};
-        error = load_cubemap(main_arena, skybox, assets_path, false);
+        error = load_cubemap(scratch_arena, skybox, assets_path, false);
         inl_assert(error == Error::Ok, "Failed to load skyboz");
-        main_arena.reset();
+        scratch_arena.reset();
 
-        log_debug("Main arena highwater mark: %uMB", main_arena.highwater_mark() / MB);
+        log_debug("Main arena highwater mark: %uKB", main_arena.highwater_mark() / KB);
+        log_debug("Scratch arena highwater mark: %uMB", scratch_arena.highwater_mark() / MB);
 
         LightDirectional light_directional {
             .dir = { -0.2f, -1.0f, -0.3f },
@@ -282,5 +281,6 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // TODO: Free backing
     return 0;
 }

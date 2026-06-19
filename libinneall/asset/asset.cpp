@@ -139,24 +139,24 @@ Error load_cubemap(Arena& arena, Cubemap& cubemap, StringView path, bool flip_ve
     return Cubemap::create(cubemap, cubemap_data[0].width, cubemap_data[0].height, 3, skybox_faces);
 }
 
-Error load_shader(
-    Arena& arena, ShaderProgram& shader_program, StringView vertex_shader_path, StringView fragment_shader_path) {
+Error load_shader(Arena& perm_arena, Arena& scratch_arena, ShaderProgram& shader_program, StringView vertex_shader_path,
+    StringView fragment_shader_path) {
     log_info("Loading shader: %s", vertex_shader_path.data());
 
     StringView vertex_shader_source {};
-    TRY(load_text_file(arena, vertex_shader_source, vertex_shader_path));
+    TRY(load_text_file(scratch_arena, vertex_shader_source, vertex_shader_path));
 
     log_info("Loading shader: %s", fragment_shader_path.data());
     ShaderStage vertex_stage {};
     TRY(ShaderStage::create(vertex_stage, ShaderType::Vertex, vertex_shader_source));
 
     StringView fragment_shader_source {};
-    TRY(load_text_file(arena, fragment_shader_source, fragment_shader_path));
+    TRY(load_text_file(scratch_arena, fragment_shader_source, fragment_shader_path));
 
     ShaderStage fragment_stage {};
     TRY(ShaderStage::create(fragment_stage, ShaderType::Fragment, fragment_shader_source));
 
-    return ShaderProgram::create(shader_program, vertex_stage, fragment_stage);
+    return ShaderProgram::create(perm_arena, shader_program, vertex_stage, fragment_stage);
 }
 
 Error load_mesh(Arena& arena, Mesh& mesh, StringView path) {

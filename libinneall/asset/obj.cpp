@@ -101,11 +101,11 @@ Error load(Arena& arena, Model& model, StringView obj_data) {
 
     ModelCount count = model_count(obj_data);
 
-    Buffer<Vector3> geometric_vertices = arena.alloc_buffer<Vector3>(count.n_verts);
-    Buffer<Vector2> texture_vertices = arena.alloc_buffer<Vector2>(count.n_texts);
-    Buffer<Vector3> vertex_normals = arena.alloc_buffer<Vector3>(count.n_norms);
+    Buffer<Vector3> geometric_vertices { arena, count.n_verts };
+    Buffer<Vector2> texture_vertices { arena, count.n_texts };
+    Buffer<Vector3> vertex_normals { arena, count.n_norms };
     static constexpr size_t N_CORNERS_PER_FACE = 3;
-    Buffer<FaceCorner> face_corners = arena.alloc_buffer<FaceCorner>(count.n_faces * N_CORNERS_PER_FACE);
+    Buffer<FaceCorner> face_corners = { arena, count.n_faces * N_CORNERS_PER_FACE };
 
     inl::Cut lines {};
     lines.right = obj_data;

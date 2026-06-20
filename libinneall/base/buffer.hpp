@@ -9,10 +9,13 @@
 namespace inl {
 template <PodType T> class Buffer {
 public:
-    Buffer(T* data, size_t capacity)
-        : m_data { data }
+    Buffer(Arena& arena, size_t capacity)
+        : m_arena { &arena }
+        , m_data {}
         , m_size {}
-        , m_capacity { capacity } { };
+        , m_capacity { capacity } {
+        m_data = m_arena->alloc_array<T>(m_capacity);
+    };
 
     void push(T const& ele) {
         inl_assert(m_size < m_capacity, "Exceeded buffer capacity");
@@ -46,6 +49,7 @@ public:
     size_t capacity() const { return m_capacity; };
 
 private:
+    Arena* m_arena {};
     T* m_data {};
     size_t m_size {};
     const size_t m_capacity {};

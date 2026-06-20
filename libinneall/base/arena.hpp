@@ -1,6 +1,5 @@
 #pragma once
 
-#include <libinneall/base/buffer.hpp>
 #include <libinneall/base/span.hpp>
 #include <libinneall/base/utility.hpp>
 
@@ -25,12 +24,6 @@ public:
     template <PodType T> T* alloc() { return static_cast<T*>(alloc(sizeof(T), alignof(T))); };
 
     template <PodType T> T* alloc_array(size_t count) { return static_cast<T*>(alloc(count * sizeof(T), alignof(T))); };
-
-    template <PodType T> Buffer<T> alloc_buffer(size_t count) {
-        T* data = alloc_array<T>(count);
-        Buffer<T> buffer { data, count };
-        return buffer;
-    };
 
     void reset() { m_offset = 0; }
     void reset_to(size_t pos) { m_offset = pos; }

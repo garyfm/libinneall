@@ -1,4 +1,5 @@
 #include <libinneall/base/array.hpp>
+#include <libinneall/base/assert.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/renderer/shader_program.hpp>
@@ -82,6 +83,7 @@ void ShaderProgram::retrieve_uniforms() {
         GLenum type { GL_NONE };
 
         glGetActiveUniform(m_handle, i, max_name_length, &name_size, &count, &type, uniform_name.data());
+        inl_assert(static_cast<size_t>(name_size) < MAX_SHADER_UNIFORM_NAME, "uniform_name string to small");
         uniform_name.resize(name_size);
 
         UniformInfo info {};

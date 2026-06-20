@@ -7,6 +7,8 @@
 #include <libinneall/base/option.hpp>
 #include <libinneall/base/span.hpp>
 
+#include <math.h>
+
 namespace inl {
 
 struct HasherFnv1a {
@@ -26,10 +28,11 @@ public:
 
         HashMap hash_map {};
         hash_map.m_arena = &arena;
-        hash_map.m_capacity = initial_capacity;
+        // NOTE: initial_capacity is the number of elements that can be stored without causing a grow
+        hash_map.m_capacity = static_cast<size_t>(ceil(static_cast<float>(initial_capacity) / grow_load_factor));
         hash_map.m_growth_factor = growth_factor;
         hash_map.m_grow_load_factor = grow_load_factor;
-        hash_map.m_buckets = hash_map.m_arena->alloc_array<Entry>(initial_capacity);
+        hash_map.m_buckets = hash_map.m_arena->alloc_array<Entry>(hash_map.m_capacity);
         return hash_map;
     }
 
@@ -83,7 +86,7 @@ public:
                 continue;
             }
 
-            insert(old_buckets[index].key, old_buckets[index].value);
+            insert_ele(old_buckets[index].key, old_buckets[index].value);
         }
         inl_assert(old_size == m_size, "Rehashing lost element");
     }

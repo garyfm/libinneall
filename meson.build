@@ -13,6 +13,8 @@ add_project_arguments(
   '-Wunreachable-code',
   '-Wsign-compare',
   '-Wfloat-equal',
+  '-fno-exceptions',
+  '-fno-rtti',
   language: ['c', 'cpp']
 )
 

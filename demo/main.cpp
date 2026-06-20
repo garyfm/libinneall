@@ -27,6 +27,7 @@
 #include <libinneall/renderer/vertex_array.hpp>
 #include <libinneall/vertex_data.hpp>
 #include <libinneall/window.hpp>
+
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <math.h>
@@ -119,168 +120,160 @@ void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height)
 int main(int argc, char* argv[]) {
     using namespace inl;
 
-    try {
+    log_debug("libinneall demo game");
+    log_info("LIBINNEALL demo game");
 
-        log_debug("libinneall demo game");
-        log_info("LIBINNEALL demo game");
-
-        if (argc < 2) {
-            log_error("Usage: game <assets_path>");
-            return -1;
-        }
-        Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
-            process_input, mouse_callback, scroll_callback, resize_callback);
-
-        inl_assert(error == Error::Ok, "Failed to create Window");
-
-        ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
-        Arena scratch_arena { scratch_backing.data(), scratch_backing.size() };
-
-        ByteSpan main_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
-        Arena main_arena { main_backing.data(), main_backing.size() };
-
-        String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
-        log_info("Asset path: %s", assets_path.data());
-        size_t assets_path_root_pos { assets_path.size() };
-
-        assets_path.append("/shaders");
-        size_t shader_path_root_pos { assets_path.size() };
-
-        ShaderProgram shader_program_lighting {};
-        String<MAX_ASSET_PATH_SIZE> vert_shader_path = assets_path.append("/lighting_phong.vert.glsl");
-        String<MAX_ASSET_PATH_SIZE> frag_shader_path
-            = assets_path.overwrite("/lighting_phong.frag.glsl", shader_path_root_pos);
-        error = load_shader(main_arena, scratch_arena, shader_program_lighting, vert_shader_path, frag_shader_path);
-        inl_assert(error == Error::Ok, "Failed to load shader lighting");
-
-        ShaderProgram shader_program_debug {};
-        vert_shader_path = assets_path.overwrite("/debug.vert.glsl", shader_path_root_pos);
-        frag_shader_path = assets_path.overwrite("/debug.frag.glsl", shader_path_root_pos);
-        error = load_shader(main_arena, scratch_arena, shader_program_debug, vert_shader_path, frag_shader_path);
-        inl_assert(error == Error::Ok, "Failed to load shader lighting");
-
-        ShaderProgram shader_program_skybox {};
-        vert_shader_path = assets_path.overwrite("/skybox.vert.glsl", shader_path_root_pos);
-        frag_shader_path = assets_path.overwrite("/skybox.frag.glsl", shader_path_root_pos);
-        error = load_shader(main_arena, scratch_arena, shader_program_skybox, vert_shader_path, frag_shader_path);
-        inl_assert(error == Error::Ok, "Failed to load shader lighting");
-        scratch_arena.reset();
-
-        assets_path.overwrite("/backpack", assets_path_root_pos);
-        size_t model_path_root_pos { assets_path.size() };
-
-        Mesh mesh {};
-        error = load_mesh(scratch_arena, mesh, assets_path.append("/mesh.obj"));
-        inl_assert(error == Error::Ok, "Failed to load mesh");
-        scratch_arena.reset();
-
-        Texture texture_albedo {};
-        error = load_texture(
-            scratch_arena, texture_albedo, assets_path.overwrite("/albedo.ppm", model_path_root_pos), false);
-        inl_assert(error == Error::Ok, "Failed to load texture_albedo");
-        scratch_arena.reset();
-
-        Texture texture_specular {};
-        error = load_texture(
-            scratch_arena, texture_specular, assets_path.overwrite("/specular.ppm", model_path_root_pos), false);
-        inl_assert(error == Error::Ok, "Failed to load texture_albedo");
-        scratch_arena.reset();
-
-        Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
-
-        Matrix4 model_matrix { 1 };
-
-        Model model { &mesh, &material, model_matrix };
-
-        // Skybox
-        assets_path.overwrite("/skybox", assets_path_root_pos);
-
-        Cubemap skybox {};
-        error = load_cubemap(scratch_arena, skybox, assets_path, false);
-        inl_assert(error == Error::Ok, "Failed to load skyboz");
-        scratch_arena.reset();
-
-        log_debug("Main arena highwater mark: %uKB", main_arena.highwater_mark() / KB);
-        log_debug("Scratch arena highwater mark: %uMB", scratch_arena.highwater_mark() / MB);
-
-        LightDirectional light_directional {
-            .dir = { -0.2f, -1.0f, -0.3f },
-            .ambient = { 0.01f, 0.01f, 0.01f },
-            .diffuse = { 0.1f, 0.1f, 0.1f },
-            .specular = { 0.2f, 0.2f, 0.2f },
-        };
-
-        LightPoint light_point {
-            .pos = { 0.5f, 5.0f, 10.0f },
-            .ambient = { 0.5f, 0.5f, 0.5f },
-            .diffuse = { 1.0f, 1.0f, 1.0f },
-            .specular = { 1.0f, 1.0f, 1.0f },
-            // TODO: Use a table based on distance for these values
-            .atten_constant = 1.0f,
-            .atten_linear = 0.09f,
-            .atten_quadratic = 0.032f,
-        };
-
-        Matrix4 model_matrix_light { 1 };
-        model_matrix_light = translate(model_matrix_light, light_point.pos);
-        model_matrix_light = scale(model_matrix_light, 0.1f);
-
-        LightSpot light_spot {
-            .pos = g_camera.position(),
-            .dir = g_camera.front(),
-            .ambient = { 0.1f, 0.1f, 0.1f },
-            .diffuse = { 0.5f, 0.5f, 0.5f },
-            .specular = { 1.0f, 1.0f, 1.0f },
-            .inner_cutoff_cosine = cosf(to_radians(12.5f)),
-            .outer_cutoff_cosine = cosf(to_radians(17.5f)),
-        };
-
-        RenderScene render_scene {
-            .models = { &model, 1 },
-            .light_directional = &light_directional,
-            .light_points = { &light_point, 1 },
-            .light_spot = &light_spot,
-        };
-
-        Renderer renderer {};
-        error = Renderer::create(renderer);
-        inl_assert(error == Error::Ok, "Failed to create renderer");
-
-        renderer.set_debug_shader(shader_program_debug);
-        renderer.set_skybox_shader(shader_program_skybox);
-
-        while (!glfwWindowShouldClose(g_window.handle())) {
-            float current_frame_time = static_cast<float>(glfwGetTime());
-            g_delta_time = current_frame_time - g_last_frame_time;
-            g_last_frame_time = current_frame_time;
-
-            g_window.process_input();
-
-            render_scene.light_spot->pos = g_camera.position();
-            render_scene.light_spot->dir = g_camera.front();
-
-            RenderView render_view {
-                .view = g_camera.view_matrix(),
-                .projection = g_camera.perspective_matrix(g_window.aspect_ratio()),
-                .pos = g_camera.position(),
-            };
-
-            renderer.begin_frame();
-
-            renderer.draw_skybox(skybox);
-            renderer.render(render_scene, render_view);
-            renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
-
-            g_window.swap_buffers();
-        }
-    } catch (const std::exception& e) {
-        log_error("Exception: {}", e.what());
-        return -1;
-    } catch (...) {
-        log_error("Unknown Exception");
+    if (argc < 2) {
+        log_error("Usage: game <assets_path>");
         return -1;
     }
+    Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
+        process_input, mouse_callback, scroll_callback, resize_callback);
 
-    // TODO: Free backing
+    inl_assert(error == Error::Ok, "Failed to create Window");
+
+    ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
+    Arena scratch_arena { scratch_backing.data(), scratch_backing.size() };
+
+    ByteSpan main_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
+    Arena main_arena { main_backing.data(), main_backing.size() };
+
+    String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
+    log_info("Asset path: %s", assets_path.data());
+    size_t assets_path_root_pos { assets_path.size() };
+
+    assets_path.append("/shaders");
+    size_t shader_path_root_pos { assets_path.size() };
+
+    ShaderProgram shader_program_lighting {};
+    String<MAX_ASSET_PATH_SIZE> vert_shader_path = assets_path.append("/lighting_phong.vert.glsl");
+    String<MAX_ASSET_PATH_SIZE> frag_shader_path
+        = assets_path.overwrite("/lighting_phong.frag.glsl", shader_path_root_pos);
+    error = load_shader(main_arena, scratch_arena, shader_program_lighting, vert_shader_path, frag_shader_path);
+    inl_assert(error == Error::Ok, "Failed to load shader lighting");
+
+    ShaderProgram shader_program_debug {};
+    vert_shader_path = assets_path.overwrite("/debug.vert.glsl", shader_path_root_pos);
+    frag_shader_path = assets_path.overwrite("/debug.frag.glsl", shader_path_root_pos);
+    error = load_shader(main_arena, scratch_arena, shader_program_debug, vert_shader_path, frag_shader_path);
+    inl_assert(error == Error::Ok, "Failed to load shader lighting");
+
+    ShaderProgram shader_program_skybox {};
+    vert_shader_path = assets_path.overwrite("/skybox.vert.glsl", shader_path_root_pos);
+    frag_shader_path = assets_path.overwrite("/skybox.frag.glsl", shader_path_root_pos);
+    error = load_shader(main_arena, scratch_arena, shader_program_skybox, vert_shader_path, frag_shader_path);
+    inl_assert(error == Error::Ok, "Failed to load shader lighting");
+    scratch_arena.reset();
+
+    assets_path.overwrite("/backpack", assets_path_root_pos);
+    size_t model_path_root_pos { assets_path.size() };
+
+    Mesh mesh {};
+    error = load_mesh(scratch_arena, mesh, assets_path.append("/mesh.obj"));
+    inl_assert(error == Error::Ok, "Failed to load mesh");
+    scratch_arena.reset();
+
+    Texture texture_albedo {};
+    error
+        = load_texture(scratch_arena, texture_albedo, assets_path.overwrite("/albedo.ppm", model_path_root_pos), false);
+    inl_assert(error == Error::Ok, "Failed to load texture_albedo");
+    scratch_arena.reset();
+
+    Texture texture_specular {};
+    error = load_texture(
+        scratch_arena, texture_specular, assets_path.overwrite("/specular.ppm", model_path_root_pos), false);
+    inl_assert(error == Error::Ok, "Failed to load texture_albedo");
+    scratch_arena.reset();
+
+    Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
+
+    Matrix4 model_matrix { 1 };
+
+    Model model { &mesh, &material, model_matrix };
+
+    // Skybox
+    assets_path.overwrite("/skybox", assets_path_root_pos);
+
+    Cubemap skybox {};
+    error = load_cubemap(scratch_arena, skybox, assets_path, false);
+    inl_assert(error == Error::Ok, "Failed to load skyboz");
+    scratch_arena.reset();
+
+    log_debug("Main arena highwater mark: %uKB", main_arena.highwater_mark() / KB);
+    log_debug("Scratch arena highwater mark: %uMB", scratch_arena.highwater_mark() / MB);
+
+    LightDirectional light_directional {
+        .dir = { -0.2f, -1.0f, -0.3f },
+        .ambient = { 0.01f, 0.01f, 0.01f },
+        .diffuse = { 0.1f, 0.1f, 0.1f },
+        .specular = { 0.2f, 0.2f, 0.2f },
+    };
+
+    LightPoint light_point {
+        .pos = { 0.5f, 5.0f, 10.0f },
+        .ambient = { 0.5f, 0.5f, 0.5f },
+        .diffuse = { 1.0f, 1.0f, 1.0f },
+        .specular = { 1.0f, 1.0f, 1.0f },
+        // TODO: Use a table based on distance for these values
+        .atten_constant = 1.0f,
+        .atten_linear = 0.09f,
+        .atten_quadratic = 0.032f,
+    };
+
+    Matrix4 model_matrix_light { 1 };
+    model_matrix_light = translate(model_matrix_light, light_point.pos);
+    model_matrix_light = scale(model_matrix_light, 0.1f);
+
+    LightSpot light_spot {
+        .pos = g_camera.position(),
+        .dir = g_camera.front(),
+        .ambient = { 0.1f, 0.1f, 0.1f },
+        .diffuse = { 0.5f, 0.5f, 0.5f },
+        .specular = { 1.0f, 1.0f, 1.0f },
+        .inner_cutoff_cosine = cosf(to_radians(12.5f)),
+        .outer_cutoff_cosine = cosf(to_radians(17.5f)),
+    };
+
+    RenderScene render_scene {
+        .models = { &model, 1 },
+        .light_directional = &light_directional,
+        .light_points = { &light_point, 1 },
+        .light_spot = &light_spot,
+    };
+
+    Renderer renderer {};
+    error = Renderer::create(renderer);
+    inl_assert(error == Error::Ok, "Failed to create renderer");
+
+    renderer.set_debug_shader(shader_program_debug);
+    renderer.set_skybox_shader(shader_program_skybox);
+
+    while (!glfwWindowShouldClose(g_window.handle())) {
+        float current_frame_time = static_cast<float>(glfwGetTime());
+        g_delta_time = current_frame_time - g_last_frame_time;
+        g_last_frame_time = current_frame_time;
+
+        g_window.process_input();
+
+        render_scene.light_spot->pos = g_camera.position();
+        render_scene.light_spot->dir = g_camera.front();
+
+        RenderView render_view {
+            .view = g_camera.view_matrix(),
+            .projection = g_camera.perspective_matrix(g_window.aspect_ratio()),
+            .pos = g_camera.position(),
+        };
+
+        renderer.begin_frame();
+
+        renderer.draw_skybox(skybox);
+        renderer.render(render_scene, render_view);
+        renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
+
+        g_window.swap_buffers();
+    }
+
+    release_backing(scratch_backing.data());
+    release_backing(main_backing.data());
     return 0;
 }

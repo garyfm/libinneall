@@ -70,6 +70,7 @@ Misc:
 - [x] Use static constructors
 - [ ] Add platform layer (Remove GLFW)
 - [ ] Remove GLAD
+- [ ] Setup Address sanitizer
 
 Removing STL:
 Size: 5116096
@@ -86,4 +87,5 @@ Size: 5116096
 - [x] std::vector
 - [x] file handling
 - [x] std::unqiue_ptr
-- [ ] hashmap
+- [x] hashmap
+- [ ] Dynamic string

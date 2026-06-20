@@ -14,7 +14,7 @@ namespace inl {
 
 class ShaderStage;
 
-static constexpr size_t MAX_SHADER_UNIFORM_NAME = 128;
+static constexpr size_t MAX_SHADER_UNIFORM_NAME = 48;
 
 inline void delete_program(GLuint handle) { glDeleteProgram(handle); }
 

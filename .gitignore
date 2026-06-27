@@ -5,3 +5,10 @@ build/
 # Resources
 *.obj
 *.ppm
+
+subprojects/doctest-2.4.12
+subprojects/glfw-3.4
+subprojects/packagecache
+
+assets/
+compile_commands.json

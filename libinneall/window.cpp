@@ -2,7 +2,6 @@
 #include <libinneall/window.hpp>
 
 namespace {
-void error_callback(int32_t error, const char* description) { log_error("GLFW error: %s (%u)", description, error); }
 
 void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
     [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
@@ -99,7 +98,8 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
 namespace inl {
 
 Error Window::create(Window& window, uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
-    MouseCallback mouse_callback, ScrollCallback scroll_callback, ResizeCallback resize_callback) {
+    [[maybe_unused]] MouseCallback mouse_callback, [[maybe_unused]] ScrollCallback scroll_callback,
+    [[maybe_unused]] ResizeCallback resize_callback) {
 
     window.m_width = width;
     window.m_height = height;
@@ -108,31 +108,15 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
 
     log_debug("Creating window: '%s' %u x %u", window.m_title.data(), window.m_width, window.m_height);
 
-    glfwSetErrorCallback(error_callback);
+    TRY(platform::window_create(window.m_native_window));
 
-    if (!glfwInit()) {
-        return Error::WindowGlfwFailedToInit;
-    }
+    TRY(platform::window_map(window.m_native_window));
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    window.m_window.reset(glfwCreateWindow(window.m_width, window.m_height, window.m_title.data(), nullptr, nullptr));
-
-    if (!window.m_window) {
-        glfwTerminate();
-        return Error::WindowGlfwFailedToCreate;
-    }
-
-    glfwMakeContextCurrent(window.m_window.get());
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        glfwTerminate();
+    if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress)) {
         return Error::WindowGladFailedToLoad;
     }
 
-    glfwSetFramebufferSizeCallback(window.m_window.get(), resize_callback);
+    // glfwSetFramebufferSizeCallback(window.m_native_window.get(), resize_callback);
     glViewport(0, 0, window.m_width, window.m_height);
 
     glEnable(GL_DEBUG_OUTPUT);
@@ -142,35 +126,27 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
     // NOTE: This can be used to filter opengl debug messages
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-    glfwSetInputMode(window.m_window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    glfwSetCursorPosCallback(window.m_window.get(), mouse_callback);
-    glfwSetScrollCallback(window.m_window.get(), scroll_callback);
-
-    window.m_created = true;
+    // glfwSetInputMode(window.m_native_window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetCursorPosCallback(window.m_native_window.get(), mouse_callback);
+    // glfwSetScrollCallback(window.m_native_window.get(), scroll_callback);
 
     return Error::Ok;
 }
 
-Window::~Window() { glfwTerminate(); }
+Window::~Window() { platform::window_destroy(m_native_window); }
 
 void Window::process_input() {
-    inl_assert(m_created, "Invalid Window");
-    glfwPollEvents();
-    if (glfwGetKey(m_window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(m_window.get(), true);
-    }
+    // glfwPollEvents();
+    // if (glfwGetKey(m_native_window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    //     glfwSetWindowShouldClose(m_native_window.get(), true);
+    // }
 
-    m_input_callback(m_window.get());
+    // m_input_callback(m_native_window.get());
 }
 
-void Window::swap_buffers() {
-    inl_assert(m_created, "Invalid Window");
-    glfwSwapBuffers(m_window.get());
-}
+void Window::swap_buffers() { platform::swap_buffers(m_native_window); }
 
 void Window::resize(uint32_t width, uint32_t height) {
-    inl_assert(m_created, "Invalid Window");
     m_width = width;
     m_height = height;
     glViewport(0, 0, m_width, m_height);

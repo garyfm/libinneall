@@ -69,7 +69,6 @@ Misc:
 - [x] Static String
 - [x] Use static constructors
 - [ ] Add platform layer (Remove GLFW)
-- [ ] Remove GLAD
 - [ ] Setup Address sanitizer
 
 Removing STL:

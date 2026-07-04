@@ -13,6 +13,7 @@
 #include <libinneall/math/math.hpp>
 #include <libinneall/math/transforms.hpp>
 #include <libinneall/mesh_data.hpp>
+#include <libinneall/platform/platform.hpp>
 #include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/cubemap.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
@@ -53,33 +54,33 @@ static inl::CameraInitialSettings camera_settings {
 
 static inl::Camera g_camera(camera_settings);
 
-void process_input(GLFWwindow* g_window);
-void mouse_callback(GLFWwindow* g_window, double x_pos, double y_pos);
-void scroll_callback(GLFWwindow* g_window, double x_offset, double y_offset);
-void resize_callback(GLFWwindow* window, int width, int height);
+void process_input(inl::platform::Window& g_window);
+void mouse_callback(inl::platform::Window& g_window, double x_pos, double y_pos);
+void scroll_callback(inl::platform::Window& g_window, double x_offset, double y_offset);
+void resize_callback(inl::platform::Window& window, int width, int height);
 inl::Window g_window;
 
-void process_input(GLFWwindow* window) {
+void process_input([[maybe_unused]] inl::platform::Window& window) {
 
     // TODO: Pull this out
-    static constexpr float movement_speed = 2.5f;
+    // static constexpr float movement_speed = 2.5f;
 
-    float velocity = movement_speed * g_delta_time;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        g_camera.move(inl::Camera::Direction::Forward, velocity);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        g_camera.move(inl::Camera::Direction::Backward, velocity);
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        g_camera.move(inl::Camera::Direction::Left, velocity);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        g_camera.move(inl::Camera::Direction::Right, velocity);
-    }
+    // float velocity = movement_speed * g_delta_time;
+    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    //     g_camera.move(inl::Camera::Direction::Forward, velocity);
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    //     g_camera.move(inl::Camera::Direction::Backward, velocity);
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    //     g_camera.move(inl::Camera::Direction::Left, velocity);
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    //     g_camera.move(inl::Camera::Direction::Right, velocity);
+    // }
 }
 
-void mouse_callback([[maybe_unused]] GLFWwindow* window, double x_pos, double y_pos) {
+void mouse_callback([[maybe_unused]] inl::platform::Window& window, double x_pos, double y_pos) {
     // TODO: Pull this out
     static const float sensitivity { 0.1f };
 
@@ -106,11 +107,12 @@ void mouse_callback([[maybe_unused]] GLFWwindow* window, double x_pos, double y_
     g_camera.rotate(x_offset, y_offset);
 }
 
-void scroll_callback([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double x_offset, double y_offset) {
+void scroll_callback(
+    [[maybe_unused]] inl::platform::Window& window, [[maybe_unused]] double x_offset, double y_offset) {
     g_camera.zoom(static_cast<float>(y_offset));
 }
 
-void resize_callback([[maybe_unused]] GLFWwindow* window, int width, int height) {
+void resize_callback([[maybe_unused]] inl::platform::Window& window, int width, int height) {
     log_debug("Window resized w: {} h: {}", width, height);
     g_window.resize(width, height);
 }
@@ -127,9 +129,9 @@ int main(int argc, char* argv[]) {
         log_error("Usage: game <assets_path>");
         return -1;
     }
+
     Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
         process_input, mouse_callback, scroll_callback, resize_callback);
-
     inl_assert(error == Error::Ok, "Failed to create Window");
 
     ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
@@ -248,8 +250,9 @@ int main(int argc, char* argv[]) {
     renderer.set_debug_shader(shader_program_debug);
     renderer.set_skybox_shader(shader_program_skybox);
 
-    while (!glfwWindowShouldClose(g_window.handle())) {
-        float current_frame_time = static_cast<float>(glfwGetTime());
+    // while (!glfwWindowShouldClose(g_window.handle())) {
+    while (true) {
+        float current_frame_time = platform::get_time();
         g_delta_time = current_frame_time - g_last_frame_time;
         g_last_frame_time = current_frame_time;
 
@@ -275,5 +278,6 @@ int main(int argc, char* argv[]) {
 
     release_backing(scratch_backing.data());
     release_backing(main_backing.data());
+
     return 0;
 }

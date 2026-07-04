@@ -17,6 +17,16 @@ namespace inl {
 #define INL_FOR_EACH_ERROR(apply) \
     apply(Ok) \
     apply(Error) \
+    apply(PlatformFailedToConnectToWindowServer) \
+    apply(PlatformFailedToMapWindow) \
+    apply(PlatformFailedToCreateWindow) \
+    apply(PlatformGfxFailedToGetDisplay) \
+    apply(PlatformGfxFailedToInit) \
+    apply(PlatformGfxUnsupportedVersion) \
+    apply(PlatformGfxFailedToBind) \
+    apply(PlatformGfxFailedToConfigure) \
+    apply(PlatformGfxFailedToMakeCurrent) \
+    apply(PlatformGfxFailedToCreateCtx) \
     apply(PpmInvalidFormat) \
     apply(PpmUnsupportedFormat) \
     apply(PpmEOFReachedUnexpectedly) \

@@ -54,67 +54,63 @@ static inl::CameraInitialSettings camera_settings {
 
 static inl::Camera g_camera(camera_settings);
 
-void process_input(inl::platform::Window& g_window);
-void mouse_callback(inl::platform::Window& g_window, double x_pos, double y_pos);
-void scroll_callback(inl::platform::Window& g_window, double x_offset, double y_offset);
-void resize_callback(inl::platform::Window& window, int width, int height);
 inl::Window g_window;
 
-void process_input([[maybe_unused]] inl::platform::Window& window) {
+void callback_input_key(
+    inl::platform::Window& window, inl::platform::InputKey key, inl::platform::InputKeyAction action) {
+    (void)window;
 
+    using namespace inl::platform;
     // TODO: Pull this out
-    // static constexpr float movement_speed = 2.5f;
+    static constexpr float movement_speed = 6.5f;
 
-    // float velocity = movement_speed * g_delta_time;
-    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    //     g_camera.move(inl::Camera::Direction::Forward, velocity);
-    // }
-    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    //     g_camera.move(inl::Camera::Direction::Backward, velocity);
-    // }
-    // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    //     g_camera.move(inl::Camera::Direction::Left, velocity);
-    // }
-    // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    //     g_camera.move(inl::Camera::Direction::Right, velocity);
-    // }
+    float velocity = movement_speed * g_delta_time;
+    if (key == InputKey::w && action == InputKeyAction::Pressed) {
+        g_camera.move(inl::Camera::Direction::Forward, velocity);
+    }
+    if (key == InputKey::s && action == InputKeyAction::Pressed) {
+        g_camera.move(inl::Camera::Direction::Backward, velocity);
+    }
+    if (key == InputKey::a && action == InputKeyAction::Pressed) {
+        g_camera.move(inl::Camera::Direction::Left, velocity);
+    }
+    if (key == InputKey::d && action == InputKeyAction::Pressed) {
+        g_camera.move(inl::Camera::Direction::Right, velocity);
+    }
 }
 
-void mouse_callback([[maybe_unused]] inl::platform::Window& window, double x_pos, double y_pos) {
+void callback_input_mouse_pos(inl::platform::Window& window, double x_pos, double y_pos) {
     // TODO: Pull this out
-    static const float sensitivity { 0.1f };
+    // static const float sensitivity { 0.1f };
 
-    static float x_prev { static_cast<float>(g_window.width()) / 2 };
-    static float y_prev { static_cast<float>(g_window.width()) / 2 };
-    static bool first_mouse_movement { false };
+    // static float x_prev { static_cast<float>(g_window.width()) / 2 };
+    // static float y_prev { static_cast<float>(g_window.width()) / 2 };
+    // static bool first_mouse_movement { false };
 
-    const float x_pos_f = static_cast<float>(x_pos);
-    const float y_pos_f = static_cast<float>(y_pos);
+    // const float x_pos_f = static_cast<float>(x_pos);
+    // const float y_pos_f = static_cast<float>(y_pos);
 
-    if (first_mouse_movement) {
-        first_mouse_movement = false;
+    // if (first_mouse_movement) {
+    //     first_mouse_movement = false;
 
-        x_prev = x_pos_f;
-        y_prev = y_pos_f;
-    }
+    //    x_prev = x_pos_f;
+    //    y_prev = y_pos_f;
+    //}
 
-    const float x_offset = (x_pos_f - x_prev) * sensitivity;
-    const float y_offset = (y_prev - y_pos_f) * sensitivity; // NOTE: Reversed as y goes from bottom to top
+    // const float x_offset = (x_pos_f - x_prev) * sensitivity;
+    // const float y_offset = (y_prev - y_pos_f) * sensitivity; // NOTE: Reversed as y goes from bottom to top
 
-    x_prev = static_cast<float>(x_pos);
-    y_prev = static_cast<float>(y_pos);
+    // x_prev = static_cast<float>(x_pos);
+    // y_prev = static_cast<float>(y_pos);
 
-    g_camera.rotate(x_offset, y_offset);
+    // g_camera.rotate(x_offset, y_offset);
+    (void)window;
+    log_debug("input_mouse_pos: %f,%f", x_pos, y_pos);
 }
 
 void scroll_callback(
     [[maybe_unused]] inl::platform::Window& window, [[maybe_unused]] double x_offset, double y_offset) {
     g_camera.zoom(static_cast<float>(y_offset));
-}
-
-void resize_callback([[maybe_unused]] inl::platform::Window& window, int width, int height) {
-    log_debug("Window resized w: {} h: {}", width, height);
-    g_window.resize(width, height);
 }
 
 } // namespace
@@ -131,7 +127,7 @@ int main(int argc, char* argv[]) {
     }
 
     Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
-        process_input, mouse_callback, scroll_callback, resize_callback);
+        callback_input_key, callback_input_mouse_pos, scroll_callback);
     inl_assert(error == Error::Ok, "Failed to create Window");
 
     ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
@@ -250,13 +246,10 @@ int main(int argc, char* argv[]) {
     renderer.set_debug_shader(shader_program_debug);
     renderer.set_skybox_shader(shader_program_skybox);
 
-    // while (!glfwWindowShouldClose(g_window.handle())) {
-    while (true) {
-        float current_frame_time = platform::get_time();
+    while (!platform::window_should_exit(g_window.native_window())) {
+        float current_frame_time = platform::get_elapsed_time(g_window.native_window());
         g_delta_time = current_frame_time - g_last_frame_time;
         g_last_frame_time = current_frame_time;
-
-        g_window.process_input();
 
         render_scene.light_spot->pos = g_camera.position();
         render_scene.light_spot->dir = g_camera.front();
@@ -274,8 +267,10 @@ int main(int argc, char* argv[]) {
         renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 
         g_window.swap_buffers();
+        g_window.process_events();
     }
 
+    log_info("Exiting...");
     release_backing(scratch_backing.data());
     release_backing(main_backing.data());
 

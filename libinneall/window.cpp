@@ -93,22 +93,26 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
     }
 }
 
+void callback_window_resize([[maybe_unused]] inl::platform::Window& window, int width, int height) {
+    // NOTE: x11 will handle resizing the window if the user changes its size so only update the opengl view port
+    glViewport(0, 0, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+}
+
 } // namespace
 
 namespace inl {
 
-Error Window::create(Window& window, uint32_t width, uint32_t height, StringView title, InputCallback input_callback,
-    [[maybe_unused]] MouseCallback mouse_callback, [[maybe_unused]] ScrollCallback scroll_callback,
-    [[maybe_unused]] ResizeCallback resize_callback) {
+Error Window::create(Window& window, uint32_t width, uint32_t height, StringView title,
+    platform::CallbackInputKey callback_input_key, platform::CallbackInputMousePos callback_input_mouse_pos,
+    [[maybe_unused]] ScrollCallback scroll_callback) {
 
-    window.m_width = width;
-    window.m_height = height;
     window.m_title = title;
-    window.m_input_callback = input_callback;
 
-    log_debug("Creating window: '%s' %u x %u", window.m_title.data(), window.m_width, window.m_height);
+    log_debug("Creating window: '%s' %u x %u", window.m_title.data(), width, height);
 
-    TRY(platform::window_create(window.m_native_window));
+    platform::initialize(window.m_native_window);
+    TRY(platform::window_create(
+        window.m_native_window, width, height, callback_window_resize, callback_input_key, callback_input_mouse_pos));
 
     TRY(platform::window_map(window.m_native_window));
 
@@ -116,8 +120,7 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
         return Error::WindowGladFailedToLoad;
     }
 
-    // glfwSetFramebufferSizeCallback(window.m_native_window.get(), resize_callback);
-    glViewport(0, 0, window.m_width, window.m_height);
+    glViewport(0, 0, width, height);
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -126,29 +129,18 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
     // NOTE: This can be used to filter opengl debug messages
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-    // glfwSetInputMode(window.m_native_window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    // glfwSetCursorPosCallback(window.m_native_window.get(), mouse_callback);
-    // glfwSetScrollCallback(window.m_native_window.get(), scroll_callback);
-
     return Error::Ok;
 }
 
 Window::~Window() { platform::window_destroy(m_native_window); }
 
-void Window::process_input() {
-    // glfwPollEvents();
-    // if (glfwGetKey(m_native_window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    //     glfwSetWindowShouldClose(m_native_window.get(), true);
-    // }
-
-    // m_input_callback(m_native_window.get());
-}
+void Window::process_events() { platform::window_process_events(m_native_window); }
 
 void Window::swap_buffers() { platform::swap_buffers(m_native_window); }
 
 void Window::resize(uint32_t width, uint32_t height) {
-    m_width = width;
-    m_height = height;
-    glViewport(0, 0, m_width, m_height);
+    // Resize the platfrom window and opengl view port
+    platform::window_resize(m_native_window, width, height);
+    glViewport(0, 0, width, height);
 }
 } // namespace inl

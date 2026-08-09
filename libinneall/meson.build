@@ -58,6 +58,8 @@ glad_dep = dependency('glad')
 
 xcb_dep = dependency('xcb', required: true)
 xcb_util_keysyms_dep = dependency('xcb-keysyms', required: true)
+xcb_xinput_dep = dependency('xcb-xinput', required: true)
+xcb_xfixes_dep = dependency('xcb-xfixes', required: true)
 egl_dep = dependency('egl', required: true)
 
 
@@ -65,7 +67,7 @@ libinneall = static_library(
     'libinneall',
     source_files,
     include_directories: include_dir,
-    dependencies: [gl_dep, glad_dep, xcb_dep, xcb_util_keysyms_dep, egl_dep]
+    dependencies: [gl_dep, glad_dep, xcb_dep, xcb_util_keysyms_dep, xcb_xinput_dep, xcb_xfixes_dep,   egl_dep]
 )
 
 libinneall_dep = declare_dependency(

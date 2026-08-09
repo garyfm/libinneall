@@ -29,6 +29,8 @@
 #include <libinneall/vertex_data.hpp>
 #include <libinneall/window.hpp>
 
+#include <xcb/xfixes.h>
+
 #include <subprojects/glad/include/glad/glad.h>
 
 #include <math.h>
@@ -59,10 +61,11 @@ inl::Window g_window;
 void callback_input_key(
     inl::platform::Window& window, inl::platform::InputKey key, inl::platform::InputKeyAction action) {
     (void)window;
+    (void)key;
+    (void)action;
 
     using namespace inl::platform;
-    // TODO: Pull this out
-    static constexpr float movement_speed = 6.5f;
+    static constexpr float movement_speed = 4.5f;
 
     float velocity = movement_speed * g_delta_time;
     if (key == InputKey::w && action == InputKeyAction::Pressed) {
@@ -79,33 +82,10 @@ void callback_input_key(
     }
 }
 
-void callback_input_mouse_pos(inl::platform::Window& window, double x_pos, double y_pos) {
-    // TODO: Pull this out
-    // static const float sensitivity { 0.1f };
+void callback_input_mouse_pos([[maybe_unused]] inl::platform::Window& window, float x_pos, float y_pos) {
+    static const float sensitivity { 0.05f };
 
-    // static float x_prev { static_cast<float>(g_window.width()) / 2 };
-    // static float y_prev { static_cast<float>(g_window.width()) / 2 };
-    // static bool first_mouse_movement { false };
-
-    // const float x_pos_f = static_cast<float>(x_pos);
-    // const float y_pos_f = static_cast<float>(y_pos);
-
-    // if (first_mouse_movement) {
-    //     first_mouse_movement = false;
-
-    //    x_prev = x_pos_f;
-    //    y_prev = y_pos_f;
-    //}
-
-    // const float x_offset = (x_pos_f - x_prev) * sensitivity;
-    // const float y_offset = (y_prev - y_pos_f) * sensitivity; // NOTE: Reversed as y goes from bottom to top
-
-    // x_prev = static_cast<float>(x_pos);
-    // y_prev = static_cast<float>(y_pos);
-
-    // g_camera.rotate(x_offset, y_offset);
-    (void)window;
-    log_debug("input_mouse_pos: %f,%f", x_pos, y_pos);
+    g_camera.rotate(x_pos * sensitivity, -y_pos * sensitivity);
 }
 
 void scroll_callback(

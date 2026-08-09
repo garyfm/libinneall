@@ -32,7 +32,7 @@ enum class InputKey {
 
 using CallbackWindowResize = void (*)(Window&, int32_t, int32_t);
 using CallbackInputKey = void (*)(Window&, InputKey key, InputKeyAction action);
-using CallbackInputMousePos = void (*)(Window&, double, double);
+using CallbackInputMousePos = void (*)(Window&, float, float);
 
 struct Window {
     // TODO: Only define for linux ? Or hide it in impelementation ?
@@ -55,6 +55,11 @@ struct Window {
     CallbackWindowResize callback_window_resize;
     CallbackInputKey callback_input_key;
     CallbackInputMousePos callback_input_mouse_pos;
+
+    float prev_cursor_x {};
+    float prev_cursor_y {};
+    float virt_cursor_x {};
+    float virt_cursor_y {};
 };
 
 struct WindowEventResize {

@@ -6,6 +6,7 @@
 #include <GL/glcorearb.h>
 #include <X11/keysym.h>
 #include <unistd.h>
+#include <xcb/xinput.h>
 
 namespace {
 
@@ -14,6 +15,55 @@ constexpr uint32_t XCB_RESPOSE_TYPE_MASK = ~0x80;
 }
 
 namespace inl::platform {
+
+static void grab_cursor(Window& window) {
+
+    // TODO:: defer cleanup
+    xcb_pixmap_t pixmap = xcb_generate_id(window.xcb_conn);
+    xcb_cursor_t cursor {};
+    { // Create invisible cursor
+        // Fill the pixmap with 0's
+        xcb_gcontext_t gc = xcb_generate_id(window.xcb_conn);
+        xcb_create_gc(window.xcb_conn, gc, pixmap, 0, nullptr);
+
+        xcb_rectangle_t rect = { 0, 0, 1, 1 };
+        xcb_poly_fill_rectangle(window.xcb_conn, pixmap, gc, 1, &rect);
+
+        xcb_create_pixmap(window.xcb_conn, 1, pixmap, window.xcb_window, 1, 1);
+
+        cursor = xcb_generate_id(window.xcb_conn);
+        xcb_create_cursor(window.xcb_conn, cursor, pixmap, pixmap, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
+    // TODO:: defer cleanup
+    {
+        xcb_grab_pointer_cookie_t cookie
+            = xcb_grab_pointer(window.xcb_conn, 1, window.xcb_window, XCB_EVENT_MASK_POINTER_MOTION,
+                XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, window.xcb_window, cursor, XCB_CURRENT_TIME);
+        xcb_generic_error_t* error {};
+        [[maybe_unused]] xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply(window.xcb_conn, cookie, &error);
+    }
+
+    {
+        xcb_query_pointer_cookie_t cookie = xcb_query_pointer(window.xcb_conn, window.xcb_window);
+        xcb_generic_error_t* error {};
+        xcb_query_pointer_reply_t* reply = xcb_query_pointer_reply(window.xcb_conn, cookie, &error);
+
+        window.prev_cursor_x = reply->win_x;
+        window.prev_cursor_y = reply->win_y;
+        window.virt_cursor_x = reply->win_x;
+        window.virt_cursor_y = reply->win_y;
+    }
+
+    {
+
+        xcb_warp_pointer(window.xcb_conn, XCB_NONE, window.xcb_window, 0, 0, 0, 0, (int16_t)window.width / 2,
+            (int16_t)window.height / 2);
+    }
+    xcb_flush(window.xcb_conn);
+
+    // hide_cursor(window);
+}
 
 static Error xcb_connection_create(Window& window, uint16_t width, uint16_t height) {
     // TODO:: Review based on I3
@@ -41,9 +91,10 @@ static Error xcb_connection_create(Window& window, uint16_t width, uint16_t heig
 
         uint32_t window_values[] = {
             0,
-            XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE
-                | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
-                | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+            XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_ENTER_WINDOW
+                | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION
+                | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS
+                | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
         };
 
         xcb_void_cookie_t cookie
@@ -91,6 +142,59 @@ static Error xcb_connection_create(Window& window, uint16_t width, uint16_t heig
         xcb_generic_error_t* error {};
         window.xcb_keyboard_mapping_reply = xcb_get_keyboard_mapping_reply(window.xcb_conn, cookie, &error);
         // TODO: handle error
+    }
+
+    // Check X
+    {
+
+        xcb_input_xi_query_version_cookie_t cookie = xcb_input_xi_query_version(window.xcb_conn, 2, 3);
+
+        xcb_generic_error_t* err = NULL;
+
+        xcb_input_xi_query_version_reply_t* reply = xcb_input_xi_query_version_reply(window.xcb_conn, cookie, &err);
+
+        if (!reply) {
+            log_error("xinput2 version invalid");
+            free(err);
+            abort();
+        }
+
+        log_debug("xinput2 version %u.%u\n", reply->major_version, reply->minor_version);
+
+        free(reply);
+    }
+
+    {
+        // NOTE: For some reason xcb defines xcb_input_event_mask_t with out the mask array
+        // x111 deinfes it as
+        // typedef struct
+        //{
+        //    int                 deviceid;
+        //    int                 mask_len;
+        //    unsigned char*      mask;
+        //} XIEventMask;
+        // The XCB api still expects the same memory layout so I've wrapped it in a struct and added the mask array
+
+        struct EventMask {
+            xcb_input_event_mask_t header;
+            xcb_input_xi_event_mask_t mask;
+        };
+
+        EventMask event_mask;
+        event_mask.header.deviceid = XCB_INPUT_DEVICE_ALL;
+        event_mask.header.mask_len = 1;
+        event_mask.mask = XCB_INPUT_XI_EVENT_MASK_RAW_MOTION;
+
+        xcb_void_cookie_t cookie = xcb_input_xi_select_events_checked(
+            window.xcb_conn, screen->root, 1, (xcb_input_event_mask_t*)&event_mask);
+
+        xcb_generic_error_t* error = xcb_request_check(window.xcb_conn, cookie);
+
+        if (error) {
+            log_error("xinput failed to select events");
+            free(error);
+            abort();
+        }
     }
     return Error::Ok;
 }
@@ -201,6 +305,12 @@ static Error egl_ctx_create(Window& window) {
         return Error::PlatformGfxFailedToMakeCurrent;
     }
 
+    EGLint w, h;
+    eglQuerySurface(window.display, window.surface, EGL_WIDTH, &w);
+    eglQuerySurface(window.display, window.surface, EGL_HEIGHT, &h);
+
+    printf("EGL: %d x %d\n", w, h);
+
     return Error::Ok;
 }
 
@@ -304,12 +414,35 @@ void window_process_events(Window& window) {
         case XCB_BUTTON_RELEASE: {
             break;
         }
-        case XCB_MOTION_NOTIFY: {
-            xcb_motion_notify_event_t* motion_event = (xcb_motion_notify_event_t*)xcb_event;
-            window.callback_input_mouse_pos(window, motion_event->root_x, motion_event->root_y);
+        case XCB_GE_GENERIC: {
+            xcb_ge_generic_event_t* generic_event = (xcb_ge_generic_event_t*)xcb_event;
+
+            if (generic_event->event_type == XCB_INPUT_RAW_MOTION) {
+                xcb_input_raw_motion_event_t* motion_event = (xcb_input_raw_motion_event_t*)xcb_event;
+                const xcb_input_fp3232_t* v = xcb_input_raw_button_press_axisvalues(motion_event);
+                double dx = v[0].integral + v[0].frac / 4294967296.0;
+                double dy = v[1].integral + v[1].frac / 4294967296.0;
+                window.callback_input_mouse_pos(window, (float)dx, (float)dy);
+            }
             break;
         }
+
+        case XCB_MOTION_NOTIFY: {
+            break;
+        }
+
         case XCB_ENTER_NOTIFY: {
+            log_debug("window event: XCB_ENTER_NOTIFY");
+            grab_cursor(window);
+            break;
+        }
+        case XCB_FOCUS_IN: {
+            log_debug("window event: XCB_FOCUS_IN");
+            grab_cursor(window);
+            break;
+        }
+        case XCB_FOCUS_OUT: {
+            log_debug("window event: XCB_FOCUS_OUT");
             break;
         }
         case XCB_CLIENT_MESSAGE: {

@@ -13,7 +13,7 @@ namespace inl {
 class Window {
 public:
     using InputCallback = void (*)(platform::Window&);
-    using MouseCallback = void (*)(platform::Window&, double, double);
+    using MouseCallback = void (*)(platform::Window&, float, float);
     using ScrollCallback = void (*)(platform::Window&, double, double);
     using ResizeCallback = void (*)(platform::Window&, int32_t, int32_t);
 

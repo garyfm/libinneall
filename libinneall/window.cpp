@@ -129,6 +129,11 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
     // NOTE: This can be used to filter opengl debug messages
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
+    GLint vp[4];
+    glGetIntegerv(GL_VIEWPORT, vp);
+
+    printf("GL: %d %d %d %d\n", vp[0], vp[1], vp[2], vp[3]);
+
     return Error::Ok;
 }
 

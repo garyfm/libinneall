@@ -28,24 +28,36 @@ enum class InputKey {
     a,
     s,
     d,
+    ESC,
 };
 
 using CallbackWindowResize = void (*)(Window&, int32_t, int32_t);
 using CallbackInputKey = void (*)(Window&, InputKey key, InputKeyAction action);
 using CallbackInputMousePos = void (*)(Window&, float, float);
 
-struct Window {
-    // TODO: Only define for linux ? Or hide it in impelementation ?
-    xcb_connection_t* xcb_conn {};
-    xcb_window_t xcb_window {};
-    int xcb_screen {};
-    xcb_intern_atom_reply_t* xcb_atom_reply_wm_protocols {};
-    xcb_intern_atom_reply_t* xcb_atom_delete_window {};
-    xcb_key_symbols_t* xcb_key_symbols {};
-    xcb_get_keyboard_mapping_reply_t* xcb_keyboard_mapping_reply {};
+struct Xcb {
+    xcb_connection_t* connection {};
+    xcb_window_t window {};
+    int screen_num {};
+    xcb_atom_t atom_wm_protocols {};
+    xcb_atom_t atom_wm_delete {};
+    xcb_key_symbols_t* key_symbols {};
+    xcb_get_keyboard_mapping_reply_t* keyboard_mapping_reply {};
+    xcb_pixmap_t pixmap {};
+    xcb_gcontext_t gc {};
+    xcb_cursor_t cursor {};
+};
+
+struct Egl {
     EGLDisplay display {};
     EGLSurface surface {};
     EGLContext context {};
+};
+
+struct Window {
+    Xcb xcb {};
+    Egl egl {};
+    bool valid {};
 
     timespec time_start {};
 
@@ -55,11 +67,6 @@ struct Window {
     CallbackWindowResize callback_window_resize;
     CallbackInputKey callback_input_key;
     CallbackInputMousePos callback_input_mouse_pos;
-
-    float prev_cursor_x {};
-    float prev_cursor_y {};
-    float virt_cursor_x {};
-    float virt_cursor_y {};
 };
 
 struct WindowEventResize {

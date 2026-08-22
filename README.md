@@ -88,3 +88,13 @@ Size: 5116096
 - [x] std::unqiue_ptr
 - [x] hashmap
 - [ ] Dynamic string
+
+Platform layer :
+- [x] Create Window
+- [x] Basic keyboard input
+- [x] Basic mouse input
+- [ ] Handle close
+- [x] Time
+- [ ] Memory
+- [ ] Files
+- [ ] Remove GLAD

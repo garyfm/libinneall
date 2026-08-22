@@ -1,3 +1,4 @@
+#include <libinneall/base/defer.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/platform/platform.hpp>
 
@@ -16,77 +17,52 @@ constexpr uint32_t XCB_RESPOSE_TYPE_MASK = ~0x80;
 
 namespace inl::platform {
 
-static void grab_cursor(Window& window) {
+static Error x_create_cursor(Xcb& xcb) {
 
-    // TODO:: defer cleanup
-    xcb_pixmap_t pixmap = xcb_generate_id(window.xcb_conn);
-    xcb_cursor_t cursor {};
-    { // Create invisible cursor
-        // Fill the pixmap with 0's
-        xcb_gcontext_t gc = xcb_generate_id(window.xcb_conn);
-        xcb_create_gc(window.xcb_conn, gc, pixmap, 0, nullptr);
-
-        xcb_rectangle_t rect = { 0, 0, 1, 1 };
-        xcb_poly_fill_rectangle(window.xcb_conn, pixmap, gc, 1, &rect);
-
-        xcb_create_pixmap(window.xcb_conn, 1, pixmap, window.xcb_window, 1, 1);
-
-        cursor = xcb_generate_id(window.xcb_conn);
-        xcb_create_cursor(window.xcb_conn, cursor, pixmap, pixmap, 0, 0, 0, 0, 0, 0, 0, 0);
+    { // Create a drawable pixmap
+        xcb.pixmap = xcb_generate_id(xcb.connection);
+        xcb_void_cookie_t cookie = xcb_create_pixmap_checked(xcb.connection, 1, xcb.pixmap, xcb.window, 1, 1);
+        xcb_generic_error_t* error = xcb_request_check(xcb.connection, cookie);
+        inl_defer(free(error));
+        if (error) return Error::PlatformXcbError;
     }
 
-    // TODO:: defer cleanup
-    {
-        xcb_grab_pointer_cookie_t cookie
-            = xcb_grab_pointer(window.xcb_conn, 1, window.xcb_window, XCB_EVENT_MASK_POINTER_MOTION,
-                XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, window.xcb_window, cursor, XCB_CURRENT_TIME);
-        xcb_generic_error_t* error {};
-        [[maybe_unused]] xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply(window.xcb_conn, cookie, &error);
+    { // Create a graphic context using the drawable pixmap
+        xcb.gc = xcb_generate_id(xcb.connection);
+        xcb_void_cookie_t cookie = xcb_create_gc_checked(xcb.connection, xcb.gc, xcb.pixmap, 0, nullptr);
+        xcb_generic_error_t* error = xcb_request_check(xcb.connection, cookie);
+        inl_defer(free(error));
+        if (error) return Error::PlatformXcbError;
     }
 
-    {
-        xcb_query_pointer_cookie_t cookie = xcb_query_pointer(window.xcb_conn, window.xcb_window);
-        xcb_generic_error_t* error {};
-        xcb_query_pointer_reply_t* reply = xcb_query_pointer_reply(window.xcb_conn, cookie, &error);
+    // Fill the pixmap with 0's
+    xcb_rectangle_t rect = { 0, 0, 1, 1 };
+    xcb_poly_fill_rectangle(xcb.connection, xcb.pixmap, xcb.gc, 1, &rect);
 
-        window.prev_cursor_x = reply->win_x;
-        window.prev_cursor_y = reply->win_y;
-        window.virt_cursor_x = reply->win_x;
-        window.virt_cursor_y = reply->win_y;
-    }
-
-    {
-
-        xcb_warp_pointer(window.xcb_conn, XCB_NONE, window.xcb_window, 0, 0, 0, 0, (int16_t)window.width / 2,
-            (int16_t)window.height / 2);
-    }
-    xcb_flush(window.xcb_conn);
-
-    // hide_cursor(window);
+    // Create the curosr as the pixmap
+    xcb.cursor = xcb_generate_id(xcb.connection);
+    xcb_create_cursor(xcb.connection, xcb.cursor, xcb.pixmap, xcb.pixmap, 0, 0, 0, 0, 0, 0, 0, 0);
+    return Error::Ok;
 }
 
-static Error xcb_connection_create(Window& window, uint16_t width, uint16_t height) {
-    // TODO:: Review based on I3
+static Error x_create(Xcb& xcb, uint16_t width, uint16_t height, StringView window_title) {
     // Connect
-    int screen_num;
-    window.xcb_conn = xcb_connect(nullptr, &screen_num);
+    xcb.connection = xcb_connect(nullptr, &xcb.screen_num);
 
-    if (window.xcb_conn == nullptr || xcb_connection_has_error(window.xcb_conn)) {
-        return Error::PlatformFailedToConnectToWindowServer;
+    if (xcb.connection == nullptr || xcb_connection_has_error(xcb.connection)) {
+        return Error::PlatformXcbError;
     }
 
     // Get screen
-    xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(window.xcb_conn));
-    for (int i = 0; i < screen_num; ++i) {
-
+    xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(xcb.connection));
+    for (int i = 0; i < xcb.screen_num; ++i) {
         xcb_screen_next(&screen_iter);
     }
 
     xcb_screen_t* screen = screen_iter.data;
 
-    // Create Window
-    {
-        window.xcb_window = xcb_generate_id(window.xcb_conn);
+    { // Create Window
+        xcb.window = xcb_generate_id(xcb.connection);
         uint32_t window_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
 
         uint32_t window_values[] = {
@@ -98,82 +74,87 @@ static Error xcb_connection_create(Window& window, uint16_t width, uint16_t heig
         };
 
         xcb_void_cookie_t cookie
-            = xcb_create_window_checked(window.xcb_conn, XCB_COPY_FROM_PARENT, window.xcb_window, screen->root, 0, 0,
-                width, height, 1, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, window_mask, window_values);
+            = xcb_create_window_checked(xcb.connection, XCB_COPY_FROM_PARENT, xcb.window, screen->root, 0, 0, width,
+                height, 1, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, window_mask, window_values);
 
-        xcb_generic_error_t* error = xcb_request_check(window.xcb_conn, cookie);
+        xcb_generic_error_t* error = xcb_request_check(xcb.connection, cookie);
+        inl_defer(free(error));
 
-        /// TODO defer free here
-        if (error != NULL) {
-            log_error("XCB error: %x", error->error_code);
-            free(error);
-            return Error::PlatformFailedToCreateWindow;
-        }
-
-        free(error);
+        if (error != NULL) return Error::PlatformXcbError;
 
         // Set the window name
-        xcb_change_property(window.xcb_conn, XCB_PROP_MODE_REPLACE, window.xcb_window, XCB_ATOM_WM_NAME,
-            XCB_ATOM_STRING, 8, sizeof("OpenGL Window") - 1, "OpenGL Window");
+        xcb_change_property(xcb.connection, XCB_PROP_MODE_REPLACE, xcb.window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
+            static_cast<uint32_t>(window_title.size()), window_title.data());
     }
 
-    // Replace default window delete function
-    {
+    { // Replace default window delete function
 
-        xcb_intern_atom_cookie_t atom_cookie_protocols = xcb_intern_atom(window.xcb_conn, 1, 12, "WM_PROTOCOLS");
-        xcb_intern_atom_cookie_t atom_cookie_delete = xcb_intern_atom(window.xcb_conn, 0, 16, "WM_DELETE_WINDOW");
+        xcb_intern_atom_cookie_t atom_cookie_wm_protocols = xcb_intern_atom(xcb.connection, 1, 12, "WM_PROTOCOLS");
         xcb_intern_atom_reply_t* atom_reply_wm_protocols
-            = xcb_intern_atom_reply(window.xcb_conn, atom_cookie_protocols, 0);
+            = xcb_intern_atom_reply(xcb.connection, atom_cookie_wm_protocols, 0);
+        inl_defer(free(atom_reply_wm_protocols););
+        if (!atom_reply_wm_protocols) return Error::PlatformXcbError;
+
+        xcb.atom_wm_protocols = atom_reply_wm_protocols->atom;
+
+        xcb_intern_atom_cookie_t atom_cookie_wm_delete = xcb_intern_atom(xcb.connection, 0, 16, "WM_DELETE_WINDOW");
         xcb_intern_atom_reply_t* atom_reply_delete_window
-            = xcb_intern_atom_reply(window.xcb_conn, atom_cookie_delete, 0);
-        xcb_change_property(window.xcb_conn, XCB_PROP_MODE_REPLACE, window.xcb_window, atom_reply_wm_protocols->atom,
-            XCB_ATOM_ATOM, 32, 1, &atom_reply_delete_window->atom);
-        window.xcb_atom_reply_wm_protocols = atom_reply_wm_protocols;
-        window.xcb_atom_delete_window = atom_reply_delete_window;
+            = xcb_intern_atom_reply(xcb.connection, atom_cookie_wm_delete, 0);
+        inl_defer(free(atom_reply_delete_window););
+
+        if (!atom_reply_delete_window) return Error::PlatformXcbError;
+
+        xcb.atom_wm_delete = atom_reply_delete_window->atom;
+
+        xcb_void_cookie_t cookie = xcb_change_property_checked(xcb.connection, XCB_PROP_MODE_REPLACE, xcb.window,
+            atom_reply_wm_protocols->atom, XCB_ATOM_ATOM, 32, 1, &atom_reply_delete_window->atom);
+        xcb_generic_error_t* error = xcb_request_check(xcb.connection, cookie);
+        inl_defer(free(error));
+        if (error) return Error::PlatformXcbError;
     }
 
-    // Key Symbols
-    {
-        window.xcb_key_symbols = xcb_key_symbols_alloc(window.xcb_conn);
-        xcb_setup_t const* setup = xcb_get_setup(window.xcb_conn);
+    { // Key Symbols
+        xcb.key_symbols = xcb_key_symbols_alloc(xcb.connection);
+        xcb_setup_t const* setup = xcb_get_setup(xcb.connection);
 
         xcb_get_keyboard_mapping_cookie_t cookie = xcb_get_keyboard_mapping(
-            window.xcb_conn, setup->min_keycode, (uint8_t)(setup->max_keycode - setup->min_keycode) + 1);
+            xcb.connection, setup->min_keycode, (uint8_t)(setup->max_keycode - setup->min_keycode) + 1);
         xcb_generic_error_t* error {};
-        window.xcb_keyboard_mapping_reply = xcb_get_keyboard_mapping_reply(window.xcb_conn, cookie, &error);
-        // TODO: handle error
+        xcb.keyboard_mapping_reply = xcb_get_keyboard_mapping_reply(xcb.connection, cookie, &error);
+        inl_defer(free(error));
+        if (error) return Error::PlatformXcbError;
     }
 
-    // Check X
-    {
+    { // Check XInput2 version
 
-        xcb_input_xi_query_version_cookie_t cookie = xcb_input_xi_query_version(window.xcb_conn, 2, 3);
+        xcb_input_xi_query_version_cookie_t cookie = xcb_input_xi_query_version(xcb.connection, 2, 3);
 
-        xcb_generic_error_t* err = NULL;
+        xcb_generic_error_t* error = NULL;
 
-        xcb_input_xi_query_version_reply_t* reply = xcb_input_xi_query_version_reply(window.xcb_conn, cookie, &err);
+        xcb_input_xi_query_version_reply_t* reply = xcb_input_xi_query_version_reply(xcb.connection, cookie, &error);
+        inl_defer({
+            free(error);
+            free(reply);
+        });
 
-        if (!reply) {
-            log_error("xinput2 version invalid");
-            free(err);
-            abort();
+        if (!reply) return Error::PlatformXcbError;
+
+        log_debug("XInput2 version %u.%u\n", reply->major_version, reply->minor_version);
+        if (reply->major_version < 2 || (reply->major_version >= 2 && reply->minor_version < 3)) {
+            return Error::PlatformXcbError;
         }
-
-        log_debug("xinput2 version %u.%u\n", reply->major_version, reply->minor_version);
-
-        free(reply);
     }
 
-    {
-        // NOTE: For some reason xcb defines xcb_input_event_mask_t with out the mask array
-        // x111 deinfes it as
-        // typedef struct
+    { // Register for XInput2 Events
+        // NOTE: For some reason xcb defines xcb_input_event_mask_t with out the
+        // mask array x111 deinfes it as typedef struct
         //{
         //    int                 deviceid;
         //    int                 mask_len;
         //    unsigned char*      mask;
         //} XIEventMask;
-        // The XCB api still expects the same memory layout so I've wrapped it in a struct and added the mask array
+        // The XCB api still expects the same memory layout so I've wrapped it in a
+        // struct and added the mask array
 
         struct EventMask {
             xcb_input_event_mask_t header;
@@ -185,53 +166,101 @@ static Error xcb_connection_create(Window& window, uint16_t width, uint16_t heig
         event_mask.header.mask_len = 1;
         event_mask.mask = XCB_INPUT_XI_EVENT_MASK_RAW_MOTION;
 
-        xcb_void_cookie_t cookie = xcb_input_xi_select_events_checked(
-            window.xcb_conn, screen->root, 1, (xcb_input_event_mask_t*)&event_mask);
+        xcb_void_cookie_t cookie
+            = xcb_input_xi_select_events_checked(xcb.connection, screen->root, 1, (xcb_input_event_mask_t*)&event_mask);
+        xcb_generic_error_t* error = xcb_request_check(xcb.connection, cookie);
+        inl_defer(free(error));
 
-        xcb_generic_error_t* error = xcb_request_check(window.xcb_conn, cookie);
-
-        if (error) {
-            log_error("xinput failed to select events");
-            free(error);
-            abort();
-        }
+        if (error) return Error::PlatformXcbError;
     }
+
+    TRY(x_create_cursor(xcb));
+
     return Error::Ok;
 }
 
-static Error egl_ctx_create(Window& window) {
+static void x_destroy(Xcb& xcb) {
+
+    free(xcb.key_symbols);
+    free(xcb.keyboard_mapping_reply);
+    xcb_free_gc(xcb.connection, xcb.gc);
+    xcb_free_pixmap(xcb.connection, xcb.pixmap);
+    xcb_free_cursor(xcb.connection, xcb.cursor);
+
+    xcb_destroy_window(xcb.connection, xcb.window);
+    xcb_disconnect(xcb.connection);
+}
+
+static xcb_keysym_t x_get_keysym(Xcb& xcb, xcb_key_press_event_t& key_event) {
+    xcb_setup_t const* setup = xcb_get_setup(xcb.connection);
+    xcb_keysym_t* keysyms = xcb_get_keyboard_mapping_keysyms(xcb.keyboard_mapping_reply);
+
+    keysyms = &keysyms[(key_event.detail - setup->min_keycode) * xcb.keyboard_mapping_reply->keysyms_per_keycode];
+    // TODO: col is to handle mode switch. Not impelemented yet.
+    xcb_keysym_t keysym = keysyms[0];
+
+    return keysym;
+}
+
+[[maybe_unused]] static Error x_grab_cursor(Xcb& xcb) {
+
+    xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(xcb.connection, 1, xcb.window, XCB_EVENT_MASK_POINTER_MOTION,
+        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, xcb.window, xcb.cursor, XCB_CURRENT_TIME);
+    xcb_generic_error_t* error {};
+    xcb_grab_pointer_reply_t* reply = xcb_grab_pointer_reply(xcb.connection, cookie, &error);
+    inl_defer({
+        free(error);
+        free(reply);
+    });
+
+    if (!reply || error) return Error::PlatformXcbError;
+
+    xcb_flush(xcb.connection);
+    return Error::Ok;
+}
+
+[[maybe_unused]] static Error x_ungrab_cursor(Xcb& xcb) {
+
+    xcb_void_cookie_t cookie = xcb_ungrab_pointer_checked(xcb.connection, XCB_CURRENT_TIME);
+    xcb_generic_error_t* error = xcb_request_check(xcb.connection, cookie);
+    inl_defer({ free(error); });
+
+    if (error) return Error::PlatformXcbError;
+    xcb_flush(xcb.connection);
+    return Error::Ok;
+}
+static Error egl_create(Egl& egl, Xcb& xcb) {
 
     // Configure EGL to use XCB
     static EGLAttrib const platform_attribute_list[] = {
         EGL_PLATFORM_XCB_SCREEN_EXT,
-        window.xcb_screen,
+        xcb.screen_num,
         EGL_NONE,
     };
 
-    window.display = eglGetPlatformDisplay(EGL_PLATFORM_XCB_EXT, (void*)window.xcb_conn, platform_attribute_list);
+    egl.display = eglGetPlatformDisplay(EGL_PLATFORM_XCB_EXT, (void*)xcb.connection, platform_attribute_list);
 
-    if (window.display == EGL_NO_DISPLAY) {
+    if (egl.display == EGL_NO_DISPLAY) {
         log_error("EGL error: %x", eglGetError());
         return Error::PlatformGfxFailedToGetDisplay;
     }
 
     EGLint major { 0 };
     EGLint minor { 0 };
-    EGLBoolean success = eglInitialize(window.display, &major, &minor);
+    EGLBoolean success = eglInitialize(egl.display, &major, &minor);
     if (!success) {
-        log_error("EGL error: %x", eglGetError());
-        return Error::PlatformGfxFailedToInit;
+        return Error::PlatformEglError;
     }
 
     if (major != 1 || (major == 1 && minor < 5)) {
         log_error("EGL error: %x", eglGetError());
-        return Error::PlatformGfxUnsupportedVersion;
+        return Error::PlatformEglError;
     }
 
     success = eglBindAPI(EGL_OPENGL_API);
     if (!success) {
         log_error("EGL error: %x", eglGetError());
-        return Error::PlatformGfxFailedToBind;
+        return Error::PlatformEglError;
     }
 
     // Configure EGL frambuffer
@@ -259,25 +288,26 @@ static Error egl_ctx_create(Window& window) {
 
     EGLConfig config;
     EGLint num_config;
-    success = eglChooseConfig(window.display, attr, &config, 1, &num_config);
+    success = eglChooseConfig(egl.display, attr, &config, 1, &num_config);
     if (!success || num_config != 1) {
         log_error("EGL error: %x", eglGetError());
-        return Error::PlatformGfxFailedToConfigure;
+        return Error::PlatformEglError;
     }
 
     // Create Window surface
     EGLAttrib window_attr[] = {
         EGL_GL_COLORSPACE,
-        EGL_GL_COLORSPACE_LINEAR, // or use EGL_GL_COLORSPACE_SRGB for sRGB framebuffer
+        EGL_GL_COLORSPACE_LINEAR, // or use EGL_GL_COLORSPACE_SRGB for sRGB
+                                  // framebuffer
         EGL_RENDER_BUFFER,
         EGL_BACK_BUFFER,
         EGL_NONE,
     };
 
-    window.surface = eglCreatePlatformWindowSurface(window.display, config, (void*)&window.xcb_window, window_attr);
-    if (window.surface == EGL_NO_SURFACE) {
+    egl.surface = eglCreatePlatformWindowSurface(egl.display, config, (void*)&xcb.window, window_attr);
+    if (egl.surface == EGL_NO_SURFACE) {
         log_error("EGL error: %x", eglGetError());
-        return Error::PlatformGfxFailedToBind;
+        return Error::PlatformEglError;
     }
 
     // Create OpenGL contex
@@ -293,25 +323,66 @@ static Error egl_ctx_create(Window& window) {
         EGL_NONE,
     };
 
-    window.context = eglCreateContext(window.display, config, EGL_NO_CONTEXT, context_attr);
-    if (window.context == EGL_NO_CONTEXT) {
+    egl.context = eglCreateContext(egl.display, config, EGL_NO_CONTEXT, context_attr);
+    if (egl.context == EGL_NO_CONTEXT) {
         log_error("EGL Error: %x", eglGetError());
         return Error::PlatformGfxFailedToCreateCtx;
     }
 
-    success = eglMakeCurrent(window.display, window.surface, window.surface, window.context);
+    success = eglMakeCurrent(egl.display, egl.surface, egl.surface, egl.context);
     if (!success) {
         log_error("EGL Error: %x", eglGetError());
-        return Error::PlatformGfxFailedToMakeCurrent;
+        return Error::PlatformEglError;
     }
 
-    EGLint w, h;
-    eglQuerySurface(window.display, window.surface, EGL_WIDTH, &w);
-    eglQuerySurface(window.display, window.surface, EGL_HEIGHT, &h);
-
-    printf("EGL: %d x %d\n", w, h);
-
     return Error::Ok;
+}
+
+static void egl_destroy(Egl& egl) {
+    eglMakeCurrent(egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    eglDestroyContext(egl.display, egl.context);
+    eglDestroySurface(egl.display, egl.surface);
+    eglTerminate(egl.display);
+}
+
+static void window_handle_key_input(Window& window, xcb_key_press_event_t& event) {
+    xcb_keysym_t keysym = x_get_keysym(window.xcb, event);
+
+    InputKey key {};
+    switch (keysym) {
+    case XK_w:
+        key = InputKey::w;
+        break;
+    case XK_a:
+        key = InputKey::a;
+        break;
+    case XK_s:
+        key = InputKey::s;
+        break;
+    case XK_d:
+        key = InputKey::d;
+        break;
+    case XK_Escape:
+        window.should_exit = true;
+        break;
+
+    default:
+        break;
+    }
+
+    InputKeyAction action { InputKeyAction::Pressed };
+    if ((event.response_type & XCB_RESPOSE_TYPE_MASK) == XCB_KEY_RELEASE) {
+        action = InputKeyAction::Released;
+    }
+    window.callback_input_key(window, key, action);
+}
+
+static void window_handle_mouse_input(Window& window, xcb_input_raw_motion_event_t& event) {
+    const xcb_input_fp3232_t* v = xcb_input_raw_button_press_axisvalues(&event);
+    double dx = v[0].integral + v[0].frac / 4294967296.0;
+    double dy = v[1].integral + v[1].frac / 4294967296.0;
+    window.callback_input_mouse_pos(window, (float)dx, (float)dy);
 }
 
 void initialize(Window& window) { clock_gettime(CLOCK_MONOTONIC, &window.time_start); }
@@ -319,8 +390,8 @@ void initialize(Window& window) { clock_gettime(CLOCK_MONOTONIC, &window.time_st
 Error window_create(Window& window, uint32_t width, uint32_t height, CallbackWindowResize callback_window_resize,
     CallbackInputKey callback_input_key, CallbackInputMousePos callback_input_mouse_pos) {
 
-    TRY(xcb_connection_create(window, static_cast<uint16_t>(width), static_cast<uint16_t>(height)));
-    TRY(egl_ctx_create(window));
+    TRY(x_create(window.xcb, static_cast<uint16_t>(width), static_cast<uint16_t>(height), "OpenGL Window"));
+    TRY(egl_create(window.egl, window.xcb));
 
     window.width = width;
     window.height = height;
@@ -328,40 +399,34 @@ Error window_create(Window& window, uint32_t width, uint32_t height, CallbackWin
     window.callback_input_key = callback_input_key;
     window.callback_input_mouse_pos = callback_input_mouse_pos;
 
+    window.valid = true;
     return Error::Ok;
 }
 
 void window_destroy(Window& window) {
-    eglMakeCurrent(window.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-    eglDestroyContext(window.display, window.context);
-    eglDestroySurface(window.display, window.surface);
-    eglTerminate(window.display);
-
-    free(window.xcb_atom_reply_wm_protocols);
-    free(window.xcb_atom_delete_window);
-
-    xcb_destroy_window(window.xcb_conn, window.xcb_window);
-    xcb_disconnect(window.xcb_conn);
+    egl_destroy(window.egl);
+    x_destroy(window.xcb);
 }
 
 Error window_map(Window& window) {
-    inl_assert(window.xcb_conn != nullptr, "Invalid window");
+    inl_assert(window.valid, "Invalid platform");
 
-    xcb_map_window(window.xcb_conn, window.xcb_window);
-    xcb_flush(window.xcb_conn);
+    xcb_map_window(window.xcb.connection, window.xcb.window);
+    xcb_flush(window.xcb.connection);
 
     return Error::Ok;
 }
 
 void window_process_events(Window& window) {
-    xcb_generic_event_t* xcb_event {};
+    inl_assert(window.valid, "Invalid platform");
 
-    while ((xcb_event = xcb_poll_for_event(window.xcb_conn))) {
+    xcb_generic_event_t* xcb_event {};
+    inl_defer(free(xcb_event));
+
+    while ((xcb_event = xcb_poll_for_event(window.xcb.connection))) {
 
         switch (xcb_event->response_type & XCB_RESPOSE_TYPE_MASK) {
         case XCB_EXPOSE: {
-            log_debug("window event: XCB_EXPOSE");
             break;
         }
         case XCB_CONFIGURE_NOTIFY: {
@@ -374,38 +439,7 @@ void window_process_events(Window& window) {
         case XCB_KEY_PRESS:
         case XCB_KEY_RELEASE: {
             xcb_key_press_event_t* key_event = (xcb_key_press_event_t*)xcb_event;
-
-            xcb_setup_t const* setup = xcb_get_setup(window.xcb_conn);
-            xcb_keysym_t* keysyms = xcb_get_keyboard_mapping_keysyms(window.xcb_keyboard_mapping_reply);
-
-            keysyms = &keysyms[(key_event->detail - setup->min_keycode)
-                * window.xcb_keyboard_mapping_reply->keysyms_per_keycode];
-            // TODO: col is to handle mode switch. Not impelemented yet.
-            xcb_keysym_t keysym = keysyms[0];
-
-            InputKey key {};
-            switch (keysym) {
-            case XK_w:
-                key = InputKey::w;
-                break;
-            case XK_a:
-                key = InputKey::a;
-                break;
-            case XK_s:
-                key = InputKey::s;
-                break;
-            case XK_d:
-                key = InputKey::d;
-                break;
-            default:
-                break;
-            }
-
-            InputKeyAction action = InputKeyAction::Pressed;
-            if ((key_event->response_type & XCB_RESPOSE_TYPE_MASK) == XCB_KEY_RELEASE) {
-                action = InputKeyAction::Released;
-            }
-            window.callback_input_key(window, key, action);
+            window_handle_key_input(window, *key_event);
             break;
         }
         case XCB_BUTTON_PRESS: {
@@ -419,10 +453,7 @@ void window_process_events(Window& window) {
 
             if (generic_event->event_type == XCB_INPUT_RAW_MOTION) {
                 xcb_input_raw_motion_event_t* motion_event = (xcb_input_raw_motion_event_t*)xcb_event;
-                const xcb_input_fp3232_t* v = xcb_input_raw_button_press_axisvalues(motion_event);
-                double dx = v[0].integral + v[0].frac / 4294967296.0;
-                double dy = v[1].integral + v[1].frac / 4294967296.0;
-                window.callback_input_mouse_pos(window, (float)dx, (float)dy);
+                window_handle_mouse_input(window, *motion_event);
             }
             break;
         }
@@ -430,23 +461,24 @@ void window_process_events(Window& window) {
         case XCB_MOTION_NOTIFY: {
             break;
         }
-
         case XCB_ENTER_NOTIFY: {
-            log_debug("window event: XCB_ENTER_NOTIFY");
-            grab_cursor(window);
+            if (x_grab_cursor(window.xcb) != Error::Ok) window.should_exit = true;
+            break;
+        }
+        case XCB_LEAVE_NOTIFY: {
+            if (x_ungrab_cursor(window.xcb) != Error::Ok) window.should_exit = true;
             break;
         }
         case XCB_FOCUS_IN: {
-            log_debug("window event: XCB_FOCUS_IN");
-            grab_cursor(window);
             break;
         }
         case XCB_FOCUS_OUT: {
-            log_debug("window event: XCB_FOCUS_OUT");
             break;
         }
         case XCB_CLIENT_MESSAGE: {
-            if ((*(xcb_client_message_event_t*)xcb_event).data.data32[0] == window.xcb_atom_delete_window->atom) {
+            xcb_client_message_event_t* client_msg_event = (xcb_client_message_event_t*)xcb_event;
+            if (client_msg_event->type == window.xcb.atom_wm_protocols
+                && client_msg_event->data.data32[0] == window.xcb.atom_wm_delete) {
                 window.should_exit = true;
                 break;
             }
@@ -456,27 +488,26 @@ void window_process_events(Window& window) {
             break;
         }
         }
-        free(xcb_event);
     }
 }
 
 void window_resize(Window& window, uint32_t width, uint32_t height) {
-    inl_assert(window.xcb_conn != nullptr, "Invalid window");
+    inl_assert(window.valid, "Invalid platform");
 
     const static uint32_t values[] = { width, height };
     window.width = width;
     window.height = height;
 
     xcb_configure_window(
-        window.xcb_conn, window.xcb_window, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values);
-    xcb_flush(window.xcb_conn);
+        window.xcb.connection, window.xcb.window, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values);
+    xcb_flush(window.xcb.connection);
 }
 
 bool window_should_exit(Window& window) { return window.should_exit; }
 
 void swap_buffers(Window& window) {
-    inl_assert(window.xcb_conn != nullptr, "Invalid window");
-    eglSwapBuffers(window.display, window.surface);
+    inl_assert(window.valid, "Invalid platform");
+    eglSwapBuffers(window.egl.display, window.egl.surface);
 }
 
 float get_elapsed_time(Window& window) {

@@ -98,8 +98,7 @@ void scroll_callback(
 int main(int argc, char* argv[]) {
     using namespace inl;
 
-    log_debug("libinneall demo game");
-    log_info("LIBINNEALL demo game");
+    log_info("libInneall demo game");
 
     if (argc < 2) {
         log_error("Usage: game <assets_path>");

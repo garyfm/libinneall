@@ -6,8 +6,7 @@ namespace {
 void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
     [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
     // ignore non-significant error/warning codes
-    if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
-        return;
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
     inl::StringView source_str {};
     switch (source) {

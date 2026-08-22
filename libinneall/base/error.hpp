@@ -27,6 +27,8 @@ namespace inl {
     apply(PlatformGfxFailedToConfigure) \
     apply(PlatformGfxFailedToMakeCurrent) \
     apply(PlatformGfxFailedToCreateCtx) \
+    apply(PlatformXcbError) \
+    apply(PlatformEglError) \
     apply(PpmInvalidFormat) \
     apply(PpmUnsupportedFormat) \
     apply(PpmEOFReachedUnexpectedly) \

@@ -91,9 +91,9 @@ Size: 5116096
 
 Platform layer :
 - [x] Create Window
-- [x] Basic keyboard input
+- [ ] Basic keyboard input
 - [x] Basic mouse input
-- [ ] Handle close
+- [x] Handle close
 - [x] Time
 - [ ] Memory
 - [ ] Files

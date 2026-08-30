@@ -92,7 +92,7 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
     }
 }
 
-void callback_window_resize([[maybe_unused]] inl::platform::Window& window, int width, int height) {
+void callback_window_resize([[maybe_unused]] inl::platform::Platform& platform, int width, int height) {
     // NOTE: x11 will handle resizing the window if the user changes its size so only update the opengl view port
     glViewport(0, 0, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }
@@ -109,11 +109,11 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
 
     log_debug("Creating window: '%s' %u x %u", window.m_title.data(), width, height);
 
-    platform::initialize(window.m_native_window);
+    platform::initialize(window.m_platform);
     TRY(platform::window_create(
-        window.m_native_window, width, height, callback_window_resize, callback_input_key, callback_input_mouse_pos));
+        window.m_platform, width, height, callback_window_resize, callback_input_key, callback_input_mouse_pos));
 
-    TRY(platform::window_map(window.m_native_window));
+    TRY(platform::window_map(window.m_platform));
 
     if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress)) {
         return Error::WindowGladFailedToLoad;
@@ -136,15 +136,15 @@ Error Window::create(Window& window, uint32_t width, uint32_t height, StringView
     return Error::Ok;
 }
 
-Window::~Window() { platform::window_destroy(m_native_window); }
+Window::~Window() { platform::window_destroy(m_platform); }
 
-void Window::process_events() { platform::window_process_events(m_native_window); }
+void Window::process_events() { platform::window_process_events(m_platform); }
 
-void Window::swap_buffers() { platform::swap_buffers(m_native_window); }
+void Window::swap_buffers() { platform::swap_buffers(m_platform); }
 
 void Window::resize(uint32_t width, uint32_t height) {
     // Resize the platfrom window and opengl view port
-    platform::window_resize(m_native_window, width, height);
+    platform::window_resize(m_platform, width, height);
     glViewport(0, 0, width, height);
 }
 } // namespace inl

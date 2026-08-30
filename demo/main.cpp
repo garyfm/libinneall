@@ -56,11 +56,9 @@ static inl::CameraInitialSettings camera_settings {
 
 static inl::Camera g_camera(camera_settings);
 
-inl::Window g_window;
-
 void callback_input_key(
-    inl::platform::Window& window, inl::platform::InputKey key, inl::platform::InputKeyAction action) {
-    (void)window;
+    inl::platform::Platform& platform, inl::platform::InputKey key, inl::platform::InputKeyAction action) {
+    (void)platform;
     (void)key;
     (void)action;
 
@@ -82,14 +80,14 @@ void callback_input_key(
     }
 }
 
-void callback_input_mouse_pos([[maybe_unused]] inl::platform::Window& window, float x_pos, float y_pos) {
+void callback_input_mouse_pos([[maybe_unused]] inl::platform::Platform& platform, float x_pos, float y_pos) {
     static const float sensitivity { 0.05f };
 
     g_camera.rotate(x_pos * sensitivity, -y_pos * sensitivity);
 }
 
 void scroll_callback(
-    [[maybe_unused]] inl::platform::Window& window, [[maybe_unused]] double x_offset, double y_offset) {
+    [[maybe_unused]] inl::platform::Platform& platform, [[maybe_unused]] double x_offset, double y_offset) {
     g_camera.zoom(static_cast<float>(y_offset));
 }
 
@@ -105,9 +103,10 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    Error error = Window::create(g_window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
+    inl::Window window;
+    Error error = Window::create(window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
         callback_input_key, callback_input_mouse_pos, scroll_callback);
-    inl_assert(error == Error::Ok, "Failed to create Window");
+    inl_assert(error == Error::Ok, "Failed to create Platform");
 
     ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
     Arena scratch_arena { scratch_backing.data(), scratch_backing.size() };
@@ -225,8 +224,8 @@ int main(int argc, char* argv[]) {
     renderer.set_debug_shader(shader_program_debug);
     renderer.set_skybox_shader(shader_program_skybox);
 
-    while (!platform::window_should_exit(g_window.native_window())) {
-        float current_frame_time = platform::get_elapsed_time(g_window.native_window());
+    while (!platform::window_should_exit(window.native_window())) {
+        float current_frame_time = platform::get_elapsed_time(window.native_window());
         g_delta_time = current_frame_time - g_last_frame_time;
         g_last_frame_time = current_frame_time;
 
@@ -235,7 +234,7 @@ int main(int argc, char* argv[]) {
 
         RenderView render_view {
             .view = g_camera.view_matrix(),
-            .projection = g_camera.perspective_matrix(g_window.aspect_ratio()),
+            .projection = g_camera.perspective_matrix(window.aspect_ratio()),
             .pos = g_camera.position(),
         };
 
@@ -245,8 +244,8 @@ int main(int argc, char* argv[]) {
         renderer.render(render_scene, render_view);
         renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 
-        g_window.swap_buffers();
-        g_window.process_events();
+        window.swap_buffers();
+        window.process_events();
     }
 
     log_info("Exiting...");

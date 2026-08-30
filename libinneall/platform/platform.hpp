@@ -9,13 +9,7 @@
 
 namespace inl::platform {
 
-struct Window;
-
-enum class WindowEventKind {
-    None,
-    Exit,
-    Resize,
-};
+struct Platform;
 
 enum class InputKeyAction {
     Pressed,
@@ -31,13 +25,13 @@ enum class InputKey {
     ESC,
 };
 
-using CallbackWindowResize = void (*)(Window&, int32_t, int32_t);
-using CallbackInputKey = void (*)(Window&, InputKey key, InputKeyAction action);
-using CallbackInputMousePos = void (*)(Window&, float, float);
+using CallbackWindowResize = void (*)(Platform&, int32_t, int32_t);
+using CallbackInputKey = void (*)(Platform&, InputKey key, InputKeyAction action);
+using CallbackInputMousePos = void (*)(Platform&, float, float);
 
 struct Xcb {
     xcb_connection_t* connection {};
-    xcb_window_t window {};
+    xcb_window_t platform {};
     int screen_num {};
     xcb_atom_t atom_wm_protocols {};
     xcb_atom_t atom_wm_delete {};
@@ -54,7 +48,7 @@ struct Egl {
     EGLContext context {};
 };
 
-struct Window {
+struct Platform {
     Xcb xcb {};
     Egl egl {};
     bool valid {};
@@ -69,31 +63,18 @@ struct Window {
     CallbackInputMousePos callback_input_mouse_pos;
 };
 
-struct WindowEventResize {
-    size_t width;
-    size_t height;
-};
-
-struct WindowEvent {
-    WindowEventKind kind;
-
-    union {
-        WindowEventResize resize;
-    };
-};
-
-void initialize(Window& window);
-Error window_create(Window& window, uint32_t width, uint32_t height, CallbackWindowResize callback_window_resize,
+void initialize(Platform& platform);
+Error window_create(Platform& platform, uint32_t width, uint32_t height, CallbackWindowResize callback_window_resize,
     CallbackInputKey callback_input_key, CallbackInputMousePos callback_input_mouse_pos);
 
-void window_destroy(Window& window);
-Error window_map(Window& window);
-void window_resize(Window& window, uint32_t width, uint32_t height);
-void window_process_events(Window& window);
-bool window_should_exit(Window& window);
+void window_destroy(Platform& platform);
+Error window_map(Platform& platform);
+void window_resize(Platform& platform, uint32_t width, uint32_t height);
+void window_process_events(Platform& platform);
+bool window_should_exit(Platform& platform);
 
-void swap_buffers(Window& window);
+void swap_buffers(Platform& platform);
 
-float get_elapsed_time(Window& window);
+float get_elapsed_time(Platform& platform);
 
 } // namespace inl::platform

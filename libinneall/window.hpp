@@ -10,6 +10,7 @@
 
 namespace inl {
 
+// TODO: can probably remove this ?
 class Window {
 public:
     using InputCallback = void (*)(platform::Platform&);
@@ -22,8 +23,7 @@ public:
     INL_DEL_COPY_MOVE(Window);
 
     static Error create(Window& window, uint32_t width, uint32_t height, StringView title,
-        platform::CallbackInputKey callback_input_key, platform::CallbackInputMousePos callback_input_mouse_pos,
-        [[maybe_unused]] ScrollCallback scroll_callback);
+        platform::CallbackInputMousePos callback_input_mouse_pos, [[maybe_unused]] ScrollCallback scroll_callback);
 
     void process_events();
     void swap_buffers();

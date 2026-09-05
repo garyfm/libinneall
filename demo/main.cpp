@@ -56,26 +56,22 @@ static inl::CameraInitialSettings camera_settings {
 
 static inl::Camera g_camera(camera_settings);
 
-void callback_input_key(
-    inl::platform::Platform& platform, inl::platform::InputKey key, inl::platform::InputKeyAction action) {
-    (void)platform;
-    (void)key;
-    (void)action;
+void process_input_keys(inl::platform::Platform& platform) {
 
     using namespace inl::platform;
     static constexpr float movement_speed = 4.5f;
 
     float velocity = movement_speed * g_delta_time;
-    if (key == InputKey::w && action == InputKeyAction::Pressed) {
+    if (get_input_key_state(platform, InputKey::w) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Forward, velocity);
     }
-    if (key == InputKey::s && action == InputKeyAction::Pressed) {
+    if (get_input_key_state(platform, InputKey::s) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Backward, velocity);
     }
-    if (key == InputKey::a && action == InputKeyAction::Pressed) {
+    if (get_input_key_state(platform, InputKey::a) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Left, velocity);
     }
-    if (key == InputKey::d && action == InputKeyAction::Pressed) {
+    if (get_input_key_state(platform, InputKey::d) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Right, velocity);
     }
 }
@@ -105,7 +101,7 @@ int main(int argc, char* argv[]) {
 
     inl::Window window;
     Error error = Window::create(window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
-        callback_input_key, callback_input_mouse_pos, scroll_callback);
+        callback_input_mouse_pos, scroll_callback);
     inl_assert(error == Error::Ok, "Failed to create Platform");
 
     ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
@@ -246,6 +242,7 @@ int main(int argc, char* argv[]) {
 
         window.swap_buffers();
         window.process_events();
+        process_input_keys(window.native_window());
     }
 
     log_info("Exiting...");

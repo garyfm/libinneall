@@ -8,6 +8,9 @@
 #include <X11/keysym.h>
 #include <unistd.h>
 #include <xcb/xinput.h>
+#define explicit explicit_
+#include <xcb/xkb.h>
+#undef explicit
 
 namespace {
 
@@ -145,7 +148,7 @@ static Error x_create(Xcb& xcb, uint16_t width, uint16_t height, StringView wind
         }
     }
 
-    { // Register for XInput2 Events
+    { // Register for XInput2 Events. Used for RAW mouse input
         // NOTE: For some reason xcb defines xcb_input_event_mask_t with out the
         // mask array x111 deinfes it as typedef struct
         //{
@@ -172,6 +175,34 @@ static Error x_create(Xcb& xcb, uint16_t width, uint16_t height, StringView wind
         inl_defer(free(error));
 
         if (error) return Error::PlatformXcbError;
+    }
+
+    { // Setup XKB
+        xcb_xkb_use_extension_cookie_t cookie
+            = xcb_xkb_use_extension(xcb.connection, XCB_XKB_MAJOR_VERSION, XCB_XKB_MINOR_VERSION);
+
+        xcb_generic_error_t* error {};
+        xcb_xkb_use_extension_reply_t* reply = xcb_xkb_use_extension_reply(xcb.connection, cookie, &error);
+        inl_defer({
+            free(error);
+            free(reply);
+        });
+
+        if (!reply || error) return Error::PlatformXcbError;
+    }
+
+    { // Enable auto repeat on keys
+        xcb_generic_error_t* error {};
+
+        auto repeat_cookie = xcb_xkb_per_client_flags(xcb.connection, XCB_XKB_ID_USE_CORE_KBD,
+            XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT, XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT, 0, 0, 0);
+
+        xcb_xkb_per_client_flags_reply_t* reply = xcb_xkb_per_client_flags_reply(xcb.connection, repeat_cookie, &error);
+        inl_defer({
+            free(error);
+            free(reply);
+        });
+        if (!reply || error) return Error::PlatformXcbError;
     }
 
     TRY(x_create_cursor(xcb));
@@ -371,11 +402,11 @@ static void window_handle_key_input(Platform& platform, xcb_key_press_event_t& e
         break;
     }
 
-    InputKeyAction action { InputKeyAction::Pressed };
-    if ((event.response_type & XCB_RESPOSE_TYPE_MASK) == XCB_KEY_RELEASE) {
-        action = InputKeyAction::Released;
+    if ((event.response_type & XCB_RESPOSE_TYPE_MASK) == XCB_KEY_PRESS) {
+        platform.key_state[static_cast<uint8_t>(key)] = InputKeyState::Pressed;
+    } else {
+        platform.key_state[static_cast<uint8_t>(key)] = InputKeyState::Released;
     }
-    platform.callback_input_key(platform, key, action);
 }
 
 static void window_handle_mouse_input(Platform& platform, xcb_input_raw_motion_event_t& event) {
@@ -388,7 +419,7 @@ static void window_handle_mouse_input(Platform& platform, xcb_input_raw_motion_e
 void initialize(Platform& platform) { clock_gettime(CLOCK_MONOTONIC, &platform.time_start); }
 
 Error window_create(Platform& platform, uint32_t width, uint32_t height, CallbackWindowResize callback_window_resize,
-    CallbackInputKey callback_input_key, CallbackInputMousePos callback_input_mouse_pos) {
+    CallbackInputMousePos callback_input_mouse_pos) {
 
     TRY(x_create(platform.xcb, static_cast<uint16_t>(width), static_cast<uint16_t>(height), "OpenGL Platform"));
     TRY(egl_create(platform.egl, platform.xcb));
@@ -396,7 +427,6 @@ Error window_create(Platform& platform, uint32_t width, uint32_t height, Callbac
     platform.width = width;
     platform.height = height;
     platform.callback_window_resize = callback_window_resize;
-    platform.callback_input_key = callback_input_key;
     platform.callback_input_mouse_pos = callback_input_mouse_pos;
 
     platform.valid = true;
@@ -424,7 +454,6 @@ void window_process_events(Platform& platform) {
     inl_defer(free(xcb_event));
 
     while ((xcb_event = xcb_poll_for_event(platform.xcb.connection))) {
-
         switch (xcb_event->response_type & XCB_RESPOSE_TYPE_MASK) {
         case XCB_EXPOSE: {
             break;

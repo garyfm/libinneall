@@ -102,16 +102,14 @@ void callback_window_resize([[maybe_unused]] inl::platform::Platform& platform, 
 namespace inl {
 
 Error Window::create(Window& window, uint32_t width, uint32_t height, StringView title,
-    platform::CallbackInputKey callback_input_key, platform::CallbackInputMousePos callback_input_mouse_pos,
-    [[maybe_unused]] ScrollCallback scroll_callback) {
+    platform::CallbackInputMousePos callback_input_mouse_pos, [[maybe_unused]] ScrollCallback scroll_callback) {
 
     window.m_title = title;
 
     log_debug("Creating window: '%s' %u x %u", window.m_title.data(), width, height);
 
     platform::initialize(window.m_platform);
-    TRY(platform::window_create(
-        window.m_platform, width, height, callback_window_resize, callback_input_key, callback_input_mouse_pos));
+    TRY(platform::window_create(window.m_platform, width, height, callback_window_resize, callback_input_mouse_pos));
 
     TRY(platform::window_map(window.m_platform));
 

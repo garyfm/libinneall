@@ -1,5 +1,6 @@
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/byte.hpp>
+#include <libinneall/platform/gl_functions.hpp>
 #include <libinneall/renderer/debug_mesh.hpp>
 #include <libinneall/renderer/renderer.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>

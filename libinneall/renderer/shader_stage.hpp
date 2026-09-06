@@ -2,12 +2,10 @@
 
 #include <libinneall/base/error.hpp>
 #include <libinneall/base/log.hpp>
+#include <libinneall/base/string_view.hpp>
 #include <libinneall/base/unique_handle.hpp>
 #include <libinneall/base/utility.hpp>
-
-#include <subprojects/glad/include/glad/glad.h>
-
-#include <libinneall/base/string_view.hpp>
+#include <libinneall/platform/gl_functions.hpp>
 
 namespace inl {
 

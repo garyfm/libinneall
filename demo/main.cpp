@@ -29,8 +29,6 @@
 #include <libinneall/renderer/vertex_array.hpp>
 #include <libinneall/vertex_data.hpp>
 
-#include <subprojects/glad/include/glad/glad.h>
-
 #include <math.h>
 
 namespace {

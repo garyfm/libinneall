@@ -3,8 +3,8 @@
 #include <libinneall/base/error.hpp>
 #include <libinneall/base/unique_handle.hpp>
 #include <libinneall/base/utility.hpp>
+#include <libinneall/platform/gl_functions.hpp>
 #include <libinneall/renderer/gl_buffer.hpp>
-#include <subprojects/glad/include/glad/glad.h>
 
 namespace inl {
 

@@ -5,8 +5,7 @@
 #include <libinneall/base/span.hpp>
 #include <libinneall/base/unique_handle.hpp>
 #include <libinneall/base/utility.hpp>
-
-#include <subprojects/glad/include/glad/glad.h>
+#include <libinneall/platform/gl_functions.hpp>
 
 namespace inl {
 

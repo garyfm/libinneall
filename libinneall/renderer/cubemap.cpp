@@ -1,4 +1,5 @@
 #include <libinneall/base/assert.hpp>
+#include <libinneall/platform/gl_functions.hpp>
 #include <libinneall/renderer/cubemap.hpp>
 
 namespace inl {

@@ -7,7 +7,6 @@
 #include <libinneall/renderer/color.hpp>
 #include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/shader_program.hpp>
-#include <subprojects/glad/include/glad/glad.h>
 
 #include <libinneall/base/string_view.hpp>
 

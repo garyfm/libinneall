@@ -4,6 +4,7 @@
 #include <libinneall/base/arena.hpp>
 #include <libinneall/base/array.hpp>
 #include <libinneall/base/assert.hpp>
+#include <libinneall/base/defer.hpp>
 #include <libinneall/base/error.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/base/option.hpp>
@@ -27,9 +28,6 @@
 #include <libinneall/renderer/texture.hpp>
 #include <libinneall/renderer/vertex_array.hpp>
 #include <libinneall/vertex_data.hpp>
-#include <libinneall/window.hpp>
-
-#include <xcb/xfixes.h>
 
 #include <subprojects/glad/include/glad/glad.h>
 
@@ -62,16 +60,16 @@ void process_input_keys(inl::platform::Platform& platform) {
     static constexpr float movement_speed = 4.5f;
 
     float velocity = movement_speed * g_delta_time;
-    if (get_input_key_state(platform, InputKey::w) == InputKeyState::Pressed) {
+    if (input_key_state(platform, InputKey::w) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Forward, velocity);
     }
-    if (get_input_key_state(platform, InputKey::s) == InputKeyState::Pressed) {
+    if (input_key_state(platform, InputKey::s) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Backward, velocity);
     }
-    if (get_input_key_state(platform, InputKey::a) == InputKeyState::Pressed) {
+    if (input_key_state(platform, InputKey::a) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Left, velocity);
     }
-    if (get_input_key_state(platform, InputKey::d) == InputKeyState::Pressed) {
+    if (input_key_state(platform, InputKey::d) == InputKeyState::Pressed) {
         g_camera.move(inl::Camera::Direction::Right, velocity);
     }
 }
@@ -82,7 +80,7 @@ void callback_input_mouse_pos([[maybe_unused]] inl::platform::Platform& platform
     g_camera.rotate(x_pos * sensitivity, -y_pos * sensitivity);
 }
 
-void scroll_callback(
+[[maybe_unused]] void scroll_callback(
     [[maybe_unused]] inl::platform::Platform& platform, [[maybe_unused]] double x_offset, double y_offset) {
     g_camera.zoom(static_cast<float>(y_offset));
 }
@@ -99,15 +97,24 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    inl::Window window;
-    Error error = Window::create(window, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "libinneall demo",
-        callback_input_mouse_pos, scroll_callback);
-    inl_assert(error == Error::Ok, "Failed to create Platform");
+    Error error {};
+
+    platform::Platform platform {};
+
+    error = platform::create(
+        platform, "libInneal", DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, callback_input_mouse_pos);
+    inl_defer(platform::destroy(platform));
+    inl_assert(error == Error::Ok, "Failed to create platform");
+
+    error = platform::window_map(platform);
+    inl_assert(error == Error::Ok, "Failed to map window");
 
     ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
+    inl_defer(release_backing(scratch_backing.data()));
     Arena scratch_arena { scratch_backing.data(), scratch_backing.size() };
 
     ByteSpan main_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
+    inl_defer(release_backing(main_backing.data()));
     Arena main_arena { main_backing.data(), main_backing.size() };
 
     String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
@@ -220,8 +227,8 @@ int main(int argc, char* argv[]) {
     renderer.set_debug_shader(shader_program_debug);
     renderer.set_skybox_shader(shader_program_skybox);
 
-    while (!platform::window_should_exit(window.native_window())) {
-        float current_frame_time = platform::get_elapsed_time(window.native_window());
+    while (!platform::window_should_exit(platform)) {
+        float current_frame_time = platform::elapsed_time(platform);
         g_delta_time = current_frame_time - g_last_frame_time;
         g_last_frame_time = current_frame_time;
 
@@ -230,7 +237,7 @@ int main(int argc, char* argv[]) {
 
         RenderView render_view {
             .view = g_camera.view_matrix(),
-            .projection = g_camera.perspective_matrix(window.aspect_ratio()),
+            .projection = g_camera.perspective_matrix(aspect_ratio(platform)),
             .pos = g_camera.position(),
         };
 
@@ -240,14 +247,12 @@ int main(int argc, char* argv[]) {
         renderer.render(render_scene, render_view);
         renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 
-        window.swap_buffers();
-        window.process_events();
-        process_input_keys(window.native_window());
+        platform::gfx_swap_buffers(platform);
+        platform::window_process_events(platform);
+        process_input_keys(platform);
     }
 
     log_info("Exiting...");
-    release_backing(scratch_backing.data());
-    release_backing(main_backing.data());
 
     return 0;
 }

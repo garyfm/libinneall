@@ -14,7 +14,7 @@ struct Platform;
 
 enum class InputKeyState : uint8_t {
     Released = 0,
-    Pressed,
+    Pressed = 1,
 };
 
 enum class InputKey : uint8_t {
@@ -26,7 +26,6 @@ enum class InputKey : uint8_t {
     ESC,
 };
 
-using CallbackWindowResize = void (*)(Platform&, int32_t, int32_t);
 using CallbackInputMousePos = void (*)(Platform&, float, float);
 
 struct Xcb {
@@ -58,28 +57,31 @@ struct Platform {
     uint32_t width;
     uint32_t height;
     bool should_exit {};
-    CallbackWindowResize callback_window_resize;
     CallbackInputMousePos callback_input_mouse_pos;
 
     Array<InputKeyState, 256> key_state {};
 };
 
-void initialize(Platform& platform);
-Error window_create(Platform& platform, uint32_t width, uint32_t height, CallbackWindowResize callback_window_resize,
+Error create(Platform& platform, StringView tite, uint32_t width, uint32_t height,
     CallbackInputMousePos callback_input_mouse_pos);
+void destroy(Platform& platform);
 
-void window_destroy(Platform& platform);
 Error window_map(Platform& platform);
 void window_resize(Platform& platform, uint32_t width, uint32_t height);
 void window_process_events(Platform& platform);
 bool window_should_exit(Platform& platform);
 
-static inline InputKeyState get_input_key_state(Platform& platform, InputKey key) {
+Error gfx_init(Platform& platform);
+void gfx_swap_buffers(Platform& platform);
+
+static inline InputKeyState input_key_state(Platform& platform, InputKey key) {
     return platform.key_state[static_cast<uint8_t>(key)];
 }
 
-void swap_buffers(Platform& platform);
+static inline float aspect_ratio(Platform& platform) {
+    return static_cast<float>(platform.width) / static_cast<float>(platform.height);
+};
 
-float get_elapsed_time(Platform& platform);
+float elapsed_time(Platform& platform);
 
 } // namespace inl::platform

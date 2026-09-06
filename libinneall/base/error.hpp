@@ -27,6 +27,7 @@ namespace inl {
     apply(PlatformGfxFailedToConfigure) \
     apply(PlatformGfxFailedToMakeCurrent) \
     apply(PlatformGfxFailedToCreateCtx) \
+    apply(PlatformGladFailedToLoad) \
     apply(PlatformXcbError) \
     apply(PlatformEglError) \
     apply(PpmInvalidFormat) \
@@ -58,10 +59,7 @@ namespace inl {
     apply(RendererShaderProgramFailedToLink) \
     apply(RendererTextureFailedToCreate) \
     apply(RendererCubemapFailedToCreate) \
-    apply(RendererVertexArrayFailedToCreate) \
-    apply(WindowGlfwFailedToInit) \
-    apply(WindowGlfwFailedToCreate) \
-    apply(WindowGladFailedToLoad)
+    apply(RendererVertexArrayFailedToCreate)
 
 // clang-format on
 

@@ -1,11 +1,9 @@
 #include <libinneall/base/defer.hpp>
 #include <libinneall/base/log.hpp>
+#include <libinneall/platform/gl_functions.hpp>
 #include <libinneall/platform/platform.hpp>
-#include <subprojects/glad/include/glad/glad.h>
 
 #include <EGL/eglext.h>
-#include <GL/gl.h>
-#include <GL/glcorearb.h>
 #include <X11/keysym.h>
 #include <unistd.h>
 #include <xcb/xinput.h>
@@ -516,9 +514,7 @@ void gfx_swap_buffers(Platform& platform) {
 }
 
 Error gfx_init(Platform& platform) {
-    if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress)) {
-        return Error::PlatformGladFailedToLoad;
-    }
+    gl_load_functions();
 
     glViewport(0, 0, static_cast<GLsizei>(platform.width), static_cast<GLsizei>(platform.height));
 

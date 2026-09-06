@@ -21,6 +21,7 @@ source_files = files(
   'math/vector4.cpp',
   'mesh_data.cpp',
   'platform/platform_linux.cpp',
+  'platform/gl_functions.cpp',
   'renderer/cubemap.cpp',
   'renderer/debug_mesh.cpp',
   'renderer/gl_buffer.cpp',
@@ -53,7 +54,6 @@ test_files = files(
 
 gl_dep = dependency('gl')
 doctest_dep = dependency('doctest')
-glad_dep = dependency('glad')
 
 xcb_dep = dependency('xcb', required: true)
 xcb_util_keysyms_dep = dependency('xcb-keysyms', required: true)
@@ -67,7 +67,7 @@ libinneall = static_library(
     'libinneall',
     source_files,
     include_directories: include_dir,
-    dependencies: [gl_dep, glad_dep, xcb_dep, xcb_util_keysyms_dep, xcb_xinput_dep, xcb_xkb_dep,   egl_dep]
+    dependencies: [gl_dep, xcb_dep, xcb_util_keysyms_dep, xcb_xinput_dep, xcb_xkb_dep,   egl_dep]
 )
 
 libinneall_dep = declare_dependency(

@@ -3,12 +3,10 @@
 #include <libinneall/base/arena.hpp>
 #include <libinneall/base/hash_map.hpp>
 #include <libinneall/base/string.hpp>
-#include <libinneall/base/unique_handle.hpp>
-#include <libinneall/renderer/shader_stage.hpp>
-
-#include <subprojects/glad/include/glad/glad.h>
-
 #include <libinneall/base/string_view.hpp>
+#include <libinneall/base/unique_handle.hpp>
+#include <libinneall/platform/gl_functions.hpp>
+#include <libinneall/renderer/shader_stage.hpp>
 
 namespace inl {
 

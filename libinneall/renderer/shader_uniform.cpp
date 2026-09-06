@@ -1,5 +1,6 @@
 #include <libinneall/base/string.hpp>
 #include <libinneall/light.hpp>
+#include <libinneall/platform/gl_functions.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
 
 namespace inl {

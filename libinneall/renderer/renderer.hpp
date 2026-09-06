@@ -8,8 +8,6 @@
 #include <libinneall/renderer/model.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 
-#include <subprojects/glad/include/glad/glad.h>
-
 namespace inl {
 
 struct RenderView {

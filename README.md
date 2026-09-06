@@ -95,6 +95,6 @@ Platform layer :
 - [x] Basic mouse input
 - [x] Handle close
 - [x] Time
-- [ ] Remove GLAD
+- [x] Remove GLAD
 - [ ] Memory
 - [ ] Files

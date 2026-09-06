@@ -7,7 +7,6 @@ build/
 *.ppm
 
 subprojects/doctest-2.4.12
-subprojects/glfw-3.4
 subprojects/packagecache
 
 assets/

@@ -91,10 +91,10 @@ Size: 5116096
 
 Platform layer :
 - [x] Create Window
-- [ ] Basic keyboard input
+- [x] Basic keyboard input
 - [x] Basic mouse input
 - [x] Handle close
 - [x] Time
+- [ ] Remove GLAD
 - [ ] Memory
 - [ ] Files
-- [ ] Remove GLAD

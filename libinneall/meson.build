@@ -31,7 +31,6 @@ source_files = files(
   'renderer/shader_uniform.cpp',
   'renderer/texture.cpp',
   'renderer/vertex_array.cpp',
-  'window.cpp',
 )
 
 test_files = files(

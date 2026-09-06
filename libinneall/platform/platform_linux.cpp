@@ -1,6 +1,7 @@
 #include <libinneall/base/defer.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/platform/platform.hpp>
+#include <subprojects/glad/include/glad/glad.h>
 
 #include <EGL/eglext.h>
 #include <GL/gl.h>
@@ -211,7 +212,6 @@ static Error x_create(Xcb& xcb, uint16_t width, uint16_t height, StringView wind
 }
 
 static void x_destroy(Xcb& xcb) {
-
     free(xcb.key_symbols);
     free(xcb.keyboard_mapping_reply);
     xcb_free_gc(xcb.connection, xcb.gc);
@@ -233,7 +233,7 @@ static xcb_keysym_t x_get_keysym(Xcb& xcb, xcb_key_press_event_t& key_event) {
     return keysym;
 }
 
-[[maybe_unused]] static Error x_grab_cursor(Xcb& xcb) {
+static Error x_grab_cursor(Xcb& xcb) {
 
     xcb_grab_pointer_cookie_t cookie = xcb_grab_pointer(xcb.connection, 1, xcb.platform, XCB_EVENT_MASK_POINTER_MOTION,
         XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, xcb.platform, xcb.cursor, XCB_CURRENT_TIME);
@@ -250,7 +250,7 @@ static xcb_keysym_t x_get_keysym(Xcb& xcb, xcb_key_press_event_t& key_event) {
     return Error::Ok;
 }
 
-[[maybe_unused]] static Error x_ungrab_cursor(Xcb& xcb) {
+static Error x_ungrab_cursor(Xcb& xcb) {
 
     xcb_void_cookie_t cookie = xcb_ungrab_pointer_checked(xcb.connection, XCB_CURRENT_TIME);
     xcb_generic_error_t* error = xcb_request_check(xcb.connection, cookie);
@@ -416,24 +416,149 @@ static void window_handle_mouse_input(Platform& platform, xcb_input_raw_motion_e
     platform.callback_input_mouse_pos(platform, (float)dx, (float)dy);
 }
 
-void initialize(Platform& platform) { clock_gettime(CLOCK_MONOTONIC, &platform.time_start); }
+void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLenum severity,
+    [[maybe_unused]] GLsizei length, const char* message, [[maybe_unused]] const void* userParam) {
+    // ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
-Error window_create(Platform& platform, uint32_t width, uint32_t height, CallbackWindowResize callback_window_resize,
-    CallbackInputMousePos callback_input_mouse_pos) {
+    inl::StringView source_str {};
+    switch (source) {
+    case GL_DEBUG_SOURCE_API:
+        source_str = "api";
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+        source_str = "window system";
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+        source_str = "shader compiler";
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+        source_str = "third party";
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+        source_str = "application";
+        break;
+    case GL_DEBUG_SOURCE_OTHER:
+        source_str = "other";
+        break;
+    default:
+        source_str = "unknown";
+    }
 
-    TRY(x_create(platform.xcb, static_cast<uint16_t>(width), static_cast<uint16_t>(height), "OpenGL Platform"));
-    TRY(egl_create(platform.egl, platform.xcb));
+    inl::StringView type_str {};
+    switch (type) {
+    case GL_DEBUG_TYPE_ERROR:
+        type_str = "error";
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        type_str = "deprecated behaviour";
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        type_str = "undefined behaviour";
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        type_str = "portability";
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        type_str = "performance";
+        break;
+    case GL_DEBUG_TYPE_MARKER:
+        type_str = "marker";
+        break;
+    case GL_DEBUG_TYPE_PUSH_GROUP:
+        type_str = "push group";
+        break;
+    case GL_DEBUG_TYPE_POP_GROUP:
+        type_str = "pop group";
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        type_str = "other";
+        break;
+    default:
+        type_str = "unknown";
+    }
 
-    platform.width = width;
-    platform.height = height;
-    platform.callback_window_resize = callback_window_resize;
-    platform.callback_input_mouse_pos = callback_input_mouse_pos;
+    inl::StringView severity_str {};
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_HIGH:
+        severity_str = "high";
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        severity_str = "medium";
+        break;
+    case GL_DEBUG_SEVERITY_LOW:
+        severity_str = "low";
+        break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        severity_str = "notification";
+        break;
+    default:
+        severity_str = "unknown";
+    }
 
-    platform.valid = true;
+    log_info("OpenGL debug callback - servierty: %s source: %s type: %s msg: %s ", severity_str, source_str, type_str,
+        message);
+
+    if (type == GL_DEBUG_TYPE_ERROR) {
+        log_error("OpenGL Debug Error... Abort");
+        abort();
+    }
+}
+
+static void gfx_resize([[maybe_unused]] inl::platform::Platform& platform, int width, int height) {
+    // NOTE: x11 will handle resizing the window if the user changes its size so only update the opengl view port
+    glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+}
+
+void gfx_swap_buffers(Platform& platform) {
+    inl_assert(platform.valid, "Invalid platform");
+    eglSwapBuffers(platform.egl.display, platform.egl.surface);
+}
+
+Error gfx_init(Platform& platform) {
+    if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress)) {
+        return Error::PlatformGladFailedToLoad;
+    }
+
+    glViewport(0, 0, static_cast<GLsizei>(platform.width), static_cast<GLsizei>(platform.height));
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(opengl_debug_callback, nullptr);
+
+    // NOTE: This can be used to filter opengl debug messages
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+    GLint vp[4];
+    glGetIntegerv(GL_VIEWPORT, vp);
+
+    log_debug("GL: %d %d %d %d\n", vp[0], vp[1], vp[2], vp[3]);
+
     return Error::Ok;
 }
 
-void window_destroy(Platform& platform) {
+Error create(Platform& platform, StringView title, uint32_t width, uint32_t height,
+    CallbackInputMousePos callback_input_mouse_pos) {
+
+    clock_gettime(CLOCK_MONOTONIC, &platform.time_start);
+
+    log_debug("Creating window: '%s' %u x %u", title, width, height);
+
+    platform.width = width;
+    platform.height = height;
+    platform.callback_input_mouse_pos = callback_input_mouse_pos;
+
+    TRY(x_create(platform.xcb, static_cast<uint16_t>(width), static_cast<uint16_t>(height), "OpenGL Platform"));
+    TRY(egl_create(platform.egl, platform.xcb));
+    TRY(gfx_init(platform));
+
+    platform.valid = true;
+
+    return Error::Ok;
+}
+
+void destroy(Platform& platform) {
+    platform.valid = false;
     egl_destroy(platform.egl);
     x_destroy(platform.xcb);
 }
@@ -459,10 +584,11 @@ void window_process_events(Platform& platform) {
             break;
         }
         case XCB_CONFIGURE_NOTIFY: {
+            // TODO: Fix window vs graphic resize black box's
             xcb_configure_notify_event_t* configure_event = (xcb_configure_notify_event_t*)xcb_event;
             platform.width = configure_event->width;
             platform.height = configure_event->height;
-            platform.callback_window_resize(platform, configure_event->width, configure_event->height);
+            gfx_resize(platform, configure_event->width, configure_event->height);
             break;
         }
         case XCB_KEY_PRESS:
@@ -534,12 +660,7 @@ void window_resize(Platform& platform, uint32_t width, uint32_t height) {
 
 bool window_should_exit(Platform& platform) { return platform.should_exit; }
 
-void swap_buffers(Platform& platform) {
-    inl_assert(platform.valid, "Invalid platform");
-    eglSwapBuffers(platform.egl.display, platform.egl.surface);
-}
-
-float get_elapsed_time(Platform& platform) {
+float elapsed_time(Platform& platform) {
     timespec now {};
     clock_gettime(CLOCK_MONOTONIC, &now);
 

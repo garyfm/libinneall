@@ -19,11 +19,11 @@ public:
 
     static constexpr size_t DEFAULT_ALIGNMENT = 16;
 
-    void* alloc(size_t size, size_t alignment = DEFAULT_ALIGNMENT);
+    void* push(size_t size, size_t alignment = DEFAULT_ALIGNMENT);
 
-    template <PodType T> T* alloc() { return static_cast<T*>(alloc(sizeof(T), alignof(T))); };
+    template <PodType T> T* push() { return static_cast<T*>(push(sizeof(T), alignof(T))); };
 
-    template <PodType T> T* alloc_array(size_t count) { return static_cast<T*>(alloc(count * sizeof(T), alignof(T))); };
+    template <PodType T> T* push_array(size_t count) { return static_cast<T*>(push(count * sizeof(T), alignof(T))); };
 
     void reset() { m_offset = 0; }
     void reset_to(size_t pos) { m_offset = pos; }
@@ -33,7 +33,7 @@ public:
     ArenaMark mark() const { return { m_offset }; };
     size_t capacity() const { return m_capacity; };
     uint8_t const* memory() const { return m_memory; };
-    uint8_t const* next_alloc() const { return m_memory + m_offset; };
+    uint8_t const* memory_end() const { return m_memory + m_offset; };
 #if BUILD_DEBUG
     size_t highwater_mark() const { return m_highwater_mark; };
 #else

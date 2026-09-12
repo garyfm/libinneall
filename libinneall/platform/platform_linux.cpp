@@ -554,6 +554,8 @@ Error create(Platform& platform, StringView title, uint32_t width, uint32_t heig
 }
 
 void destroy(Platform& platform) {
+    log_debug("Exiting...");
+
     platform.valid = false;
     egl_destroy(platform.egl);
     x_destroy(platform.xcb);
@@ -669,6 +671,17 @@ float elapsed_time(Platform& platform) {
     float elapsed = float(td.tv_sec) + (float(td.tv_nsec) / NS_PER_SEC);
 
     return elapsed;
+}
+
+void* mem_alloc(size_t size) {
+    void* mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    inl_assert(mem != MAP_FAILED, "mmap failed");
+    return mem;
+}
+
+void mem_free(void* mem, size_t size) {
+    int result = munmap(mem, size);
+    inl_assert(result == 0, "unmap failed");
 }
 
 } // namespace inl::platform

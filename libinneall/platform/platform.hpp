@@ -4,6 +4,7 @@
 #include <libinneall/base/error.hpp>
 
 #include <EGL/egl.h>
+#include <sys/mman.h>
 #include <time.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
@@ -83,5 +84,8 @@ static inline float aspect_ratio(Platform& platform) {
 };
 
 float elapsed_time(Platform& platform);
+
+void* mem_alloc(size_t size);
+void mem_free(void* mem, size_t size);
 
 } // namespace inl::platform

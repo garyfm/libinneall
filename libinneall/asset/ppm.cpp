@@ -49,11 +49,9 @@ inl::Error extract_int(inl::Span<uint8_t> buffer, int32_t& value, size_t& cursor
     // TODO: Implement from_int rather than strtol
     long int result = strtol(str.data(), &end, 10);
 
-    if (end == str.data())
-        return inl::Error::PpmFailedToExtractInteger;
+    if (end == str.data()) return inl::Error::PpmFailedToExtractInteger;
 
-    if (errno == ERANGE)
-        return inl::Error::PpmFailedToExtractInteger;
+    if (errno == ERANGE) return inl::Error::PpmFailedToExtractInteger;
 
     value = static_cast<int32_t>(result);
 
@@ -111,7 +109,7 @@ Error load(Image& image, ByteSpan raw_data) {
 void flip_vertically(Arena& arena, Image& image) {
 
     ArenaTemp arena_temp { arena };
-    uint8_t* temp_row = arena_temp.arena->alloc_array<uint8_t>(image.row_size_bytes());
+    uint8_t* temp_row = arena_temp.arena->push_array<uint8_t>(image.row_size_bytes());
 
     for (size_t row = 0; row < image.height; ++row) {
         size_t top_cursor { row * image.row_size_bytes() };

@@ -14,7 +14,7 @@ public:
         , m_data {}
         , m_size {}
         , m_capacity { capacity } {
-        m_data = m_arena->alloc_array<T>(m_capacity);
+        m_data = m_arena->push_array<T>(m_capacity);
     };
 
     void push(T const& ele) {

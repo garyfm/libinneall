@@ -16,7 +16,7 @@ public:
         , m_capacity { initial_capacity }
         , m_growth_factor { growth_factor } {
         inl_assert(growth_factor >= 2, "Invalid growth factor");
-        m_data = m_arena->alloc_array<T>(m_capacity);
+        m_data = m_arena->push_array<T>(m_capacity);
     };
 
     INL_DEL_COPY_MOVE(ArrayDyn);
@@ -27,15 +27,15 @@ public:
         if (m_size < m_capacity) {
             // Space in array
             m_data[m_size] = ele;
-        } else if (reinterpret_cast<uintptr_t>(m_arena->next_alloc()) == reinterpret_cast<uintptr_t>(end())) {
+        } else if (reinterpret_cast<uintptr_t>(m_arena->memory_end()) == reinterpret_cast<uintptr_t>(end())) {
             // Nothing else has been pushed to the arena so it is safe to extended it
-            m_arena->alloc(sizeof(T));
+            m_arena->push(sizeof(T));
             ++m_capacity;
             m_data[m_size] = ele;
         } else {
             // Realloc array
             size_t new_capacity = m_capacity == 0 ? 1 : m_capacity * m_growth_factor;
-            T* new_memory = m_arena->alloc_array<T>(new_capacity);
+            T* new_memory = m_arena->push_array<T>(new_capacity);
             m_capacity = new_capacity;
 
             memcpy(new_memory, m_data, m_size * sizeof(T));

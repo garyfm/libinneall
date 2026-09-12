@@ -58,7 +58,7 @@ TEST_CASE("ArrayDyn: Test growth realloc") {
     CHECK(array.size() == 10);
     CHECK(array.capacity() == 10);
 
-    arena.alloc(1);
+    arena.push(1);
 
     // Trigger realloc
     array.push(11);

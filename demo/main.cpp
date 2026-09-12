@@ -142,31 +142,35 @@ int main(int argc, char* argv[]) {
     inl_assert(error == Error::Ok, "Failed to load shader lighting");
     scratch_arena.reset();
 
+    AssetStore asset_store {};
+
     assets_path.overwrite("/backpack", assets_path_root_pos);
-    size_t model_path_root_pos { assets_path.size() };
 
-    Mesh mesh {};
-    error = load_mesh(scratch_arena, mesh, assets_path.append("/mesh.obj"));
-    inl_assert(error == Error::Ok, "Failed to load mesh");
+    Model* model_backpack = asset_store.push_model();
+    error = load_model(scratch_arena, asset_store, *model_backpack, assets_path);
+    inl_assert(error == Error::Ok, "Failed to load model");
     scratch_arena.reset();
+    model_backpack->material.shader = &shader_program_lighting;
 
-    Texture texture_albedo {};
-    error
-        = load_texture(scratch_arena, texture_albedo, assets_path.overwrite("/albedo.ppm", model_path_root_pos), false);
-    inl_assert(error == Error::Ok, "Failed to load texture_albedo");
+    assets_path.overwrite("/sword-sting", assets_path_root_pos);
+    Model* model_sword = asset_store.push_model();
+    error = load_model(scratch_arena, asset_store, *model_sword, assets_path);
+    inl_assert(error == Error::Ok, "Failed to load model");
     scratch_arena.reset();
+    model_sword->material.shader = &shader_program_lighting;
 
-    Texture texture_specular {};
-    error = load_texture(
-        scratch_arena, texture_specular, assets_path.overwrite("/specular.ppm", model_path_root_pos), false);
-    inl_assert(error == Error::Ok, "Failed to load texture_albedo");
+    model_sword->model_matrix = scale(model_sword->model_matrix, 0.06f);
+    model_sword->model_matrix = rotate(model_sword->model_matrix, to_radians(-90), { 1, 0, 0 });
+    model_sword->model_matrix = translate(model_sword->model_matrix, { 5, 0, 0 });
+
+    assets_path.overwrite("/woodhouse", assets_path_root_pos);
+    Model* model_house = asset_store.push_model();
+    error = load_model(scratch_arena, asset_store, *model_house, assets_path);
+    inl_assert(error == Error::Ok, "Failed to load model");
     scratch_arena.reset();
-
-    Material material { &texture_albedo, &texture_specular, 32, &shader_program_lighting };
-
-    Matrix4 model_matrix { 1 };
-
-    Model model { &mesh, &material, model_matrix };
+    model_house->model_matrix = scale(model_house->model_matrix, 5.00f);
+    model_house->model_matrix = translate(model_house->model_matrix, { -20, -2, 0 });
+    model_house->material.shader = &shader_program_lighting;
 
     // Skybox
     assets_path.overwrite("/skybox", assets_path_root_pos);
@@ -198,8 +202,8 @@ int main(int argc, char* argv[]) {
     };
 
     Matrix4 model_matrix_light { 1 };
-    model_matrix_light = translate(model_matrix_light, light_point.pos);
     model_matrix_light = scale(model_matrix_light, 0.1f);
+    model_matrix_light = translate(model_matrix_light, light_point.pos);
 
     LightSpot light_spot {
         .pos = g_camera.position(),
@@ -211,8 +215,14 @@ int main(int argc, char* argv[]) {
         .outer_cutoff_cosine = cosf(to_radians(17.5f)),
     };
 
+    Matrix4 model_matrix_ground { 1 };
+    // TODO: fix transforms
+    model_matrix_ground = scale(model_matrix_ground, 100.0f);
+    model_matrix_ground = rotate(model_matrix_ground, to_radians(-90.0f), { 1, 0, 0 });
+    model_matrix_ground = translate(model_matrix_ground, { 0, -2, 0 });
+
     RenderScene render_scene {
-        .models = { &model, 1 },
+        .models = asset_store.models(),
         .light_directional = &light_directional,
         .light_points = { &light_point, 1 },
         .light_spot = &light_spot,
@@ -244,6 +254,9 @@ int main(int argc, char* argv[]) {
         renderer.draw_skybox(skybox);
         renderer.render(render_scene, render_view);
         renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
+
+        // Ground
+        renderer.draw_debug_quad(model_matrix_ground, { 0.2f, 0.2f, 0.2f });
 
         platform::gfx_swap_buffers(platform);
         platform::window_process_events(platform);

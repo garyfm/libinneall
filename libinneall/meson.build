@@ -2,6 +2,7 @@ include_dir = '..'
 
 source_files = files(
   'asset/asset.cpp',
+  'asset/asset_store.cpp',
   'asset/obj.cpp',
   'asset/ppm.cpp',
   'base/arena.cpp',

@@ -2,7 +2,6 @@
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/log.hpp>
 #include <libinneall/renderer/shader_stage.hpp>
-#include <libinneall/renderer/texture.hpp>
 
 #include <stdio.h>
 
@@ -175,6 +174,32 @@ Error load_mesh(Arena& arena, Mesh& mesh, StringView path) {
     MeshData mesh_data = to_mesh_data(arena, obj_model);
 
     return Mesh::create(mesh, mesh_data);
+}
+
+Error load_model(Arena& arena, AssetStore& store, Model& model, StringView path) {
+    log_info("Loading model: %s", path.data());
+
+    String<256> scratch_path { path };
+    size_t model_dir_pos = path.size();
+
+    Mesh* mesh = store.push_mesh();
+    TRY(load_mesh(arena, *mesh, scratch_path.append("/mesh.obj")));
+    arena.reset();
+
+    Texture* texture_albedo = store.push_texture();
+    TRY(load_texture(arena, *texture_albedo, scratch_path.overwrite("/albedo.ppm", model_dir_pos), false));
+    arena.reset();
+
+    Texture* texture_specular = store.push_texture();
+
+    // TODO: This should be optional
+    TRY(load_texture(arena, *texture_specular, scratch_path.overwrite("/specular.ppm", model_dir_pos), false));
+    arena.reset();
+
+    model.mesh = mesh;
+    model.material = { texture_albedo, texture_specular, 32 };
+
+    return Error::Ok;
 }
 
 } // namespace inl

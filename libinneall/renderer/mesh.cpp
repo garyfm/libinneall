@@ -68,9 +68,8 @@ Error Mesh::create(Mesh& mesh, MeshData const& mesh_data) {
 }
 
 Mesh::~Mesh() {
-    if (is_bound()) {
-        unbind();
-    }
+    if (!m_created) return;
+    if (is_bound()) unbind();
 }
 
 void Mesh::bind() {

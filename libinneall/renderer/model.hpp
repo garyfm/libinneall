@@ -2,15 +2,14 @@
 
 #include <libinneall/math/matrix4.hpp>
 #include <libinneall/renderer/material.hpp>
-#include <libinneall/renderer/mesh.hpp>
 
 namespace inl {
 
-struct Model {
-    Mesh* const mesh {};
-    Material* const material {};
+class Mesh;
 
-    // TODO: make this a transform
+struct Model {
+    Mesh* mesh {};
+    Material material {};
     Matrix4 model_matrix { 1 };
 };
 

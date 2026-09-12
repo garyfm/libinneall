@@ -45,7 +45,8 @@ void Renderer::render(RenderScene& scene, RenderView const& view) {
     inl_assert(m_created, "Invalid Renderer");
 
     for (auto& model : scene.models) {
-        ShaderProgram* const shader = model.material->shader;
+        ShaderProgram* const shader = model.material.shader;
+        inl_assert(shader != nullptr, "Invalid shader");
         shader->use();
 
         m_ubo_render_view.upload(to_bytes(view));
@@ -72,27 +73,26 @@ void Renderer::render(Model& model) {
     inl_assert(m_created, "Invalid Renderer");
 
     inl_assert(model.mesh != nullptr, "Empty mesh");
-    inl_assert(model.material != nullptr, "Empty material");
-    inl_assert(model.material->shader != nullptr, "Empty shader");
+    inl_assert(model.material.shader != nullptr, "Empty shader");
 
     model.mesh->bind();
-    model.material->shader->use();
+    model.material.shader->use();
 
-    if (model.material->albedo != nullptr) {
-        model.material->albedo->bind(static_cast<GLuint>(TextureUnit::Albedo));
+    if (model.material.albedo != nullptr) {
+        model.material.albedo->bind(static_cast<GLuint>(TextureUnit::Albedo));
     }
 
-    if (model.material->albedo != nullptr) {
-        model.material->specular->bind(static_cast<GLuint>(TextureUnit::Specular));
+    if (model.material.specular != nullptr) {
+        model.material.specular->bind(static_cast<GLuint>(TextureUnit::Specular));
     }
 
-    set_uniform(*model.material->shader, "u_material", *model.material);
+    set_uniform(*model.material.shader, "u_material", model.material);
 
-    set_uniform(*model.material->shader, "u_model", model.model_matrix);
+    set_uniform(*model.material.shader, "u_model", model.model_matrix);
 
     Matrix3 normal_matrix { 1 };
     normal_matrix = Matrix3(transpose(inverse(model.model_matrix)));
-    set_uniform(*model.material->shader, "u_normal_matrix", normal_matrix);
+    set_uniform(*model.material.shader, "u_normal_matrix", normal_matrix);
 
     if (model.mesh->index_count() != 0) {
         glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(model.mesh->index_count()), GL_UNSIGNED_INT, 0);

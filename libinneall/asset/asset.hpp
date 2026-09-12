@@ -1,3 +1,4 @@
+#include <libinneall/asset/asset_store.hpp>
 #include <libinneall/asset/ppm.hpp>
 #include <libinneall/base/arena.hpp>
 #include <libinneall/base/array.hpp>
@@ -8,6 +9,7 @@
 #include <libinneall/renderer/cubemap.hpp>
 #include <libinneall/renderer/material.hpp>
 #include <libinneall/renderer/mesh.hpp>
+#include <libinneall/renderer/model.hpp>
 #include <libinneall/renderer/shader_program.hpp>
 #include <libinneall/renderer/texture.hpp>
 
@@ -25,5 +27,5 @@ Error load_cubemap(Arena& arena, Cubemap& cubemap, StringView path, bool flip_ve
 Error load_shader(Arena& perm_arena, Arena& scratch_arena, ShaderProgram& shader_program, StringView vertex_shader_path,
     StringView fragment_shader_path);
 Error load_mesh(Arena& arena, Mesh& mesh, StringView path);
-
+Error load_model(Arena& arena, AssetStore& store, Model& model, StringView path);
 } // namespace inl

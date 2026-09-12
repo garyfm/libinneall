@@ -1,5 +1,5 @@
 #include <libinneall/asset/obj.hpp>
-#include <libinneall/base/array_dyn.hpp>
+#include <libinneall/base/array_list.hpp>
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/hash_map.hpp>
 #include <libinneall/base/log.hpp>
@@ -10,8 +10,8 @@ namespace inl {
 
 MeshData to_mesh_data(Arena& arena, obj::Model const& model) {
 
-    ArrayDyn<VertexData> vertex_data { arena, model.face_corners.size() };
-    ArrayDyn<uint32_t> index_data { arena, model.face_corners.size() };
+    ArrayList<VertexData> vertex_data { arena, model.face_corners.size() };
+    ArrayList<uint32_t> index_data { arena, model.face_corners.size() };
 
     auto vertex_map = HashMap<VertexData, uint32_t>::create(arena, model.face_corners.size());
     uint32_t ebo_index { 0 };

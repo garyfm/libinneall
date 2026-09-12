@@ -7,9 +7,9 @@
 #include <libinneall/base/utility.hpp>
 
 namespace inl {
-template <PodType T> class ArrayDyn {
+template <PodType T> class ArrayList {
 public:
-    ArrayDyn(Arena& arena, size_t initial_capacity, size_t growth_factor = 2)
+    ArrayList(Arena& arena, size_t initial_capacity, size_t growth_factor = 2)
         : m_arena { &arena }
         , m_data {}
         , m_size {}
@@ -19,7 +19,7 @@ public:
         m_data = m_arena->push_array<T>(m_capacity);
     };
 
-    INL_DEL_COPY_MOVE(ArrayDyn);
+    INL_DEL_COPY_MOVE(ArrayList);
 
     void push(T const& ele) {
         inl_assert(m_arena != nullptr, "Invalid arena");

@@ -1,12 +1,12 @@
 #include <doctest.h>
 
 #include <libinneall/base/arena.hpp>
-#include <libinneall/base/array_dyn.hpp>
+#include <libinneall/base/array_list.hpp>
 
-TEST_CASE("ArrayDyn: Test growth none") {
+TEST_CASE("ArrayList: Test growth none") {
     uint8_t backing[100] = { 0 };
     inl::Arena arena { backing, sizeof(backing) };
-    inl::ArrayDyn<int> array { arena, 10 };
+    inl::ArrayList<int> array { arena, 10 };
     CHECK(array.size() == 0);
     CHECK(array.capacity() == 10);
 
@@ -21,10 +21,10 @@ TEST_CASE("ArrayDyn: Test growth none") {
     CHECK(array.capacity() == 10);
 }
 
-TEST_CASE("ArrayDyn: Test growth extend") {
+TEST_CASE("ArrayList: Test growth extend") {
     uint8_t backing[100] = { 0 };
     inl::Arena arena { backing, sizeof(backing) };
-    inl::ArrayDyn<int> array { arena, 10 };
+    inl::ArrayList<int> array { arena, 10 };
     CHECK(array.size() == 0);
     CHECK(array.capacity() == 10);
 
@@ -43,10 +43,10 @@ TEST_CASE("ArrayDyn: Test growth extend") {
     CHECK(array.capacity() == 11);
 }
 
-TEST_CASE("ArrayDyn: Test growth realloc") {
+TEST_CASE("ArrayList: Test growth realloc") {
     uint8_t backing[200] = { 0 };
     inl::Arena arena { backing, sizeof(backing) };
-    inl::ArrayDyn<int> array { arena, 10 };
+    inl::ArrayList<int> array { arena, 10 };
     CHECK(array.size() == 0);
     CHECK(array.capacity() == 10);
 

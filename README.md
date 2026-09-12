@@ -68,7 +68,7 @@ Misc:
 - [x] Debug meshs
 - [x] Static String
 - [x] Use static constructors
-- [ ] Add platform layer (Remove GLFW)
+- [x] Add platform layer (Remove GLFW)
 - [ ] Setup Address sanitizer
 
 Removing STL:
@@ -96,5 +96,4 @@ Platform layer :
 - [x] Handle close
 - [x] Time
 - [x] Remove GLAD
-- [ ] Memory
-- [ ] Files
+- [x] Memory

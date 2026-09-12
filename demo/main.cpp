@@ -107,12 +107,12 @@ int main(int argc, char* argv[]) {
     error = platform::window_map(platform);
     inl_assert(error == Error::Ok, "Failed to map window");
 
-    ByteSpan scratch_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
-    inl_defer(release_backing(scratch_backing.data()));
+    ByteSpan scratch_backing = { static_cast<uint8_t*>(platform::mem_alloc(inl::MB * 100)), inl::MB * 100 };
+    inl_defer(platform::mem_free(scratch_backing.data(), scratch_backing.size()));
     Arena scratch_arena { scratch_backing.data(), scratch_backing.size() };
 
-    ByteSpan main_backing = { allocate_backing(inl::MB * 100), inl::MB * 100 };
-    inl_defer(release_backing(main_backing.data()));
+    ByteSpan main_backing = { static_cast<uint8_t*>(platform::mem_alloc(inl::MB * 100)), inl::MB * 100 };
+    inl_defer(platform::mem_free(main_backing.data(), main_backing.size()));
     Arena main_arena { main_backing.data(), main_backing.size() };
 
     String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
@@ -249,8 +249,6 @@ int main(int argc, char* argv[]) {
         platform::window_process_events(platform);
         process_input_keys(platform);
     }
-
-    log_info("Exiting...");
 
     return 0;
 }

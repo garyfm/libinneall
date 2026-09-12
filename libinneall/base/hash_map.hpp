@@ -32,7 +32,7 @@ public:
         hash_map.m_capacity = static_cast<size_t>(ceil(static_cast<float>(initial_capacity) / grow_load_factor));
         hash_map.m_growth_factor = growth_factor;
         hash_map.m_grow_load_factor = grow_load_factor;
-        hash_map.m_buckets = hash_map.m_arena->alloc_array<Entry>(hash_map.m_capacity);
+        hash_map.m_buckets = hash_map.m_arena->push_array<Entry>(hash_map.m_capacity);
         return hash_map;
     }
 
@@ -78,7 +78,7 @@ public:
 
         size_t old_size { m_size };
         Entry* old_buckets { m_buckets };
-        m_buckets = m_arena->alloc_array<Entry>(m_capacity);
+        m_buckets = m_arena->push_array<Entry>(m_capacity);
 
         m_size = 0;
         for (size_t index = 0; index < old_capacity; ++index) {

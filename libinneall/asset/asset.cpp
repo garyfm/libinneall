@@ -37,7 +37,7 @@ Error load_file(Arena& arena, ByteSpan& file_data, StringView path) {
     }
 
     ArenaMark arena_mark = arena.mark();
-    uint8_t* buffer = arena.alloc_array<uint8_t>(file_size ? file_size : 1);
+    uint8_t* buffer = arena.push_array<uint8_t>(file_size ? file_size : 1);
 
     size_t bytes_read = fread(buffer, sizeof(uint8_t), file_size, file);
 

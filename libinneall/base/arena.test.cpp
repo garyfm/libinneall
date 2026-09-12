@@ -10,7 +10,7 @@ TEST_CASE("Arena: Test allocation") {
         CHECK(arena.capacity() == sizeof(backing));
         CHECK(arena.highwater_mark() == 0);
 
-        void* obj = arena.alloc(16);
+        void* obj = arena.push(16);
         CHECK(obj != nullptr);
         CHECK(arena.offset() == 16);
         CHECK(arena.capacity() == sizeof(backing));
@@ -21,13 +21,13 @@ TEST_CASE("Arena: Test allocation") {
         CHECK(arena.capacity() == sizeof(backing));
         CHECK(arena.highwater_mark() == 16);
 
-        obj = arena.alloc(13);
+        obj = arena.push(13);
         CHECK(obj != nullptr);
         CHECK(arena.offset() == 13);
         CHECK(arena.capacity() == sizeof(backing));
         CHECK(arena.highwater_mark() == 16);
 
-        obj = arena.alloc(4);
+        obj = arena.push(4);
         CHECK(obj != nullptr);
         CHECK(arena.offset() == 20);
         CHECK(arena.capacity() == sizeof(backing));

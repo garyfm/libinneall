@@ -159,17 +159,17 @@ int main(int argc, char* argv[]) {
     scratch_arena.reset();
     model_sword->material.shader = &shader_program_lighting;
 
-    model_sword->model_matrix = scale(model_sword->model_matrix, 0.06f);
-    model_sword->model_matrix = rotate(model_sword->model_matrix, to_radians(-90), { 1, 0, 0 });
-    model_sword->model_matrix = translate(model_sword->model_matrix, { 5, 0, 0 });
+    model_sword->transform.scaling = { 0.06f, 0.06f, 0.06f };
+    model_sword->transform.rotation = { to_radians(-90.0f), 0.0f, 0.0f };
+    model_sword->transform.position = { 5, 0, 0 };
 
     assets_path.overwrite("/woodhouse", assets_path_root_pos);
     Model* model_house = asset_store.push_model();
     error = load_model(scratch_arena, asset_store, *model_house, assets_path);
     inl_assert(error == Error::Ok, "Failed to load model");
     scratch_arena.reset();
-    model_house->model_matrix = scale(model_house->model_matrix, 5.00f);
-    model_house->model_matrix = translate(model_house->model_matrix, { -20, -2, 0 });
+    model_house->transform.scaling = { 5.0f, 5.0f, 5.0f };
+    model_house->transform.position = { -20, -2, 0 };
     model_house->material.shader = &shader_program_lighting;
 
     // Skybox
@@ -215,11 +215,10 @@ int main(int argc, char* argv[]) {
         .outer_cutoff_cosine = cosf(to_radians(17.5f)),
     };
 
-    Matrix4 model_matrix_ground { 1 };
-    // TODO: fix transforms
-    model_matrix_ground = scale(model_matrix_ground, 100.0f);
-    model_matrix_ground = rotate(model_matrix_ground, to_radians(-90.0f), { 1, 0, 0 });
-    model_matrix_ground = translate(model_matrix_ground, { 0, -2, 0 });
+    Transform transform_ground {};
+    transform_ground.scaling = { 100.0f, 100.0f, 100.0f };
+    transform_ground.rotation = { to_radians(-90.0f), 0.0f, 0.0f };
+    transform_ground.position = { 0, -2, 0 };
 
     RenderScene render_scene {
         .models = asset_store.models(),
@@ -256,7 +255,7 @@ int main(int argc, char* argv[]) {
         renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 
         // Ground
-        renderer.draw_debug_quad(model_matrix_ground, { 0.2f, 0.2f, 0.2f });
+        renderer.draw_debug_quad(transform_ground.matrix(), { 0.1f, 0.1f, 0.1f });
 
         platform::gfx_swap_buffers(platform);
         platform::window_process_events(platform);

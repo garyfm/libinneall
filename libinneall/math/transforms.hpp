@@ -21,4 +21,23 @@ Vector3 rotate(Vector3 const& vector, float angle_radians, Vector3 const& unit_a
 Matrix4 rotate(Matrix4 const& matrix, float angle_radians, Vector3 const& unit_axis);
 
 Matrix4 perspective(Matrix4 const& matrix, float fov_y, float aspect, float z_near, float z_far);
+
+struct Transform {
+    Vector3 position {};
+    // radians
+    Vector3 rotation {};
+    Vector3 scaling { 1, 1, 1 };
+
+    Matrix4 matrix() {
+        Matrix4 model { 1 };
+
+        model = scale(model, scaling);
+        model = rotate(model, rotation.x, { 1, 0, 0 });
+        model = rotate(model, rotation.y, { 0, 1, 0 });
+        model = rotate(model, rotation.z, { 0, 0, 1 });
+        model = translate(model, position);
+        return model;
+    }
+};
+
 }

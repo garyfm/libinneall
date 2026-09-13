@@ -4,6 +4,7 @@
 #include <libinneall/renderer/debug_mesh.hpp>
 #include <libinneall/renderer/renderer.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
+#include <libinneall/renderer/texture.hpp>
 
 namespace {
 
@@ -88,10 +89,10 @@ void Renderer::render(Model& model) {
 
     set_uniform(*model.material.shader, "u_material", model.material);
 
-    set_uniform(*model.material.shader, "u_model", model.model_matrix);
+    set_uniform(*model.material.shader, "u_model", model.transform.matrix());
 
     Matrix3 normal_matrix { 1 };
-    normal_matrix = Matrix3(transpose(inverse(model.model_matrix)));
+    normal_matrix = Matrix3(transpose(inverse(model.transform.matrix())));
     set_uniform(*model.material.shader, "u_normal_matrix", normal_matrix);
 
     if (model.mesh->index_count() != 0) {

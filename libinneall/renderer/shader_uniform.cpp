@@ -2,6 +2,7 @@
 #include <libinneall/light.hpp>
 #include <libinneall/platform/gl_functions.hpp>
 #include <libinneall/renderer/shader_uniform.hpp>
+#include <libinneall/renderer/texture.hpp>
 
 namespace inl {
 

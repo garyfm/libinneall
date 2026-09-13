@@ -1,10 +1,9 @@
 #pragma once
 
-#include <libinneall/math/vector3.hpp>
-#include <libinneall/renderer/shader_program.hpp>
-#include <libinneall/renderer/texture.hpp>
-
 namespace inl {
+
+class Texture;
+class ShaderProgram;
 
 struct Material {
     Texture* albedo {};

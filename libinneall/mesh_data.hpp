@@ -11,6 +11,6 @@ struct MeshData {
     Span<uint32_t> index_data;
 };
 
-MeshData to_mesh_data(Arena& arena, obj::Model const& model);
+MeshData to_mesh_data(Arena& arena, obj::Mesh const& model);
 
 } // namespace inl

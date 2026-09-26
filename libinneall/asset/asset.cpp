@@ -12,7 +12,7 @@ Error load_file(Arena& arena, ByteSpan& file_data, StringView path) {
     FILE* file = fopen(path.data(), "rb");
 
     if (!file) {
-        log_error("Failed to open file: {}", path.data());
+        log_error("Failed to open file: %.*s", path.size(), path.data());
         return Error::AssetFailedToOpenFile;
     }
 
@@ -69,6 +69,13 @@ Error load_image(Arena& arena, ppm::Image& image, StringView path) {
     log_debug("PPM image: f:%d, w:%d, h:%d, v:%d size:%d", static_cast<int32_t>(image.format), image.width,
         image.height, image.max_value, image.pixel_data.size());
 
+    return Error::Ok;
+}
+
+Error load_obj(Arena& arena, obj::Mesh& mesh, StringView path) {
+    StringView obj_data {};
+    TRY(load_text_file(arena, obj_data, path));
+    TRY(obj::load(arena, mesh, obj_data));
     return Error::Ok;
 }
 
@@ -161,17 +168,11 @@ Error load_shader(Arena& perm_arena, Arena& scratch_arena, ShaderProgram& shader
 Error load_mesh(Arena& arena, Mesh& mesh, StringView path) {
     log_info("Loading mesh: %s", path.data());
 
-    StringView obj_data {};
-    TRY(load_text_file(arena, obj_data, path));
-
-    obj::Model obj_model {};
-    TRY(obj::load(arena, obj_model, { obj_data.data(), obj_data.size() }));
-
-    log_debug("OBJ model: vertices:%u, textures:%u, normals:5u, faces:%u", obj_model.geometric_vertices.size(),
-        obj_model.texture_vertices.size(), obj_model.vertex_normals.size(), obj_model.face_corners.size());
+    obj::Mesh obj_mesh {};
+    TRY(load_obj(arena, obj_mesh, path));
 
     // TODO: Free using temp
-    MeshData mesh_data = to_mesh_data(arena, obj_model);
+    MeshData mesh_data = to_mesh_data(arena, obj_mesh);
 
     return Mesh::create(mesh, mesh_data);
 }
@@ -182,22 +183,46 @@ Error load_model(Arena& arena, AssetStore& store, Model& model, StringView path)
     String<256> scratch_path { path };
     size_t model_dir_pos = path.size();
 
+    // NOTE: This assumes a mesh.obj and material.mtl file
     Mesh* mesh = store.push_mesh();
     TRY(load_mesh(arena, *mesh, scratch_path.append("/mesh.obj")));
     arena.reset();
 
-    Texture* texture_albedo = store.push_texture();
-    TRY(load_texture(arena, *texture_albedo, scratch_path.overwrite("/albedo.ppm", model_dir_pos), false));
-    arena.reset();
+    // NOTE: This assumes a mesh has a single material
+    StringView mtl_data {};
+    obj::Mtl mtl {};
+    TRY(load_text_file(arena, mtl_data, scratch_path.overwrite("/material.mtl", model_dir_pos)));
+    TRY(obj::load(mtl, mtl_data));
 
-    Texture* texture_specular = store.push_texture();
+    Texture* texture_albedo {};
+    if (!mtl.map_albedo.empty()) {
 
-    // TODO: This should be optional
-    TRY(load_texture(arena, *texture_specular, scratch_path.overwrite("/specular.ppm", model_dir_pos), false));
-    arena.reset();
+        ArenaTemp temp { arena };
+        texture_albedo = store.push_texture();
+        TRY(load_texture(
+            *temp.arena, *texture_albedo, scratch_path.overwrite(mtl.map_albedo, model_dir_pos + 1), false));
+    }
+
+    Texture* texture_specular {};
+    if (!mtl.map_specular.empty()) {
+        ArenaTemp temp { arena };
+        texture_specular = store.push_texture();
+        TRY(load_texture(
+            *temp.arena, *texture_specular, scratch_path.overwrite(mtl.map_specular, model_dir_pos + 1), false));
+    }
+
+    Texture* texture_normal {};
+    if (!mtl.map_normal.empty()) {
+        ArenaTemp temp { arena };
+        texture_normal = store.push_texture();
+        TRY(load_texture(
+            *temp.arena, *texture_normal, scratch_path.overwrite(mtl.map_normal, model_dir_pos + 1), false));
+    }
 
     model.mesh = mesh;
-    model.material = { texture_albedo, texture_specular, 32 };
+    model.material
+        = { texture_albedo, texture_specular, texture_normal, mtl.ambient, mtl.diffuse, mtl.specular, mtl.shininess };
+    arena.reset();
 
     return Error::Ok;
 }

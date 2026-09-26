@@ -24,6 +24,7 @@ enum class InputKey : uint8_t {
     a,
     s,
     d,
+    f,
     ESC,
 };
 

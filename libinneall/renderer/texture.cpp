@@ -44,4 +44,9 @@ void Texture::bind(GLuint texture_unit) {
     glBindTextureUnit(m_unit, m_handle);
 }
 
+void Texture::unbind() {
+    inl_assert(m_handle != 0, "Invalid Texture");
+    glBindTextureUnit(m_unit, 0);
+    m_unit = 0;
+}
 }

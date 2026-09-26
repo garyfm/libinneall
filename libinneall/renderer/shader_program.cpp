@@ -101,7 +101,8 @@ GLuint ShaderProgram::uniform_location(StringView name) const {
     Option<UniformInfo*> uniform = m_uniforms.find(name);
 
     if (!uniform.has_value()) {
-        // NOTE: Maybe this shouldnt assert ?
+        // NOTE: if a uniform isnt used in a shader, it wont be found by retrieve uniforms.
+        // So you may end up here
         inl_assert(false, "Failed to find uniform");
     }
 

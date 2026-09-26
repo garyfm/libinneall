@@ -21,6 +21,7 @@ public:
 
     INL_DEL_COPY_MOVE(ArrayList);
 
+    // TODO: Push that doenst grow
     void push(T const& ele) {
         inl_assert(m_arena != nullptr, "Invalid arena");
 

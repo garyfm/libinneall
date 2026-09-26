@@ -116,6 +116,7 @@ int main(int argc, char* argv[]) {
     Arena main_arena { main_backing.data(), main_backing.size() };
 
     String<MAX_ASSET_PATH_SIZE> assets_path { argv[1] };
+    assets_path.resize(assets_path.size() - 1); // Drop the '/'
     log_info("Asset path: %s", assets_path.data());
     size_t assets_path_root_pos { assets_path.size() };
 
@@ -190,8 +191,8 @@ int main(int argc, char* argv[]) {
         .specular = { 0.2f, 0.2f, 0.2f },
     };
 
-    LightPoint light_point {
-        .pos = { 0.5f, 5.0f, 10.0f },
+    LightPoint light_point_1 {
+        .pos = { 0.0f, 2.0f, 5.0f },
         .ambient = { 0.5f, 0.5f, 0.5f },
         .diffuse = { 1.0f, 1.0f, 1.0f },
         .specular = { 1.0f, 1.0f, 1.0f },
@@ -201,9 +202,18 @@ int main(int argc, char* argv[]) {
         .atten_quadratic = 0.032f,
     };
 
-    Matrix4 model_matrix_light { 1 };
-    model_matrix_light = scale(model_matrix_light, 0.1f);
-    model_matrix_light = translate(model_matrix_light, light_point.pos);
+    LightPoint light_point_2 {
+        .pos = { -20.0f, 2.0f, 5.0f },
+        .ambient = { 0.5f, 0.5f, 0.5f },
+        .diffuse = { 1.0f, 1.0f, 1.0f },
+        .specular = { 1.0f, 1.0f, 1.0f },
+        // TODO: Use a table based on distance for these values
+        .atten_constant = 1.0f,
+        .atten_linear = 0.09f,
+        .atten_quadratic = 0.032f,
+    };
+
+    Array<LightPoint, 2> light_points { light_point_1, light_point_2 };
 
     LightSpot light_spot {
         .pos = g_camera.position(),
@@ -213,6 +223,7 @@ int main(int argc, char* argv[]) {
         .specular = { 1.0f, 1.0f, 1.0f },
         .inner_cutoff_cosine = cosf(to_radians(12.5f)),
         .outer_cutoff_cosine = cosf(to_radians(17.5f)),
+        .on = false,
     };
 
     Transform transform_ground {};
@@ -223,7 +234,7 @@ int main(int argc, char* argv[]) {
     RenderScene render_scene {
         .models = asset_store.models(),
         .light_directional = &light_directional,
-        .light_points = { &light_point, 1 },
+        .light_points = light_points,
         .light_spot = &light_spot,
     };
 
@@ -252,7 +263,9 @@ int main(int argc, char* argv[]) {
 
         renderer.draw_skybox(skybox);
         renderer.render(render_scene, render_view);
-        renderer.draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
+
+        renderer.draw_debug_light_point(light_point_1);
+        renderer.draw_debug_light_point(light_point_2);
 
         // Ground
         renderer.draw_debug_quad(transform_ground.matrix(), { 0.1f, 0.1f, 0.1f });

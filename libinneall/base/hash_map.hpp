@@ -36,6 +36,13 @@ public:
         return hash_map;
     }
 
+    void insert_no_grow(K const& key, V const& value) {
+        inl_assert(m_size < m_capacity, "Exceeds capacity");
+        inl_assert(load_factor() >= m_grow_load_factor, "Exceeds load factor");
+
+        insert_ele(key, value);
+    }
+
     void insert(K const& key, V const& value) {
         inl_assert(m_size < m_capacity, "Exceeds capacity");
 

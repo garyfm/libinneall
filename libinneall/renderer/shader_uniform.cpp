@@ -46,9 +46,17 @@ void set_uniform(ShaderProgram& shader, StringView name, Material const& materia
     String<MAX_SHADER_UNIFORM_NAME> buffer { name };
 
     // NOTE: samplers must use glProgramUniform1i, explicit cast here to ensure interger is used
-    set_uniform(shader, buffer.append(".albedo"), static_cast<int32_t>(material.albedo->unit()));
-    set_uniform(shader, buffer.overwrite(".specular", name.size()), static_cast<int32_t>(material.specular->unit()));
+    if (material.map_albedo) {
+        set_uniform(shader, buffer.append(".map_albedo"), static_cast<int32_t>(material.map_albedo->unit()));
+    }
+    if (material.map_specular) {
+        set_uniform(shader, buffer.overwrite(".map_specular", name.size()),
+            static_cast<int32_t>(material.map_specular->unit()));
+    }
     set_uniform(shader, buffer.overwrite(".shininess", name.size()), material.shininess);
+    set_uniform(shader, buffer.overwrite(".ambient", name.size()), material.ambient);
+    set_uniform(shader, buffer.overwrite(".diffuse", name.size()), material.diffuse);
+    set_uniform(shader, buffer.overwrite(".specular", name.size()), material.specular);
 }
 
 void set_uniform(ShaderProgram& shader, StringView name, LightDirectional const& light) {

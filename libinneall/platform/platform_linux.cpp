@@ -378,6 +378,7 @@ static void egl_destroy(Egl& egl) {
 static void window_handle_key_input(Platform& platform, xcb_key_press_event_t& event) {
     xcb_keysym_t keysym = x_get_keysym(platform.xcb, event);
 
+    // TODO: Make a map here
     InputKey key {};
     switch (keysym) {
     case XK_w:
@@ -391,6 +392,9 @@ static void window_handle_key_input(Platform& platform, xcb_key_press_event_t& e
         break;
     case XK_d:
         key = InputKey::d;
+        break;
+    case XK_f:
+        key = InputKey::f;
         break;
     case XK_Escape:
         platform.should_exit = true;

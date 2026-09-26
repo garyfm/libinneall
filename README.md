@@ -27,6 +27,11 @@ meson test -C build -v
 
 ## TODO
 
+Up next:
+- Instancing
+- Normal Maps
+- Render text
+
 Stage 1 - Draw scene
 - [x] Setup shader compilation
 - [x] Shader uniforms 
@@ -43,7 +48,7 @@ Stage 2 - 3D mesh loader
 - [x] OBJ format
 - [x] Load mesh
 - [x] Handle duplicated vertices 
-- [ ] Load materials
+- [x] Load materials
 
 Stage 3 - Lighting
 - [x] Basic Phong Lighting
@@ -57,8 +62,8 @@ Stage 4 - Advanced OpenGL
 
 Implement when needed:
 - [ ] Instancing
-- [ ] Anti-Aliasing
 - [ ] Normal Maps
+- [ ] Anti-Aliasing
 
 Misc:
 - [x] Error handing
@@ -72,7 +77,6 @@ Misc:
 - [ ] Setup Address sanitizer
 
 Removing STL:
-Size: 5116096
 - [x] std integral types
 - [x] std::byte
 - [x] std::array
@@ -89,7 +93,7 @@ Size: 5116096
 - [x] hashmap
 - [ ] Dynamic string
 
-Platform layer :
+Platform layer:
 - [x] Create Window
 - [x] Basic keyboard input
 - [x] Basic mouse input

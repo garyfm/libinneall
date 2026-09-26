@@ -1,5 +1,6 @@
 #include <libinneall/base/assert.hpp>
 #include <libinneall/base/byte.hpp>
+#include <libinneall/base/defer.hpp>
 #include <libinneall/platform/gl_functions.hpp>
 #include <libinneall/renderer/debug_mesh.hpp>
 #include <libinneall/renderer/renderer.hpp>
@@ -62,7 +63,7 @@ void Renderer::render(RenderScene& scene, RenderView const& view) {
         }
 
         if (scene.light_spot != nullptr) {
-            set_uniform(*shader, "u_use_light_spot", true);
+            set_uniform(*shader, "u_use_light_spot", scene.light_spot->on);
             set_uniform(*shader, "u_light_spot", *scene.light_spot);
         }
 
@@ -79,12 +80,12 @@ void Renderer::render(Model& model) {
     model.mesh->bind();
     model.material.shader->use();
 
-    if (model.material.albedo != nullptr) {
-        model.material.albedo->bind(static_cast<GLuint>(TextureUnit::Albedo));
+    if (model.material.map_albedo) {
+        model.material.map_albedo->bind(static_cast<GLuint>(TextureUnit::Albedo));
     }
 
-    if (model.material.specular != nullptr) {
-        model.material.specular->bind(static_cast<GLuint>(TextureUnit::Specular));
+    if (model.material.map_specular) {
+        model.material.map_specular->bind(static_cast<GLuint>(TextureUnit::Specular));
     }
 
     set_uniform(*model.material.shader, "u_material", model.material);
@@ -100,6 +101,9 @@ void Renderer::render(Model& model) {
     } else {
         glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(model.mesh->vertext_count()));
     }
+
+    if (model.material.map_albedo) model.material.map_albedo->unbind();
+    if (model.material.map_specular) model.material.map_specular->unbind();
     model.mesh->unbind();
 }
 
@@ -137,6 +141,13 @@ void Renderer::draw_debug_cube(const Matrix4& model_matrix, const Vector3& color
 
     Mesh* debug_mesh = debug_mesh_cube();
     draw_debug_mesh(*debug_mesh, model_matrix, color);
+}
+
+void Renderer::draw_debug_light_point(inl::LightPoint& point) {
+    inl::Matrix4 model_matrix_light { 1 };
+    model_matrix_light = scale(model_matrix_light, 0.1f);
+    model_matrix_light = translate(model_matrix_light, point.pos);
+    draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 }
 
 void Renderer::draw_skybox(Cubemap& skybox) {

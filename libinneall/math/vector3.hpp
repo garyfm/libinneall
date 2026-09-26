@@ -9,9 +9,9 @@ namespace inl {
 struct Vector3 {
     union {
         struct {
-            float x;
-            float y;
-            float z;
+            float x {};
+            float y {};
+            float z {};
         };
 
         float elements[3];

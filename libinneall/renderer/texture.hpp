@@ -21,6 +21,7 @@ public:
 
     GLuint handle() const { return m_handle; }
     void bind(GLuint texture_unit);
+    void unbind();
 
     GLuint unit() const { return m_unit; }
 

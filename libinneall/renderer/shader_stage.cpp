@@ -36,8 +36,7 @@ bool compile_shader(inl::ShaderStage const& shader_stage, inl::StringView source
 
         glGetShaderInfoLog(shader_stage.handle(), inl::MAX_OPENGL_INFO_LOG_SIZE, &info_log_size, info_log.data());
         info_log.resize(info_log_size);
-        log_error("Error compiling shader id {}: {}", shader_stage.handle(),
-            inl::StringView { info_log.data(), info_log.size() });
+        log_error("Error compiling shader id %d: " FMT_SV, shader_stage.handle(), FMT_SV_ARGS(info_log));
 
         return false;
     }

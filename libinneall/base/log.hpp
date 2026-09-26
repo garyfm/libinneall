@@ -3,6 +3,12 @@
 #include <libinneall/base/option.hpp>
 #include <libinneall/base/string_view.hpp>
 
+#define FMT_SV "%.*s"
+#define FMT_SV_ARGS(sv) sv.size(), sv.data()
+
+#define FMT_VEC3 "%f, %f, %f"
+#define FMT_VEC3_ARGS(vec) vec.x, vec.y, vec.z
+
 namespace inl {
 
 enum class LogLevel : char {
@@ -27,7 +33,7 @@ constexpr StringView get_module_name(StringView filename) {
 void log(char const* filename, size_t line, LogLevel lvl, char const* fmt, ...);
 
 } // namespace inl
-  //
+
 #define log_debug(fmt, ...) ::inl::log(__FILE__, __LINE__, ::inl::LogLevel::Info, fmt, ##__VA_ARGS__)
 #define log_info(fmt, ...) ::inl::log(__FILE__, __LINE__, ::inl::LogLevel::Debug, fmt, ##__VA_ARGS__)
 #define log_warn(fmt, ...) ::inl::log(__FILE__, __LINE__, ::inl::LogLevel::Warn, fmt, ##__VA_ARGS__)

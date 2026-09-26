@@ -8,7 +8,7 @@
 
 namespace inl {
 
-MeshData to_mesh_data(Arena& arena, obj::Model const& model) {
+MeshData to_mesh_data(Arena& arena, obj::Mesh const& model) {
 
     ArrayList<VertexData> vertex_data { arena, model.face_corners.size() };
     ArrayList<uint32_t> index_data { arena, model.face_corners.size() };

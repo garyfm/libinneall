@@ -39,6 +39,7 @@ public:
     void draw_debug_quad(const Matrix4& model_matrix, const Vector3& color);
     void draw_debug_cube(const Matrix4& model_matrix, const Vector3& color);
     void draw_debug_light_point(inl::LightPoint& point);
+    void draw_debug_textured_quad(const Matrix4& model_matrix, Texture& texture);
     void draw_skybox(Cubemap& skybox);
 
 private:

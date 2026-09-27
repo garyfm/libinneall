@@ -150,6 +150,23 @@ void Renderer::draw_debug_light_point(inl::LightPoint& point) {
     draw_debug_cube(model_matrix_light, { 1.0f, 1.0f, 1.0f });
 }
 
+void Renderer::draw_debug_textured_quad(const Matrix4& model_matrix, Texture& texture) {
+    inl_assert(m_created, "Invalid Renderer");
+    inl_assert(m_debug_shader != nullptr, "Debug shader not set");
+
+    Mesh* debug_mesh = debug_mesh_quad();
+
+    m_debug_shader->use();
+    texture.bind(static_cast<GLuint>(TextureUnit::Albedo));
+    set_uniform(*m_debug_shader, "u_map_albedo", texture.unit());
+
+    set_uniform(*m_debug_shader, "u_use_texture", true);
+    draw_debug_mesh(*debug_mesh, model_matrix, {});
+    set_uniform(*m_debug_shader, "u_use_texture", false);
+
+    texture.unbind();
+}
+
 void Renderer::draw_skybox(Cubemap& skybox) {
     inl_assert(m_created, "Invalid Renderer");
     inl_assert(m_skybox_shader != nullptr, "skybox shader not set");

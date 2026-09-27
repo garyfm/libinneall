@@ -1,6 +1,7 @@
 #version 460 core
 
 layout (location = 0) in vec3 a_pos;
+layout (location = 1) in vec2 a_uv;
 
 layout (std140, binding = 0) uniform RenderView {
     mat4 u_view;
@@ -10,7 +11,15 @@ layout (std140, binding = 0) uniform RenderView {
 
 uniform mat4 u_model;
 
+out VS_OUT {
+    vec3 frag_pos;
+    vec3 normal;
+    vec2 uv;
+} o_vertex;
+
+
 void main()
 {
     gl_Position = u_projection * u_view * u_model * vec4(a_pos, 1.0);
+    o_vertex.uv = a_uv;
 }

@@ -62,6 +62,24 @@ Error Mesh::create(Mesh& mesh, MeshData const& mesh_data) {
         .normalise = false,
     });
 
+    mesh.m_vertex_array.set_attribute({
+        .index = 3,
+        .binding_index = 0,
+        .n_components = sizeof(Vector3) / sizeof(float),
+        .offset_bytes = offsetof(VertexData, tangent),
+        .type = GL_FLOAT,
+        .normalise = false,
+    });
+
+    mesh.m_vertex_array.set_attribute({
+        .index = 4,
+        .binding_index = 0,
+        .n_components = sizeof(Vector3) / sizeof(float),
+        .offset_bytes = offsetof(VertexData, bitangent),
+        .type = GL_FLOAT,
+        .normalise = false,
+    });
+
     mesh.m_created = true;
 
     return Error::Ok;

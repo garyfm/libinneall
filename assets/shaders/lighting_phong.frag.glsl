@@ -9,13 +9,14 @@ layout (std140, binding = 0) uniform RenderView {
 };
 
 struct Material {
+    sampler2D map_albedo;
+    sampler2D map_specular;
+    sampler2D map_normal;
+
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
     float shininess;
-    sampler2D map_albedo;
-    sampler2D map_specular;
-
 };
 
 struct LightDirectional {
@@ -54,6 +55,7 @@ in VS_OUT {
     vec3 frag_pos;
     vec3 normal;
     vec2 uv;
+    mat3 tbn;
 } i_frag;
 
 out vec4 v_frag_color;
@@ -67,6 +69,8 @@ uniform int u_num_light_points = 0;
 
 uniform LightSpot u_light_spot; 
 uniform bool u_use_light_spot = false;
+
+uniform bool debug_normals = false;
 
 vec3 CalculateLightDirectional(LightDirectional light, vec3 frag_pos, vec3 material_ambient, vec3 material_diffuse, vec3 material_specular, 
                             float material_shininess, vec3 normal, vec3 view_dir)
@@ -146,13 +150,18 @@ vec3 CalculateLightSpot(LightSpot light, vec3 frag_pos, vec3 material_ambient, v
 
 void main()
 {
-    vec3 normal = normalize(i_frag.normal);
     vec3 view_dir = normalize(u_view_pos - i_frag.frag_pos);
     vec3 material_albedo = vec3(texture(u_material.map_albedo, i_frag.uv));
 
     vec3 material_ambient = u_material.ambient * material_albedo;
     vec3 material_diffuse = u_material.diffuse * material_albedo;
-    vec3 material_specular = u_material.specular * vec3(texture(u_material.map_specular, i_frag.uv));
+
+    vec3 material_specular  = u_material.specular * vec3(texture(u_material.map_specular, i_frag.uv));
+
+    vec3 normal = texture(u_material.map_normal, i_frag.uv).rgb;
+    // transform normal vector to range [-1,1]
+    normal = normalize(normal * 2.0  - 1.0);
+    normal = normalize(i_frag.tbn * normal);
 
     vec3 result = CalculateLightDirectional(u_light_dir, i_frag.frag_pos, material_ambient, material_diffuse, material_specular, u_material.shininess, normal, view_dir);
 
@@ -166,5 +175,13 @@ void main()
         result += CalculateLightSpot(u_light_spot, i_frag.frag_pos, material_ambient, material_diffuse, material_specular, u_material.shininess, normal, view_dir);
     }
 
-    v_frag_color = vec4(result, 1.0);
+    if(debug_normals)
+    {
+        v_frag_color = vec4(normal * 0.5 + 0.5, 1.0);
+    }
+    else
+    {
+        v_frag_color = vec4(result, 1.0);
+    }
 } 
+

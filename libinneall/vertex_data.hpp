@@ -9,6 +9,8 @@ struct VertexData {
     Vector3 pos;
     Vector2 uv;
     Vector3 normal;
+    Vector3 tangent;
+    Vector3 bitangent;
 
     bool operator==(const VertexData& other) const {
         return (pos == other.pos) && (uv == other.uv) && (normal == other.normal);

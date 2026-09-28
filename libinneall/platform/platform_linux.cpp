@@ -498,8 +498,8 @@ void APIENTRY opengl_debug_callback(GLenum source, GLenum type, uint32_t id, GLe
         severity_str = "unknown";
     }
 
-    log_info("OpenGL debug callback - servierty: %s source: %s type: %s msg: %s ", severity_str, source_str, type_str,
-        message);
+    log_info("OpenGL debug callback - servierty: " FMT_SV " source: " FMT_SV " type: " FMT_SV " msg: %s",
+        FMT_SV_ARGS(severity_str), FMT_SV_ARGS(source_str), FMT_SV_ARGS(type_str), message);
 
     if (type == GL_DEBUG_TYPE_ERROR) {
         log_error("OpenGL Debug Error... Abort");

@@ -146,7 +146,6 @@ int main(int argc, char* argv[]) {
     AssetStore asset_store {};
 
     assets_path.overwrite("/backpack", assets_path_root_pos);
-
     Model* model_backpack = asset_store.push_model();
     error = load_model(scratch_arena, asset_store, *model_backpack, assets_path);
     inl_assert(error == Error::Ok, "Failed to load model");
@@ -159,7 +158,6 @@ int main(int argc, char* argv[]) {
     inl_assert(error == Error::Ok, "Failed to load model");
     scratch_arena.reset();
     model_sword->material.shader = &shader_program_lighting;
-
     model_sword->transform.scaling = { 0.06f, 0.06f, 0.06f };
     model_sword->transform.rotation = { to_radians(-90.0f), 0.0f, 0.0f };
     model_sword->transform.position = { 5, 0, 0 };
@@ -173,26 +171,35 @@ int main(int argc, char* argv[]) {
     model_house->transform.position = { -20, -2, 0 };
     model_house->material.shader = &shader_program_lighting;
 
+    assets_path.overwrite("/brickwall", assets_path_root_pos);
+    Model* model_brickwall = asset_store.push_model();
+    error = load_model(scratch_arena, asset_store, *model_brickwall, assets_path);
+    scratch_arena.reset();
+    inl_assert(error == Error::Ok, "Failed to load brickwall");
+    model_brickwall->transform.scaling = { 5.0f, 5.0f, 5.0f };
+    model_brickwall->transform.rotation = {};
+    model_brickwall->transform.position = { 10, 0, 0 };
+    model_brickwall->material.shader = &shader_program_lighting;
+
     // Skybox
     assets_path.overwrite("/skybox", assets_path_root_pos);
-
     Cubemap skybox {};
     error = load_cubemap(scratch_arena, skybox, assets_path, false);
-    inl_assert(error == Error::Ok, "Failed to load skyboz");
+    inl_assert(error == Error::Ok, "Failed to load skybox");
     scratch_arena.reset();
 
     log_debug("Main arena highwater mark: %uKB", main_arena.highwater_mark() / KB);
     log_debug("Scratch arena highwater mark: %uMB", scratch_arena.highwater_mark() / MB);
 
-    LightDirectional light_directional {
+    [[maybe_unused]] LightDirectional light_directional {
         .dir = { -0.2f, -1.0f, -0.3f },
         .ambient = { 0.01f, 0.01f, 0.01f },
-        .diffuse = { 0.1f, 0.1f, 0.1f },
-        .specular = { 0.2f, 0.2f, 0.2f },
+        .diffuse = { 0.01f, 0.01f, 0.01f },
+        .specular = { 0.02f, 0.01f, 0.01f },
     };
 
     LightPoint light_point_1 {
-        .pos = { 0.0f, 2.0f, 5.0f },
+        .pos = { 0.0f, 0.5f, 3.0f },
         .ambient = { 0.5f, 0.5f, 0.5f },
         .diffuse = { 1.0f, 1.0f, 1.0f },
         .specular = { 1.0f, 1.0f, 1.0f },
@@ -203,7 +210,7 @@ int main(int argc, char* argv[]) {
     };
 
     LightPoint light_point_2 {
-        .pos = { -20.0f, 2.0f, 5.0f },
+        .pos = { -20.0f, 0.5f, 3.0f },
         .ambient = { 0.5f, 0.5f, 0.5f },
         .diffuse = { 1.0f, 1.0f, 1.0f },
         .specular = { 1.0f, 1.0f, 1.0f },
@@ -213,16 +220,26 @@ int main(int argc, char* argv[]) {
         .atten_quadratic = 0.032f,
     };
 
-    Array<LightPoint, 2> light_points { light_point_1, light_point_2 };
+    LightPoint light_point_3 {
+        .pos = { 10.50f, 0.5f, 3.0f },
+        .ambient = { 0.2f, 0.2f, 0.2f },
+        .diffuse = { 0.6f, 0.6f, 0.6f },
+        .specular = { 1.0f, 1.0f, 1.0f },
+        // TODO: Use a table based on distance for these values
+        .atten_constant = 1.0f,
+        .atten_linear = 0.09f,
+        .atten_quadratic = 0.032f,
+    };
+    Array<LightPoint, 3> light_points { light_point_1, light_point_2, light_point_3 };
 
-    LightSpot light_spot {
+    [[maybe_unused]] LightSpot light_spot {
         .pos = g_camera.position(),
         .dir = g_camera.front(),
         .ambient = { 0.1f, 0.1f, 0.1f },
         .diffuse = { 0.5f, 0.5f, 0.5f },
         .specular = { 1.0f, 1.0f, 1.0f },
-        .inner_cutoff_cosine = cosf(to_radians(12.5f)),
-        .outer_cutoff_cosine = cosf(to_radians(17.5f)),
+        .inner_cutoff_cosine = cosf(to_radians(6.5f)),
+        .outer_cutoff_cosine = cosf(to_radians(12.5f)),
         .on = false,
     };
 
@@ -264,8 +281,9 @@ int main(int argc, char* argv[]) {
         renderer.draw_skybox(skybox);
         renderer.render(render_scene, render_view);
 
-        renderer.draw_debug_light_point(light_point_1);
-        renderer.draw_debug_light_point(light_point_2);
+        for (size_t i = 0; i < light_points.size(); ++i) {
+            renderer.draw_debug_light_point(light_points[i]);
+        }
 
         // Ground
         renderer.draw_debug_quad(transform_ground.matrix(), { 0.1f, 0.1f, 0.1f });

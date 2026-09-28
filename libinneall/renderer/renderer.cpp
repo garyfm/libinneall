@@ -9,11 +9,11 @@
 
 namespace {
 
-// TODO: texture unit is hardcoded here. Do these need to be dynamically allocated ?
 enum class TextureUnit : GLuint {
     Albedo = 0,
     Specular = 1,
-    Skybox = 2,
+    Normal = 2,
+    Skybox = 3,
 };
 
 }
@@ -87,6 +87,9 @@ void Renderer::render(Model& model) {
     if (model.material.map_specular) {
         model.material.map_specular->bind(static_cast<GLuint>(TextureUnit::Specular));
     }
+    if (model.material.map_normal) {
+        model.material.map_normal->bind(static_cast<GLuint>(TextureUnit::Normal));
+    }
 
     set_uniform(*model.material.shader, "u_material", model.material);
 
@@ -104,6 +107,8 @@ void Renderer::render(Model& model) {
 
     if (model.material.map_albedo) model.material.map_albedo->unbind();
     if (model.material.map_specular) model.material.map_specular->unbind();
+    if (model.material.map_normal) model.material.map_normal->unbind();
+
     model.mesh->unbind();
 }
 

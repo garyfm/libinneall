@@ -53,6 +53,10 @@ void set_uniform(ShaderProgram& shader, StringView name, Material const& materia
         set_uniform(shader, buffer.overwrite(".map_specular", name.size()),
             static_cast<int32_t>(material.map_specular->unit()));
     }
+    if (material.map_normal) {
+        set_uniform(
+            shader, buffer.overwrite(".map_normal", name.size()), static_cast<int32_t>(material.map_normal->unit()));
+    }
     set_uniform(shader, buffer.overwrite(".shininess", name.size()), material.shininess);
     set_uniform(shader, buffer.overwrite(".ambient", name.size()), material.ambient);
     set_uniform(shader, buffer.overwrite(".diffuse", name.size()), material.diffuse);

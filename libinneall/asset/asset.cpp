@@ -171,8 +171,8 @@ Error load_mesh(Arena& arena, Mesh& mesh, StringView path) {
     obj::Mesh obj_mesh {};
     TRY(load_obj(arena, obj_mesh, path));
 
-    // TODO: Free using temp
     MeshData mesh_data = to_mesh_data(arena, obj_mesh);
+    calculate_tangents(mesh_data);
 
     return Mesh::create(mesh, mesh_data);
 }

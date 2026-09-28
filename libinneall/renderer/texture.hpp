@@ -23,7 +23,10 @@ public:
     void bind(GLuint texture_unit);
     void unbind();
 
-    GLuint unit() const { return m_unit; }
+    GLuint unit() const {
+        // TODO: way to prevent a uniform from being set on an unbound texture
+        return m_unit;
+    }
 
 private:
     UniqueHandle<GLuint, delete_texture> m_handle { 0 };

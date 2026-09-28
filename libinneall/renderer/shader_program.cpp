@@ -103,7 +103,9 @@ GLuint ShaderProgram::uniform_location(StringView name) const {
     if (!uniform.has_value()) {
         // NOTE: if a uniform isnt used in a shader, it wont be found by retrieve uniforms.
         // So you may end up here
-        inl_assert(false, "Failed to find uniform");
+        log_error("Failed to find uniform: " FMT_SV, FMT_SV_ARGS(name));
+        // inl_assert(false, "Failed to find uniform");
+        return 0;
     }
 
     return uniform.value()->location;

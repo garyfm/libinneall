@@ -26,7 +26,7 @@ private:
     // TODO: These should be pools
     Array<Mesh, STORE_SIZE> m_mesh_store {};
     size_t m_mesh_store_head {};
-    Array<Texture, STORE_SIZE> m_texture_store {};
+    Array<Texture, STORE_SIZE + 10> m_texture_store {};
     size_t m_texture_store_head {};
     Array<Model, STORE_SIZE> m_model_store {};
     size_t m_model_store_head {};

@@ -28,8 +28,8 @@ meson test -C build -v
 ## TODO
 
 Up next:
-- Instancing
 - Normal Maps
+- Instancing
 - Render text
 
 Stage 1 - Draw scene

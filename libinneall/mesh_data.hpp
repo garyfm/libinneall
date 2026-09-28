@@ -13,4 +13,6 @@ struct MeshData {
 
 MeshData to_mesh_data(Arena& arena, obj::Mesh const& model);
 
+void calculate_tangents(MeshData& mesh);
+
 } // namespace inl
